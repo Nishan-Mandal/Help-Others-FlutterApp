@@ -92,13 +92,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final formKey = GlobalKey<FormState>();
 
-  uploadUserPhoneNumberAndUid() {
-    Map<String, String> userPhoneMap = {
-      "mobile_number": _phoneNumberController.text,
-      "uid": FirebaseAuth.instance.currentUser.uid
-    };
-    databaseMethods.uploadUserInfoPhoneNumberAndUid(userPhoneMap);
-  }
+  // uploadUserPhoneNumberAndUid() {
+  //   Map<String, String> userPhoneMap = {
+  //     "mobile_number": _phoneNumberController.text,
+  //     "uid": FirebaseAuth.instance.currentUser.uid
+  //   };
+  //   databaseMethods.uploadUserInfo(userPhoneMap);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -125,13 +125,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             ],
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
-                                suffixIcon: IconButton(
-                                  icon: Icon(Icons.person_add),
-                                  onPressed: () async => {
-                                    _phoneNumberController.text =
-                                        await _autoFill.hint
-                                  },
-                                ),
                                 enabledBorder: OutlineInputBorder(
                                   borderSide: BorderSide(color: Colors.amber),
                                   borderRadius: BorderRadius.circular(20),
@@ -161,7 +154,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: RaisedButton(
                       child: Text("Get Otp"),
                       onPressed: () async {
-                        uploadUserPhoneNumberAndUid();
                         Navigator.push(
                             context,
                             MaterialPageRoute(
