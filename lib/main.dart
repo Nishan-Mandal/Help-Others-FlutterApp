@@ -92,11 +92,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final formKey = GlobalKey<FormState>();
 
-  uploadUserPhoneNumber() {
+  uploadUserPhoneNumberAndUid() {
     Map<String, String> userPhoneMap = {
-      "phoneNumber": _phoneNumberController.text
+      "mobile_number": _phoneNumberController.text,
+      "uid": FirebaseAuth.instance.currentUser.uid
     };
-    databaseMethods.uploadUserInfo(userPhoneMap);
+    databaseMethods.uploadUserInfoPhoneNumberAndUid(userPhoneMap);
   }
 
   @override
@@ -160,7 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: RaisedButton(
                       child: Text("Get Otp"),
                       onPressed: () async {
-                        uploadUserPhoneNumber();
+                        uploadUserPhoneNumberAndUid();
                         Navigator.push(
                             context,
                             MaterialPageRoute(

@@ -31,11 +31,8 @@ class _userSignupPageState extends State<userSignupPage> {
             builder: (context) => dashboard(),
           ),
           (route) => false);
-      Map<String, String> userNameMap = {
-        "name": userNameControler.text,
-        "email": userEmailControler.text
-      };
-      databaseMethods.uploadUserInfo(userNameMap);
+    
+      databaseMethods.uploadUserInfoNameAndEmailAndPhoto(userNameControler.text,userEmailControler.text,imageFile.path);
       ;
     }
   }
@@ -59,7 +56,7 @@ class _userSignupPageState extends State<userSignupPage> {
                 CircleAvatar(
                   radius: 80.0,
                   backgroundImage: imageFile == null
-                      ? AssetImage('PicsArt_01-01-08.21.28.jpg')
+                      ? NetworkImage("https://www.google.com/search?q=user%20icon&tbm=isch&rlz=1C5CHFA_enIN768IN768&hl=en-GB&sa=X&ved=0CB0QtI8BKABqFwoTCIjExf6lyPACFQAAAAAdAAAAABAH&biw=1440&bih=700#imgrc=gzW4aEW--xWE9M")
                       : FileImage(File(imageFile.path)),
                 ),
                 Positioned(

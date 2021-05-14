@@ -9,12 +9,13 @@ import 'package:pinput/pin_put/pin_put.dart';
 import 'ProfilePage.dart';
 
 class GetOtpPage extends StatefulWidget {
-  final String phoneNumber;
+  String phoneNumber;
   GetOtpPage(this.phoneNumber);
 
   @override
   _GetOtpPageState createState() => _GetOtpPageState();
 }
+
 
 class _GetOtpPageState extends State<GetOtpPage> {
   int counter = 180;
@@ -47,8 +48,12 @@ class _GetOtpPageState extends State<GetOtpPage> {
       color: const Color.fromRGBO(126, 203, 224, 1),
     ),
   );
+
+
+
   @override
   Widget build(BuildContext context) {
+  
     return Scaffold(
       body: Column(
         children: [
@@ -124,6 +129,9 @@ class _GetOtpPageState extends State<GetOtpPage> {
 
   _verifyPhone() async {
     startTimer();
+    if(widget.phoneNumber[0]!='+'){
+      widget.phoneNumber="+91"+widget.phoneNumber;
+  }
     await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: '${widget.phoneNumber}',
         verificationCompleted: (PhoneAuthCredential credential) async {
