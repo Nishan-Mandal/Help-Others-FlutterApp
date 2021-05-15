@@ -10,14 +10,13 @@ class DatabaseMethods {
   //       .get();
   // }
 
-  uploadUserInfoPhoneNumberAndUid(userMap) {
-    FirebaseFirestore.instance.collection("user_account").add(userMap).catchError((e) {
+  uploadUserInfo(userMap) {
+    FirebaseFirestore.instance
+        .collection("user_account")
+        .add(userMap)
+        .catchError((e) {
       print(e.toString());
     });
-  }
-
-  uploadUserInfoNameAndEmailAndPhoto(String userName,String userEmail,String userPhoto) {
-    FirebaseFirestore.instance.collection("user_account").where("uid",isEqualTo: FirebaseAuth.instance.currentUser.uid).where("name",isEqualTo: userName).where("email",isEqualTo: userEmail).where("photo",isEqualTo: userPhoto);
   }
 
   uploadTicketInfo(titleMap) {

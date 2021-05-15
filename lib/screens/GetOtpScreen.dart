@@ -16,7 +16,6 @@ class GetOtpPage extends StatefulWidget {
   _GetOtpPageState createState() => _GetOtpPageState();
 }
 
-
 class _GetOtpPageState extends State<GetOtpPage> {
   int counter = 180;
   Timer timer;
@@ -49,11 +48,8 @@ class _GetOtpPageState extends State<GetOtpPage> {
     ),
   );
 
-
-
   @override
   Widget build(BuildContext context) {
-  
     return Scaffold(
       body: Column(
         children: [
@@ -129,11 +125,8 @@ class _GetOtpPageState extends State<GetOtpPage> {
 
   _verifyPhone() async {
     startTimer();
-    if(widget.phoneNumber[0]!='+'){
-      widget.phoneNumber="+91"+widget.phoneNumber;
-  }
     await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: '${widget.phoneNumber}',
+        phoneNumber: '+91${widget.phoneNumber}',
         verificationCompleted: (PhoneAuthCredential credential) async {
           await FirebaseAuth.instance
               .signInWithCredential(credential)
