@@ -5,21 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 
 class DatabaseMethods {
-  // getUserByUsername(String username) async {
-  //   return await FirebaseFirestore.instance
-  //       .collection("users")
-  //       .where("name", isEqualTo: username)
-  //       .get();
-  // }
-
-  uploadUserInfoPhoneNumberAndUid(userMap) {
-    FirebaseFirestore.instance.collection("user_account").add(userMap).catchError((e) {
-      print(e.toString());
+  uploadUserInfo(String name, String mobileNumber, String email, String photo,
+      String uid) {
+    FirebaseFirestore.instance
+        .collection("user_account")
+        .doc(FirebaseAuth.instance.currentUser.phoneNumber)
+        .set({
+      "name": name,
+      "mobile_number": mobileNumber,
+      "email": email,
+      "photo": photo,
+      "uid": uid
     });
-  }
-
-  uploadUserInfoNameAndEmailAndPhoto(String userName,String userEmail,String userPhoto) {
-    FirebaseFirestore.instance.collection("user_account").where("uid",isEqualTo: FirebaseAuth.instance.currentUser.uid).where("name",isEqualTo: userName).where("email",isEqualTo: userEmail).where("photo",isEqualTo: userPhoto);
   }
 
   uploadTicketInfo(titleMap) {

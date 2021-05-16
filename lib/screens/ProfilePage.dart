@@ -1,11 +1,47 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:help_others/main.dart';
 import 'package:help_others/screens/Dashboard.dart';
 import 'package:help_others/services/Database.dart';
 import 'package:help_others/services/Database.dart';
 import 'package:image_picker/image_picker.dart';
+
+class checkUserExistance extends StatefulWidget {
+  checkUserExistance({Key key}) : super(key: key);
+
+  @override
+  _checkUserExistanceState createState() => _checkUserExistanceState();
+}
+
+class _checkUserExistanceState extends State<checkUserExistance> {
+  @override
+  Widget build(BuildContext context) {
+    CollectionReference user =
+        FirebaseFirestore.instance.collection("user_account");
+    return FutureBuilder<DocumentSnapshot>(
+      future: user.doc(FirebaseAuth.instance.currentUser.phoneNumber).get(),
+      builder:
+          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        if (snapshot.hasError) {
+          return Text("Something went wrong");
+        }
+        if (snapshot.hasData && !snapshot.data.exists) {
+          return userSignupPage();
+        } else {
+          FirebaseFirestore.instance
+              .collection("user_account")
+              .doc(FirebaseAuth.instance.currentUser.phoneNumber)
+              .update({"uid": FirebaseAuth.instance.currentUser.uid});
+          return dashboard();
+        }
+        return CircularProgressIndicator();
+      },
+    );
+  }
+}
 
 class userSignupPage extends StatefulWidget {
   @override
@@ -31,9 +67,13 @@ class _userSignupPageState extends State<userSignupPage> {
             builder: (context) => dashboard(),
           ),
           (route) => false);
-    
-      databaseMethods.uploadUserInfoNameAndEmailAndPhoto(userNameControler.text,userEmailControler.text,imageFile.path);
-      ;
+
+      databaseMethods.uploadUserInfo(
+          userNameControler.text,
+          FirebaseAuth.instance.currentUser.phoneNumber,
+          userEmailControler.text,
+          imageFile.path,
+          FirebaseAuth.instance.currentUser.uid);
     }
   }
 
@@ -56,7 +96,8 @@ class _userSignupPageState extends State<userSignupPage> {
                 CircleAvatar(
                   radius: 80.0,
                   backgroundImage: imageFile == null
-                      ? NetworkImage("https://www.google.com/search?q=user%20icon&tbm=isch&rlz=1C5CHFA_enIN768IN768&hl=en-GB&sa=X&ved=0CB0QtI8BKABqFwoTCIjExf6lyPACFQAAAAAdAAAAABAH&biw=1440&bih=700#imgrc=gzW4aEW--xWE9M")
+                      ? NetworkImage(
+                          "https://www.google.com/search?q=add+image+icon&sxsrf=ALeKk00alB-GQbj0iOA81jRsUlbLfYEicA:1620998687226&source=lnms&tbm=isch&sa=X&ved=2ahUKEwivr7vXosnwAhVB7HMBHczIAkkQ_AUoAXoECAEQAw&biw=1920&bih=969#imgrc=L-KZ0egb0lSNfM")
                       : FileImage(File(imageFile.path)),
                 ),
                 Positioned(
