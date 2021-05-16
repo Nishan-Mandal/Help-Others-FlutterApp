@@ -87,7 +87,7 @@ class _GetOtpPageState extends State<GetOtpPage> {
                       Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => userSignupPage()),
+                              builder: (context) => checkUserExistance()),
                           (route) => false);
                     }
                   });
@@ -136,7 +136,7 @@ class _GetOtpPageState extends State<GetOtpPage> {
               Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => userSignupPage(),
+                    builder: (context) => checkUserExistance(),
                   ),
                   (route) => false);
             }

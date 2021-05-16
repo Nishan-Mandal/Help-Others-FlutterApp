@@ -12,12 +12,25 @@ class DatabaseMethods {
   //       .get();
   // }
 
-  uploadUserInfo(userMap) {
+  // uploadUserInfo(userMap) {
+  //   FirebaseFirestore.instance
+  //       .collection("user_account")
+  //       .add(userMap)
+  //       .catchError((e) {
+  //     print(e.toString());
+  //   });
+  // }
+  uploadUserInfo(String name, String mobileNumber, String email, String photo,
+      String uid) {
     FirebaseFirestore.instance
         .collection("user_account")
-        .add(userMap)
-        .catchError((e) {
-      print(e.toString());
+        .doc(FirebaseAuth.instance.currentUser.phoneNumber)
+        .set({
+      "name": name,
+      "mobile_number": mobileNumber,
+      "email": email,
+      "photo": photo,
+      "uid": uid
     });
   }
 
