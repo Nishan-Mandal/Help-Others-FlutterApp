@@ -1,13 +1,16 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:help_others/main.dart';
+import 'package:help_others/screens/CreateTickets.dart';
+
 import 'package:help_others/screens/Dashboard.dart';
+import 'package:help_others/screens/NavigationBar.dart';
 import 'package:help_others/services/Database.dart';
-import 'package:help_others/services/Database.dart';
+
 import 'package:image_picker/image_picker.dart';
+// import 'package:path/path.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class checkUserExistance extends StatefulWidget {
   checkUserExistance({Key key}) : super(key: key);
@@ -35,13 +38,14 @@ class _checkUserExistanceState extends State<checkUserExistance> {
               .collection("user_account")
               .doc(FirebaseAuth.instance.currentUser.phoneNumber)
               .update({"uid": FirebaseAuth.instance.currentUser.uid});
-          return dashboard();
+          return navigationBar();
         }
-        return CircularProgressIndicator();
       },
     );
   }
 }
+
+TextEditingController userNameControler = new TextEditingController();
 
 class userSignupPage extends StatefulWidget {
   @override
@@ -52,27 +56,38 @@ class _userSignupPageState extends State<userSignupPage> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
   final nameformKey = GlobalKey<FormState>();
   final emailformKey = GlobalKey<FormState>();
-  PickedFile imageFile;
-  final ImagePicker picker = ImagePicker();
 
-  TextEditingController userNameControler = new TextEditingController();
   final TextEditingController userEmailControler = TextEditingController();
 
-  signUp() {
+  PickedFile imageFile;
+
+  final ImagePicker picker = ImagePicker();
+
+  signUp() async {
+    String userImageUrl;
+    File file = File(imageFile.path);
+
     if (nameformKey.currentState.validate() &&
         emailformKey.currentState.validate()) {
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => dashboard(),
-          ),
-          (route) => false);
+      try {
+        await FirebaseStorage.instance
+            .ref(
+                'user_profile_image${FirebaseAuth.instance.currentUser.phoneNumber}')
+            .putFile(file);
+
+        userImageUrl = await FirebaseStorage.instance
+            .ref(
+                'user_profile_image${FirebaseAuth.instance.currentUser.phoneNumber}')
+            .getDownloadURL();
+      } on FirebaseException catch (e) {
+        print("error in uploding user image");
+      }
 
       databaseMethods.uploadUserInfo(
           userNameControler.text,
           FirebaseAuth.instance.currentUser.phoneNumber,
           userEmailControler.text,
-          imageFile.path,
+          userImageUrl,
           FirebaseAuth.instance.currentUser.uid);
     }
   }
@@ -96,8 +111,7 @@ class _userSignupPageState extends State<userSignupPage> {
                 CircleAvatar(
                   radius: 80.0,
                   backgroundImage: imageFile == null
-                      ? NetworkImage(
-                          "https://www.google.com/search?q=add+image+icon&sxsrf=ALeKk00alB-GQbj0iOA81jRsUlbLfYEicA:1620998687226&source=lnms&tbm=isch&sa=X&ved=2ahUKEwivr7vXosnwAhVB7HMBHczIAkkQ_AUoAXoECAEQAw&biw=1920&bih=969#imgrc=L-KZ0egb0lSNfM")
+                      ? AssetImage("PicsArt_01-01-08.21.28.jpg")
                       : FileImage(File(imageFile.path)),
                 ),
                 Positioned(
@@ -165,7 +179,16 @@ class _userSignupPageState extends State<userSignupPage> {
             ),
             RaisedButton(
               child: Text("Save"),
-              onPressed: () => signUp(),
+              onPressed: () {
+                signUp();
+
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => navigationBar(),
+                    ),
+                    (route) => false);
+              },
             )
           ],
         ),
@@ -219,6 +242,7 @@ class _userSignupPageState extends State<userSignupPage> {
 
   void takePhoto(ImageSource source) async {
     final pickerFile = await picker.getImage(source: source);
+
     setState(() {
       imageFile = pickerFile;
     });

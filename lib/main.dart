@@ -2,15 +2,24 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:help_others/screens/CreateTickets.dart';
 import 'package:help_others/screens/Dashboard.dart';
 import 'package:help_others/screens/GetOtpScreen.dart';
 import 'package:help_others/screens/GetStartedPage.dart';
+import 'package:help_others/screens/MyTickets.dart';
+import 'package:help_others/screens/NavigationBar.dart';
 import 'package:help_others/screens/ProfilePage.dart';
 import 'package:help_others/services/Database.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  ErrorWidget.builder = (FlutterErrorDetails details) => Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
 
   runApp(MyApp());
 }
@@ -34,13 +43,13 @@ class MyApp extends StatelessWidget {
           print('${snapshot.error}');
         }
 
-        // Once complete, show your application
         if (snapshot.connectionState == ConnectionState.done) {
           return MaterialApp(
             title: 'Flutter Demo',
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
+            routes: {'/category': (context) => categoryPage(1.0, 1.0)},
             home: LandingPage(),
             debugShowCheckedModeBanner: false,
           );
@@ -52,8 +61,35 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class LandingPage extends StatelessWidget {
+class LandingPage extends StatefulWidget {
   const LandingPage({Key key, String title}) : super(key: key);
+
+  @override
+  _LandingPageState createState() => _LandingPageState();
+}
+
+double latitudeData1;
+double longitudeData1;
+
+class _LandingPageState extends State<LandingPage> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getCurrentLocation();
+    print("object999999999999999999999999999999");
+    print(latitudeData1);
+    print(longitudeData1);
+  }
+
+  getCurrentLocation() async {
+    final geoposition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best);
+    setState(() {
+      latitudeData1 = geoposition.latitude;
+      longitudeData1 = geoposition.longitude;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +101,7 @@ class LandingPage extends StatelessWidget {
           if (user == null) {
             return GetStartrdPage();
           } else {
-            return dashboard();
+            return navigationBar();
           }
         } else {
           return Scaffold(
