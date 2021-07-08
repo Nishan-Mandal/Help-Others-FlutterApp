@@ -25,7 +25,6 @@ class _GetOtpPageState extends State<GetOtpPage> {
       setState(() {
         if (counter > 0) {
           counter--;
-          print(counter);
         } else {
           resendButton = true;
           timer.cancel();
@@ -112,7 +111,6 @@ class _GetOtpPageState extends State<GetOtpPage> {
                   startTimer();
                   _verifyPhone();
                 } else {
-                  print("Button i s disable");
                   null;
                 }
               });

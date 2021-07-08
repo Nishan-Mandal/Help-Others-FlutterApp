@@ -8,8 +8,9 @@ class chatRoom extends StatefulWidget {
   String responderMobileNumber;
   String ticketTitle;
   String docIdInMessageCollection;
+  String name;
   chatRoom(this.ticketUniqueId, this.responderMobileNumber, this.ticketTitle,
-      this.docIdInMessageCollection);
+      this.docIdInMessageCollection, this.name);
 
   @override
   _chatRoomState createState() => _chatRoomState();
@@ -41,7 +42,7 @@ class _chatRoomState extends State<chatRoom> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.ticketTitle),
+            Text(widget.name),
             Text(
               widget.responderMobileNumber,
               style: TextStyle(fontSize: 12),

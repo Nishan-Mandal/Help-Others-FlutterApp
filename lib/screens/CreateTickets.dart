@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -10,6 +11,7 @@ import 'package:help_others/screens/NavigationBar.dart';
 
 import 'package:help_others/services/Database.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // import '../main.dart';
 
@@ -46,25 +48,26 @@ class _categoryPageState extends State<categoryPage> {
             child: Padding(
               padding: const EdgeInsets.all(2.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => category1(
-                                  widget.latitudeData, widget.longitudeData),
-                            ));
-                      },
-                      child: Container(
-                        height: queryData.height * 0.1,
-                        width: queryData.height,
-                        decoration: BoxDecoration(
-                            border: Border.all(width: 1, color: Colors.black)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => category1(
+                                widget.latitudeData, widget.longitudeData),
+                          ));
+                    },
+                    child: Container(
+                      height: queryData.height * 0.1,
+                      width: queryData.height,
+                      decoration: BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(color: Colors.black12))),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Center(
                           child: Text(
                             "Dating, Romance, Long term relationship (LTR)",
                             style: TextStyle(fontSize: 20),
@@ -73,48 +76,50 @@ class _categoryPageState extends State<categoryPage> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => category2(
-                                  widget.latitudeData, widget.longitudeData),
-                            ));
-                      },
-                      child: Container(
-                        height: queryData.height * 0.1,
-                        width: queryData.height,
-                        decoration: BoxDecoration(border: Border.all()),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            "sex with no string attached (NSA)",
-                            style: TextStyle(fontSize: 20),
-                          ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => category2(
+                                widget.latitudeData, widget.longitudeData),
+                          ));
+                    },
+                    child: Container(
+                      height: queryData.height * 0.1,
+                      width: queryData.height,
+                      // decoration: BoxDecoration(
+                      //     border:
+                      //         Border(bottom: BorderSide(color: Colors.black))),
+
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8, top: 25),
+                        child: Text(
+                          "sex with no string attached (NSA)",
+                          style: TextStyle(fontSize: 20),
                         ),
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => category3(
-                                  widget.latitudeData, widget.longitudeData),
-                            ));
-                      },
-                      child: Container(
-                        height: queryData.height * 0.1,
-                        width: queryData.height,
-                        decoration: BoxDecoration(border: Border.all()),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => category3(
+                                widget.latitudeData, widget.longitudeData),
+                          ));
+                    },
+                    child: Container(
+                      height: queryData.height * 0.1,
+                      width: queryData.height,
+                      decoration: BoxDecoration(
+                          border: Border(
+                              top: BorderSide(color: Colors.black12),
+                              bottom: BorderSide(color: Colors.black12))),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Center(
                           child: Text(
                             "erotic services (massages, strippers, etc)",
                             style: TextStyle(fontSize: 20),
@@ -149,28 +154,14 @@ class _category1State extends State<category1> {
     var queryData = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Category"),
+        title: Text("Dating, Romance, Long term relationship (LTR)"),
+        backgroundColor: Colors.blueGrey,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Container(
           child: Column(
             children: [
-              Container(
-                height: queryData.height / 20,
-                width: queryData.width,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                    border: Border.all(width: 5),
-                    color: Colors.black),
-                child: Text(
-                  "Dating, Romance, Long term relationship (LTR)",
-                  style: TextStyle(fontSize: 17, color: Colors.white),
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -183,10 +174,15 @@ class _category1State extends State<category1> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "I am a men seeking a women",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "I am a men seeking a women",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -205,10 +201,15 @@ class _category1State extends State<category1> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "I am a women seeking a men",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "I am a women seeking a men",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -227,10 +228,15 @@ class _category1State extends State<category1> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "I am a men seeking a men",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "I am a men seeking a men",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -249,10 +255,15 @@ class _category1State extends State<category1> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "I am a women seeking a women",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "I am a women seeking a women",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               )
@@ -280,28 +291,14 @@ class _category2State extends State<category2> {
     var queryData = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Category"),
+        title: Text("Sex with no strings attached (NSA)"),
+        backgroundColor: Colors.blueGrey,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Container(
           child: Column(
             children: [
-              Container(
-                height: queryData.height / 20,
-                width: queryData.width,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                    border: Border.all(width: 5),
-                    color: Colors.black),
-                child: Text(
-                  "Sex with no strings attached (NSA)",
-                  style: TextStyle(fontSize: 17, color: Colors.white),
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -314,10 +311,15 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "I am a man looking for a women",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "I am a man looking for a women",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -338,10 +340,15 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "I am looking for fetish encounters",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "I am looking for fetish encounters",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -360,10 +367,15 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "I am a men looking for a men",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "I am a men looking for a men",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -384,10 +396,15 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "I am a transsexual looking for a men",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "I am a transsexual looking for a men",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -408,10 +425,15 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "We are a couple looking for a women",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "We are a couple looking for a women",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -432,10 +454,15 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "We are a couple looking for a men",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "We are a couple looking for a men",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -456,10 +483,17 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "We are a couple looking for another couple",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 8,
+                    ),
+                    child: Text(
+                      "We are a couple looking for another couple",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -487,28 +521,14 @@ class _category3State extends State<category3> {
     var queryData = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Category"),
+        title: Text("Erotic services (massages, strippers, etc.)"),
+        backgroundColor: Colors.blueGrey,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Container(
           child: Column(
             children: [
-              Container(
-                height: queryData.height / 20,
-                width: queryData.width,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                    border: Border.all(width: 5),
-                    color: Colors.black),
-                child: Text(
-                  "Erotic services (massages, strippers, etc.)",
-                  style: TextStyle(fontSize: 17, color: Colors.white),
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -521,10 +541,15 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "BDSM & Fetish",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "BDSM & Fetish",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -543,10 +568,15 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "Massage Parlours",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "Massage Parlours",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -565,10 +595,15 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "Adult Jobs",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "Adult Jobs",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -587,10 +622,15 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "Erotic Bars & Clubs",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "Erotic Bars & Clubs",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -609,10 +649,15 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "Erotic Phone & Cam Services",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "Erotic Phone & Cam Services",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -631,10 +676,15 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "Erotic Photography",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "Erotic Photography",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -653,10 +703,15 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "Other Personals Services",
-                    style: TextStyle(fontSize: 25),
+                  decoration: BoxDecoration(
+                      border:
+                          Border(bottom: BorderSide(color: Colors.black12))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 10),
+                    child: Text(
+                      "Other Personals Services",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
               ),
@@ -724,6 +779,7 @@ class _crreateTicketsState extends State<crreateTickets> {
       child: Scaffold(
         appBar: AppBar(
           title: Text("Create Ticket"),
+          backgroundColor: Colors.blueGrey,
         ),
         body: Container(
             height: screenSize.height,
@@ -785,7 +841,7 @@ class _crreateTicketsState extends State<crreateTickets> {
                             ),
                             validator: (value) {
                               return value.length < 10
-                                  ? "Please Provide Title"
+                                  ? "Title should be more than 10 characters"
                                   : null;
                             },
                             controller: titleControler,
@@ -847,7 +903,7 @@ class _crreateTicketsState extends State<crreateTickets> {
                               ),
                               validator: (value) {
                                 return value.length < 20
-                                    ? "Please Provide Description"
+                                    ? "Description should be more than 20 characters"
                                     : null;
                               },
                               controller: descriptionControler,
@@ -863,7 +919,7 @@ class _crreateTicketsState extends State<crreateTickets> {
                         child: Container(
                           decoration: BoxDecoration(
                               border:
-                                  Border.all(color: Colors.black, width: 5)),
+                                  Border.all(color: Colors.black, width: 3)),
                           child: Text(
                               "Discribe your offer/search with as much details as possible!\n"
                               "\nProviding enough relevent information to other user gets your ad fund even faster"),
@@ -876,31 +932,9 @@ class _crreateTicketsState extends State<crreateTickets> {
                   width: screenSize.width,
                   height: 50,
                   child: RaisedButton(
-                    color: Colors.blue,
+                    color: Colors.greenAccent,
                     onPressed: () {
                       setState(() {
-                        // int ticketUploadTime =
-                        //     DateTime.now().millisecondsSinceEpoch;
-                        // String mobileNumber =
-                        //     FirebaseAuth.instance.currentUser.phoneNumber;
-                        // databaseMethods.uploadTicketInfo(
-                        //   titleControler.text,
-                        //   descriptionControler.text,
-                        //   ticketUploadTime,
-                        //   false,
-                        //   mobileNumber,
-                        //   widget.latitude,
-                        //   widget.longitude,
-                        //   false,
-                        // );
-                        // titleControler.clear();
-                        // descriptionControler.clear();
-
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //       builder: (context) => dashboard(""),
-                        //     ));
                         if (titleKey.currentState.validate() &&
                             discriptionKey.currentState.validate()) {
                           Navigator.push(
@@ -947,13 +981,18 @@ class secondPage extends StatefulWidget {
 
 class _secondPageState extends State<secondPage> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
-
+  final snackBar = SnackBar(
+    content: Text('Choose photo'),
+    duration: Duration(seconds: 1),
+    backgroundColor: Colors.redAccent,
+  );
   @override
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Profile"),
+        title: Text("Choose a photo"),
+        backgroundColor: Colors.blueGrey,
       ),
       body: Container(
         height: queryData.height,
@@ -981,7 +1020,7 @@ class _secondPageState extends State<secondPage> {
                             builder: (context) => bottomSheet(),
                           ),
                           child: Text("Change Photo"),
-                          color: Colors.blue,
+                          color: Colors.greenAccent,
                         ),
                 ),
                 Padding(
@@ -1009,20 +1048,24 @@ class _secondPageState extends State<secondPage> {
               height: 50,
               width: queryData.width,
               child: RaisedButton(
-                color: Colors.blue,
+                color: Colors.greenAccent,
                 child: Text("Preview"),
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => preview(
-                          widget.latitude,
-                          widget.longitude,
-                          widget.title,
-                          widget.description,
-                          widget.category),
-                    ),
-                  );
+                  if (imageFile != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => preview(
+                            widget.latitude,
+                            widget.longitude,
+                            widget.title,
+                            widget.description,
+                            widget.category),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  }
                 },
               ),
             )
@@ -1081,6 +1124,7 @@ class _secondPageState extends State<secondPage> {
 
     setState(() {
       imageFile = pickerFile;
+      Navigator.pop(context);
     });
   }
 }
@@ -1101,8 +1145,96 @@ class preview extends StatefulWidget {
 
 class _previewState extends State<preview> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
-  uploadImage() async {
+
+  void _tripEditModalBottomSheet(context) {
+    bool _switchValue = false;
+    var queryData = MediaQuery.of(context).size;
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return Container(
+          height: MediaQuery.of(context).size.height * .40,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 210,
+                      width: 130,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        image: DecorationImage(
+                            image: AssetImage("shareNumber.jpg"),
+                            fit: BoxFit.fill),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          "I dont want to share my mobile number",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        StatefulBuilder(
+                          builder: (context, setState) {
+                            return CupertinoSwitch(
+                              activeColor: Colors.green,
+                              value: _switchValue,
+                              onChanged: (value) {
+                                print(value);
+
+                                setState(() {
+                                  _switchValue = value;
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 50,
+                  width: queryData.width,
+                  child: FlatButton(
+                    onPressed: () {
+                      uploadImage(_switchValue);
+                      imageFile = null;
+
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => navigationBar(),
+                          ),
+                          (route) => false);
+                    },
+                    child: Text("POST"),
+                    color: Colors.greenAccent,
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  uploadImage(bool shareMobileNumber) async {
     String userImageUrl;
+    bool shareMobile = true;
+    if (shareMobileNumber) {
+      shareMobile = false;
+    }
     File file = File(imageFile.path);
 
     try {
@@ -1119,103 +1251,173 @@ class _previewState extends State<preview> {
     databaseMethods.uploadTicketInfo(
         widget.title,
         widget.description,
-        false,
+        shareMobile,
         FirebaseAuth.instance.currentUser.phoneNumber,
         widget.latitude,
         widget.longitude,
-        false,
         userImageUrl,
         widget.category);
+  }
+
+  Future<void> mapInBrowser(String url) async {
+    if (await canLaunch(url)) {
+      await launch(
+        url,
+        forceSafariVC: false,
+        forceWebView: false,
+        headers: <String, String>{'my_header_key': 'my_header_value'},
+      );
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Preview"),
+      floatingActionButton: Row(
+        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SizedBox(
+            width: 20,
+          ),
+          Align(
+              alignment: Alignment(-0.9, -0.8),
+              child: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () => Navigator.of(context).pop(navigationBar()),
+              )),
+          SizedBox(
+            width: 240,
+          ),
+        ],
       ),
       body: Container(
           child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: queryData.height / 15,
-                  width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 5)),
-                  child: Text(
-                    "Category :" + widget.category,
-                    style: TextStyle(fontSize: 20),
+          Container(
+            height: 60,
+            width: queryData.width,
+            decoration: BoxDecoration(boxShadow: [
+              BoxShadow(
+                color: Colors.cyan[800],
+                // spreadRadius: 10,
+                // blurRadius: 25.0,
+                offset: Offset(0, 0),
+              ),
+            ]),
+            alignment: Alignment.bottomLeft,
+            // child: IconButton(
+            //   icon: Icon(Icons.arrow_back),
+            //   onPressed: () => Navigator.of(context).pop(dashboard("")),
+            // ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 20,
                   ),
-                ),
-              ),
-              Text("Title", style: TextStyle(fontSize: 20)),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: queryData.height / 15,
-                  width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 2)),
-                  child: Text(
-                    widget.title,
-                    style: TextStyle(fontSize: 20),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Text("Description", style: TextStyle(fontSize: 20)),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: queryData.height / 15,
-                  width: queryData.width,
-                  decoration: BoxDecoration(border: Border.all(width: 2)),
-                  child: Text(
-                    widget.description,
-                    style: TextStyle(fontSize: 20),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                    alignment: Alignment.centerLeft,
-                    height: 300,
+                  Container(
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Colors.white, Colors.grey])),
+                    height: 250,
                     width: queryData.width,
-                    child: imageFile != null
-                        ? Image(image: FileImage(File(imageFile.path)))
-                        : Icon(
-                            (Icons.person),
-                            size: 200,
-                          )),
+                    child: Image(
+                      image: FileImage(File(imageFile.path)),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(9.0),
+                    child: Text(
+                      widget.title,
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(9.0),
+                    child: Text("Description",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12, right: 12),
+                    child: Container(
+                      width: queryData.width,
+                      height: queryData.height / 4,
+                      color: Colors.grey[300],
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text(widget.description,
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w400)),
+                      ),
+                    ),
+                  ),
+                  // https://www.google.com/maps/place/Newtown,+Kolkata,+West+Bengal/@22.5861408,88.4227606,12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d22.5753931!4d88.4797903
+                  // RaisedButton(
+                  //   child: Text("map"),
+                  //   onPressed: () {
+                  //     mapInBrowser(
+                  //         // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}");
+                  //         // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}/@${widget.latitude},${widget.longitude},12z");
+                  //         "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d${widget.latitude}!4d${widget.longitude}");
+                  //   },
+                  // ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        right: 12.0, left: 12.0, top: 12.0),
+                    child: Text(
+                      "Ad posted at",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => mapInBrowser(
+                        "https://www.google.com/maps/preview/@${widget.latitude},${widget.longitude},17z"
+                        // "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},${widget.latitude}${widget.longitude}"
+                        // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}"
+                        // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}"
+                        ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Container(
+                        height: 90,
+                        width: queryData.width,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          image: DecorationImage(
+                              image: AssetImage("map.jpg"), fit: BoxFit.fill),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
           Container(
             height: 50,
             width: queryData.width,
             child: FlatButton(
               onPressed: () {
-                uploadImage();
-                imageFile = null;
-
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => navigationBar(),
-                    ),
-                    (route) => false);
+                _tripEditModalBottomSheet(context);
               },
               child: Text("Post"),
-              color: Colors.blue,
+              color: Colors.greenAccent,
             ),
           ),
         ],

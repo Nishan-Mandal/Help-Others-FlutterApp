@@ -23,14 +23,44 @@ double longitudeData;
 class _navigationBarState extends State<navigationBar> {
   bool messageCheker = false;
   int navBarIndex = 0;
+
   getCurrentLocation() async {
     final geoposition = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.best);
-    setState(() {
-      latitudeData = geoposition.latitude;
-      longitudeData = geoposition.longitude;
-    });
+    // setState(() {
+    latitudeData = geoposition.latitude;
+    longitudeData = geoposition.longitude;
+    // });
   }
+
+  // checkMessage() async {
+  //   var data = await FirebaseFirestore.instance
+  //       .collection("messages")
+  //       .where("participants",
+  //           arrayContains: FirebaseAuth.instance.currentUser.phoneNumber)
+  //       .orderBy("timeStamp", descending: true)
+  //       .get()
+  //       .then((value) {
+  //     value.docs.forEach((element) async {
+  //       String thisUser = await element.get("ticket_creater_mobile");
+  //       if (thisUser == FirebaseAuth.instance.currentUser.phoneNumber &&
+  //           element.get("ownerMessageSeen") == false) {
+  //         if (this.mounted) {
+  //           setState(() {
+  //             messageCheker = true;
+  //           });
+  //         }
+  //       } else if (thisUser != FirebaseAuth.instance.currentUser.phoneNumber &&
+  //           element.get("responderMessageSeen") == false) {
+  //         if (this.mounted) {
+  //           setState(() {
+  //             messageCheker = true;
+  //           });
+  //         }
+  //       }
+  //     });
+  //   });
+  // }
 
   @override
   void initState() {
@@ -63,119 +93,131 @@ class _navigationBarState extends State<navigationBar> {
     return StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection("messages")
-            .where(
-              "participants",
-              arrayContains: FirebaseAuth.instance.currentUser.phoneNumber,
-            )
+            .where("participants",
+                arrayContains: FirebaseAuth.instance.currentUser.phoneNumber)
             .orderBy("timeStamp", descending: true)
-            .limit(1)
             .snapshots(),
-        builder: (context, snapshot) {
-          // bool data = false;
-          // if (snapshot.data.docs[0]["responderNumber"] ==
-          //     FirebaseAuth.instance.currentUser.phoneNumber) {
-          //   data = snapshot.data.docs[0]['responderMessageSeen'];
-          // } else if (snapshot.data.docs[0]["ticket_creater_mobile"] ==
-          //     FirebaseAuth.instance.currentUser.phoneNumber) {
-          //   data = snapshot.data.docs[0]['ownerMessageSeen'];
-          // }
-
-          // if (data == false) {
-          //   setState(() {
-          //     messageCheker = true;
-          //   });
-          // }
-          return Scaffold(
-            body: tabs[navBarIndex],
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: navBarIndex,
-              onTap: (value) {
-                setState(() {
-                  navBarIndex = value;
-                });
-              },
-              backgroundColor: Colors.blueGrey,
-              selectedIconTheme: IconThemeData(color: Colors.white),
-              selectedItemColor: Colors.white,
-              // selectedItemColor: Colors.amber[800],
-              selectedLabelStyle: TextStyle(color: Colors.white),
-              unselectedItemColor: Colors.blueGrey[900],
-              type: BottomNavigationBarType.fixed,
-              items: <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.home,
-                    // color: Colors.white,
+        builder: (context, snapshot2) {
+          // var userTicketDocument = snapshot2.data;
+          // print("------------------------");
+          // // print(userTicketDocument["responderMessageSeen"]);
+          // print(snapshot2.data.docs[0]["ownerMessageSeen"]);
+          if (!snapshot2.hasData || snapshot2.hasError) {
+            return CircularProgressIndicator();
+          } else {
+            if (snapshot2.data.docs.length != 0) {
+              String thisUser = snapshot2.data.docs[0]["ticket_creater_mobile"];
+              if (thisUser == FirebaseAuth.instance.currentUser.phoneNumber &&
+                  snapshot2.data.docs[0]["ownerMessageSeen"] == false) {
+                // if (this.mounted) {
+                // setState(() {
+                messageCheker = true;
+                // });
+                // }
+              } else if (thisUser !=
+                      FirebaseAuth.instance.currentUser.phoneNumber &&
+                  snapshot2.data.docs[0]["responderMessageSeen"] == false) {
+                // if (this.mounted) {
+                // setState(() {
+                messageCheker = true;
+                // });
+                // }
+              } else {
+                messageCheker = false;
+              }
+            }
+            return Scaffold(
+              body: tabs[navBarIndex],
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: navBarIndex,
+                onTap: (value) {
+                  setState(() {
+                    navBarIndex = value;
+                  });
+                },
+                backgroundColor: Colors.blueGrey,
+                selectedIconTheme: IconThemeData(color: Colors.white),
+                selectedItemColor: Colors.white,
+                // selectedItemColor: Colors.amber[800],
+                selectedLabelStyle: TextStyle(color: Colors.white),
+                unselectedItemColor: Colors.blueGrey[900],
+                type: BottomNavigationBarType.fixed,
+                items: <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: Icon(
+                      Icons.home,
+                      // color: Colors.white,
+                    ),
+                    title: Text(
+                      'Dashboard',
+                      // style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                  title: Text(
-                    'Dashboard',
-                    // style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                BottomNavigationBarItem(
-                  icon: Stack(
-                    children: <Widget>[
-                      new Icon(
-                        Icons.message,
-                        size: 25.5,
-                        // color: Colors.white,
-                      ),
-                      Visibility(
-                        visible: messageCheker,
-                        child: Positioned(
-                          right: -1.0,
-                          top: -1.0,
-                          child: Stack(
-                            children: <Widget>[
-                              Icon(
-                                Icons.brightness_1,
-                                size: 12.0,
-                                color: Colors.red,
-                              ),
-                            ],
+                  BottomNavigationBarItem(
+                    icon: Stack(
+                      children: <Widget>[
+                        new Icon(
+                          Icons.message,
+                          size: 25.5,
+                          // color: Colors.white,
+                        ),
+                        Visibility(
+                          visible: messageCheker,
+                          child: Positioned(
+                            right: -1.0,
+                            top: -1.0,
+                            child: Stack(
+                              children: <Widget>[
+                                Icon(
+                                  Icons.brightness_1,
+                                  size: 12.0,
+                                  color: Colors.red,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    title: Text(
+                      'messages',
+                      // style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                  title: Text(
-                    'messages',
-                    // style: TextStyle(color: Colors.white),
+                  BottomNavigationBarItem(
+                    icon: Icon(
+                      Icons.add,
+                      color: Colors.limeAccent,
+                    ),
+                    title: Text(
+                      'Post Ad',
+                      // style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.add,
-                    color: Colors.limeAccent,
+                  BottomNavigationBarItem(
+                    icon: Icon(
+                      Icons.art_track,
+                      // color: Colors.white,
+                    ),
+                    title: Text(
+                      'My Ads',
+                      // style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                  title: Text(
-                    'Post Ad',
-                    // style: TextStyle(color: Colors.white),
+                  BottomNavigationBarItem(
+                    icon: Icon(
+                      Icons.account_circle,
+                      // color: Colors.white,
+                    ),
+                    title: Text(
+                      'Account',
+                      // style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.art_track,
-                    // color: Colors.white,
-                  ),
-                  title: Text(
-                    'My Ads',
-                    // style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.account_circle,
-                    // color: Colors.white,
-                  ),
-                  title: Text(
-                    'Account',
-                    // style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-          );
+                ],
+              ),
+            );
+          }
         });
   }
 }

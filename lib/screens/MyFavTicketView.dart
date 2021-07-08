@@ -1,10 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:help_others/screens/EditTicket.dart';
 import 'package:help_others/services/Database.dart';
 
-class myTicketsResponses extends StatefulWidget {
+class myFavTicketView extends StatefulWidget {
   String ticketOwnweMobileNumber;
   String title;
   String description;
@@ -14,7 +11,7 @@ class myTicketsResponses extends StatefulWidget {
   double latitude;
   double longitude;
   String date;
-  myTicketsResponses(
+  myFavTicketView(
       this.ticketOwnweMobileNumber,
       this.title,
       this.description,
@@ -24,56 +21,19 @@ class myTicketsResponses extends StatefulWidget {
       this.latitude,
       this.longitude,
       this.date);
-
   @override
-  _myTicketsResponsesState createState() => _myTicketsResponsesState();
+  _myFavTicketViewState createState() => _myFavTicketViewState();
 }
 
-class _myTicketsResponsesState extends State<myTicketsResponses> {
+class _myFavTicketViewState extends State<myFavTicketView> {
   @override
   DatabaseMethods databaseMethods = new DatabaseMethods();
-  // final TextEditingController messageControler = TextEditingController();
-  bool responded = false;
-
-  Future<bool> onBackPress() {
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        // shape:
-        //     RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-        title: Text("Do you want to delete your post ?"),
-        // backgroundColor: Colors.amber[300],
-        actions: [
-          FlatButton(
-            child: Text("No"),
-            onPressed: () => Navigator.pop(context, false),
-          ),
-          FlatButton(
-            child: Text("Yes"),
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              databaseMethods.deleteTicket(widget.id);
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                onBackPress();
-              })
-        ],
-      ),
+      appBar: AppBar(),
       body: Container(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,9 +43,6 @@ class _myTicketsResponsesState extends State<myTicketsResponses> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      height: 20,
-                    ),
                     Container(
                       decoration: BoxDecoration(
                           gradient: LinearGradient(

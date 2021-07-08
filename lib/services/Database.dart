@@ -11,15 +11,13 @@ import 'package:sms_autofill/sms_autofill.dart';
 import 'package:intl/intl.dart';
 
 class DatabaseMethods {
-  uploadUserInfo(String name, String mobileNumber, String email, String photo,
-      String uid) {
+  uploadUserInfo(String name, String mobileNumber, String photo, String uid) {
     FirebaseFirestore.instance
         .collection("user_account")
         .doc(FirebaseAuth.instance.currentUser.phoneNumber)
         .set({
       "name": name,
       "mobile_number": mobileNumber,
-      "email": email,
       "photo": photo,
       "uid": uid
     }).catchError((e) {
@@ -30,11 +28,10 @@ class DatabaseMethods {
   uploadTicketInfo(
     String title,
     String description,
-    bool is_reviewed,
+    bool shareMobile,
     String ticketOwnerMobile,
     double latitude,
     double longitude,
-    bool markAsDone,
     String uplodedPhoto,
     String category,
   ) {
@@ -61,12 +58,11 @@ class DatabaseMethods {
       "title": title,
       "description": description,
       "time": DateTime.now().millisecondsSinceEpoch,
-      "is_reviewed": false,
+      "share_mobile": false,
       "ticket_owner": ticketOwnerMobile,
       "latitude": latitude,
       "longitude": longitude,
       "id": ref.id,
-      "mark_as_done": markAsDone,
       "uplodedPhoto": uplodedPhoto,
       "category": category,
       "date": date,
@@ -75,42 +71,42 @@ class DatabaseMethods {
     });
   }
 
-  updateTicketInfo(String ticketDocumentId, String title, String description,
-      bool is_reviewed, String ticket_owner) {
-    DateTime now = new DateTime.now();
-    DateTime date = new DateTime(now.year, now.month, now.day);
-    var ref = FirebaseFirestore.instance
-        .collection("global_ticket")
-        .doc("$ticketDocumentId");
+  // updateTicketInfo(String ticketDocumentId, String title, String description,
+  //     bool is_reviewed, String ticket_owner) {
+  //   DateTime now = new DateTime.now();
+  //   DateTime date = new DateTime(now.year, now.month, now.day);
+  //   var ref = FirebaseFirestore.instance
+  //       .collection("global_ticket")
+  //       .doc("$ticketDocumentId");
 
-    FirebaseFirestore.instance
-        .collection("global_ticket")
-        .doc("$ticketDocumentId")
-        .collection("responses")
-        .get()
-        .then((value) => {
-              value.docs.forEach((doc) {
-                FirebaseFirestore.instance
-                    .collection("global_ticket")
-                    .doc("$ticketDocumentId")
-                    .collection("responses")
-                    .doc(doc.id)
-                    .delete();
-              })
-            });
+  //   FirebaseFirestore.instance
+  //       .collection("global_ticket")
+  //       .doc("$ticketDocumentId")
+  //       .collection("responses")
+  //       .get()
+  //       .then((value) => {
+  //             value.docs.forEach((doc) {
+  //               FirebaseFirestore.instance
+  //                   .collection("global_ticket")
+  //                   .doc("$ticketDocumentId")
+  //                   .collection("responses")
+  //                   .doc(doc.id)
+  //                   .delete();
+  //             })
+  //           });
 
-    return ref.update({
-      "title": title,
-      "description": description,
-      "time": DateTime.now().millisecondsSinceEpoch,
-      "is_reviewed": false,
-      "ticket_owner": ticket_owner,
-      "id": ref.id,
-      "date": date,
-    }).catchError((e) {
-      print(e.toString());
-    });
-  }
+  //   return ref.update({
+  //     "title": title,
+  //     "description": description,
+  //     "time": DateTime.now().millisecondsSinceEpoch,
+  //     "share_mobile_number": false,
+  //     "ticket_owner": ticket_owner,
+  //     "id": ref.id,
+  //     "date": date,
+  //   }).catchError((e) {
+  //     print(e.toString());
+  //   });
+  // }
 
   deleteTicket(
     String ticketDocumentId,
@@ -128,7 +124,6 @@ class DatabaseMethods {
   uploadTicketResponse(
     String comment,
     String ticketDocumentId,
-    bool share_email,
     bool share_mobile,
     String ticket_creater_mobile,
     bool responded,
@@ -158,7 +153,6 @@ class DatabaseMethods {
     ref.set({
       "comment": comment,
       "ticket_unique_id": ticketDocumentId,
-      "share_email": share_email,
       "share_mobile": share_mobile,
       "ticket_owner_mobile": ticket_creater_mobile,
       "utr_mobile": FirebaseAuth.instance.currentUser.phoneNumber,
@@ -186,6 +180,8 @@ class DatabaseMethods {
       "ownerPic": ownerPic,
       "responderPic": photo,
       "ticketTitle": ticketTitle,
+    }).catchError((e) {
+      print(e.toString());
     });
     // });
     DateTime now = DateTime.now();
@@ -195,6 +191,34 @@ class DatabaseMethods {
       "sender": FirebaseAuth.instance.currentUser.phoneNumber,
       "timeStamp": DateTime.now().millisecondsSinceEpoch,
       "messageSentTime": time,
+    }).catchError((e) {
+      print(e.toString());
+    });
+  }
+
+  uploadTicketResponseByCall(
+    String comment,
+    String ticketDocumentId,
+    bool share_mobile,
+    String ticket_creater_mobile,
+    bool responded,
+  ) {
+    var ref = FirebaseFirestore.instance
+        .collection("global_ticket")
+        .doc("$ticketDocumentId")
+        .collection("responses")
+        .doc(FirebaseAuth.instance.currentUser.phoneNumber);
+
+    ref.set({
+      "comment": comment,
+      "ticket_unique_id": ticketDocumentId,
+      "share_mobile": share_mobile,
+      "ticket_owner_mobile": ticket_creater_mobile,
+      "utr_mobile": FirebaseAuth.instance.currentUser.phoneNumber,
+      "id": ref.id,
+      "responded": responded,
+    }).catchError((e) {
+      print(e.toString());
     });
   }
 
@@ -284,7 +308,9 @@ class DatabaseMethods {
     var message = FirebaseFirestore.instance
         .collection("messages")
         .doc(docIdInMessageCollection);
-    message.update({"ownerMessageSeen": true});
+    message.update({"ownerMessageSeen": true}).catchError((e) {
+      print(e.toString());
+    });
   }
 
   updateResponderMessageSeenStatus(
@@ -293,7 +319,9 @@ class DatabaseMethods {
     var message = FirebaseFirestore.instance
         .collection("messages")
         .doc(docIdInMessageCollection);
-    message.update({"responderMessageSeen": true});
+    message.update({"responderMessageSeen": true}).catchError((e) {
+      print(e.toString());
+    });
   }
 
   updataLastChat(String docIdInMessageCollection, String message) {
@@ -303,16 +331,38 @@ class DatabaseMethods {
     ticket.update({
       "lastMessage": message,
       "timeStamp": DateTime.now().microsecondsSinceEpoch
+    }).catchError((e) {
+      print(e.toString());
     });
   }
 
-  updateTicketStatus(
-    String ticketDocumentId,
-    bool markAsDone,
-  ) {
-    var ref = FirebaseFirestore.instance
-        .collection("global_ticket")
-        .doc("$ticketDocumentId");
-    return ref.update({"mark_as_done": markAsDone});
+  // updateTicketStatus(
+  //   String ticketDocumentId,
+  //   bool markAsDone,
+  // ) {
+  //   var ref = FirebaseFirestore.instance
+  //       .collection("global_ticket")
+  //       .doc("$ticketDocumentId");
+  //   return ref.update({"mark_as_done": markAsDone}).catchError((e) {
+  //     print(e.toString());
+  //   });
+  // }
+
+  myFavourites(String ticketId) {
+    var ref =
+        FirebaseFirestore.instance.collection("global_ticket").doc(ticketId);
+    ref.update({
+      "favourites": FieldValue.arrayUnion(
+        ["${FirebaseAuth.instance.currentUser.phoneNumber}"],
+      ),
+    });
+    // var ref = FirebaseFirestore.instance.collection("myFavourites").doc();
+    // return ref.set({
+    //   "ticketId": ticketId,
+    //   "mobileNumber": mobileNumber,
+    //   "isFavourite": true
+    // }).catchError((e) {
+    //   print(e.toString());
+    // });
   }
 }

@@ -9,6 +9,7 @@ import 'package:help_others/screens/GetOtpScreen.dart';
 import 'package:help_others/screens/GetStartedPage.dart';
 import 'package:help_others/screens/MyTickets.dart';
 import 'package:help_others/screens/NavigationBar.dart';
+import 'package:help_others/screens/PrivacyPolicy.dart';
 import 'package:help_others/screens/ProfilePage.dart';
 import 'package:help_others/services/Database.dart';
 import 'package:sms_autofill/sms_autofill.dart';
@@ -49,7 +50,7 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
-            routes: {'/category': (context) => categoryPage(1.0, 1.0)},
+            routes: {'/navigationBar': (context) => navigationBar()},
             home: LandingPage(),
             debugShowCheckedModeBanner: false,
           );
@@ -127,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
 
   final formKey = GlobalKey<FormState>();
-
+  bool acceptAll = true;
   // uploadUserPhoneNumberAndUid() {
   //   Map<String, String> userPhoneMap = {
   //     "mobile_number": _phoneNumberController.text,
@@ -182,7 +183,31 @@ class _MyHomePageState extends State<MyHomePage> {
                     ],
                   ),
                   SizedBox(
-                    height: 50,
+                    height: 40,
+                  ),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: acceptAll,
+                        onChanged: (value) {
+                          setState(() {
+                            acceptAll = value;
+                          });
+                        },
+                      ),
+                      InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => privacyPolicy(),
+                                ));
+                          },
+                          child: Text(
+                            "I have read and accept the \nTerms & Conditions",
+                            style: TextStyle(color: Colors.blue),
+                          ))
+                    ],
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -190,12 +215,14 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: RaisedButton(
                       child: Text("Get Otp"),
                       onPressed: () async {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  GetOtpPage(_phoneNumberController.text),
-                            ));
+                        if (acceptAll) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    GetOtpPage(_phoneNumberController.text),
+                              ));
+                        }
                       },
                     ),
                   ),

@@ -55,9 +55,8 @@ class userSignupPage extends StatefulWidget {
 class _userSignupPageState extends State<userSignupPage> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
   final nameformKey = GlobalKey<FormState>();
-  final emailformKey = GlobalKey<FormState>();
 
-  final TextEditingController userEmailControler = TextEditingController();
+  // final TextEditingController userEmailControler = TextEditingController();
 
   PickedFile imageFile;
 
@@ -67,8 +66,7 @@ class _userSignupPageState extends State<userSignupPage> {
     String userImageUrl;
     File file = File(imageFile.path);
 
-    if (nameformKey.currentState.validate() &&
-        emailformKey.currentState.validate()) {
+    if (nameformKey.currentState.validate()) {
       try {
         await FirebaseStorage.instance
             .ref(
@@ -86,7 +84,6 @@ class _userSignupPageState extends State<userSignupPage> {
       databaseMethods.uploadUserInfo(
           userNameControler.text,
           FirebaseAuth.instance.currentUser.phoneNumber,
-          userEmailControler.text,
           userImageUrl,
           FirebaseAuth.instance.currentUser.uid);
     }
@@ -153,27 +150,27 @@ class _userSignupPageState extends State<userSignupPage> {
                 ),
               ),
             ),
-            SizedBox(
-              height: 20,
-            ),
-            Form(
-              key: emailformKey,
-              child: Flexible(
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    labelText: "Email",
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  validator: (value) {
-                    return value.isEmpty ? "Please provide email" : null;
-                  },
-                  controller: userEmailControler,
-                ),
-              ),
-            ),
+            // SizedBox(
+            //   height: 20,
+            // ),
+            // Form(
+            //   key: emailformKey,
+            //   child: Flexible(
+            //     child: TextFormField(
+            //       decoration: InputDecoration(
+            //         labelText: "Email",
+            //         enabledBorder: OutlineInputBorder(
+            //           borderSide: BorderSide(color: Colors.black),
+            //           borderRadius: BorderRadius.circular(10),
+            //         ),
+            //       ),
+            //       validator: (value) {
+            //         return value.isEmpty ? "Please provide email" : null;
+            //       },
+            //       controller: userEmailControler,
+            //     ),
+            //   ),
+            // ),
             SizedBox(
               height: 50,
             ),

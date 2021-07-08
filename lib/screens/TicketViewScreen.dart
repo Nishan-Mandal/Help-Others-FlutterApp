@@ -19,21 +19,21 @@ class ticketViewScreen extends StatefulWidget {
   String title;
   String description;
   String id;
-  bool markAsDone;
   String photo;
   double latitude;
   double longitude;
   String date;
+  bool shareMobileNumber;
   ticketViewScreen(
     this.ticketOwnweMobileNumber,
     this.title,
     this.description,
     this.id,
-    this.markAsDone,
     this.photo,
     this.latitude,
     this.longitude,
     this.date,
+    this.shareMobileNumber,
   );
 
   @override
@@ -68,20 +68,23 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
     }
   }
 
-  void sendMessageFromGivenKeywords(String text) {
+  void sendMessageFromGivenKeywords(
+    String text,
+  ) {
     var userAccount;
+    var name;
     setState(() {
       var data = FirebaseFirestore.instance
           .collection("user_account")
           .doc(widget.ticketOwnweMobileNumber)
           .get()
-          .then((value) => {userAccount = value.get("photo")});
+          .then((value) =>
+              {userAccount = value.get("photo"), name = value.get("name")});
     });
-    Future.delayed(const Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(seconds: 3), () {
       databaseMethods.uploadTicketResponse(
           "comment",
           widget.id,
-          false,
           false,
           widget.ticketOwnweMobileNumber,
           true,
@@ -93,7 +96,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
         context,
         MaterialPageRoute(
           builder: (context) => chatRoom(widget.id,
-              widget.ticketOwnweMobileNumber, widget.title, widget.id),
+              widget.ticketOwnweMobileNumber, widget.title, widget.id, name),
         ));
   }
 
@@ -384,7 +387,11 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                 ),
                                 GestureDetector(
                                   onTap: () => mapInBrowser(
-                                      "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}/@${widget.latitude},${widget.longitude},12z"),
+                                      "https://www.google.com/maps/preview/@${widget.latitude},${widget.longitude},17z"
+                                      // "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},${widget.latitude}${widget.longitude}"
+                                      // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}"
+                                      // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}"
+                                      ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(12.0),
                                     child: Container(
@@ -400,67 +407,70 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                   ),
                                 ),
 
-                                Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Container(
-                                    width: queryData.width,
-                                    height: queryData.height * 0.12,
-                                    decoration: BoxDecoration(
-                                        color: Colors.grey[300],
-                                        borderRadius:
-                                            BorderRadius.circular(20)),
-                                    child: Row(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(12.0),
-                                          child: CircleAvatar(
-                                            minRadius: 40,
-                                            backgroundImage: NetworkImage(
-                                                userAccount["photo"]),
+                                Visibility(
+                                  visible: userAccount["mobile_number"] !=
+                                          FirebaseAuth
+                                              .instance.currentUser.phoneNumber
+                                      ? true
+                                      : false,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Container(
+                                      width: queryData.width,
+                                      height: queryData.height * 0.12,
+                                      decoration: BoxDecoration(
+                                          color: Colors.grey[300],
+                                          borderRadius:
+                                              BorderRadius.circular(20)),
+                                      child: Row(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(12.0),
+                                            child: CircleAvatar(
+                                              minRadius: 40,
+                                              backgroundImage: NetworkImage(
+                                                  userAccount["photo"]),
+                                            ),
                                           ),
-                                        ),
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 15),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(userAccount["name"],
-                                                  style: TextStyle(
-                                                      fontSize: 20,
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                              Text(userAccount["email"],
-                                                  style: TextStyle(
-                                                    fontSize: 15,
-                                                  )),
-                                              SizedBox(
-                                                height: 5,
-                                              ),
-                                              InkWell(
-                                                onTap: () => Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          seeProfileOfTicketOwner(
-                                                              userAccount[
-                                                                  "photo"],
-                                                              userAccount[
-                                                                  "name"],
-                                                              widget
-                                                                  .ticketOwnweMobileNumber),
-                                                    )),
-                                                child: Text("SEE PROFILE",
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 15),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(userAccount["name"],
                                                     style: TextStyle(
-                                                      color: Colors.blue,
-                                                      fontSize: 17,
-                                                    )),
-                                              )
-                                            ],
+                                                        fontSize: 20,
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                SizedBox(
+                                                  height: 5,
+                                                ),
+                                                InkWell(
+                                                  onTap: () => Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            seeProfileOfTicketOwner(
+                                                                userAccount[
+                                                                    "photo"],
+                                                                userAccount[
+                                                                    "name"],
+                                                                widget
+                                                                    .ticketOwnweMobileNumber),
+                                                      )),
+                                                  child: Text("SEE PROFILE",
+                                                      style: TextStyle(
+                                                        color: Colors.blue,
+                                                        fontSize: 17,
+                                                      )),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 )
@@ -503,29 +513,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                             setState(() {
                                               _tripEditModalBottomSheet(
                                                   context);
-                                              // databaseMethods
-                                              //     .uploadTicketResponse(
-                                              //   "comment",
-                                              //   widget.id,
-                                              //   false,
-                                              //   false,
-                                              //   widget.ticketOwnweMobileNumber,
-                                              //   true,
-                                              //   userAccount["photo"],
-                                              //   widget.title,
-                                              // );
-                                              // Navigator.push(
-                                              //     context,
-                                              //     MaterialPageRoute(
-                                              //       builder: (context) => chatRoom(
-                                              //           widget.id,
-                                              //           widget
-                                              //               .ticketOwnweMobileNumber,
-                                              //           widget.title,
-                                              //           widget.id),
-                                              //     ));
-
-                                              // responded = true;
                                             });
                                           },
                                         ),
@@ -554,35 +541,88 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                         widget
                                                             .ticketOwnweMobileNumber,
                                                         widget.title,
-                                                        widget.id),
+                                                        widget.id,
+                                                        userAccount["name"]),
                                                   ));
                                             });
                                           },
                                         ),
                                       )),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: SizedBox(
-                                width: queryData.width * 0.3,
-                                height: 50,
-                                child: FlatButton(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15)),
-                                  onPressed: () => callTicketOwner(),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.call,
-                                        color: Colors.white,
+                            Visibility(
+                              visible: widget.ticketOwnweMobileNumber !=
+                                      FirebaseAuth
+                                          .instance.currentUser.phoneNumber
+                                  ? true
+                                  : true,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: SizedBox(
+                                      width: queryData.width * 0.3,
+                                      height: 50,
+                                      child: FlatButton(
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15)),
+                                        onPressed: () {
+                                          callTicketOwner();
+                                          databaseMethods
+                                              .uploadTicketResponseByCall(
+                                                  "",
+                                                  widget.id,
+                                                  false,
+                                                  widget
+                                                      .ticketOwnweMobileNumber,
+                                                  false);
+                                        },
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.call,
+                                              color: Colors.white,
+                                            ),
+                                            Text(
+                                              "   Call",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ],
+                                        ),
+                                        color: Colors.black,
                                       ),
-                                      Text(
-                                        "   Call",
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                  color: Colors.black,
-                                ),
+                                  Center(
+                                    child: Positioned(
+                                      left: 15,
+                                      child: Visibility(
+                                        visible: widget.shareMobileNumber
+                                            ? false
+                                            : true,
+                                        child: Opacity(
+                                          opacity: 0.7,
+                                          child: Container(
+                                            height: 70,
+                                            width: 120,
+                                            color: Colors.white,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 16, left: 8),
+                                              child: Text(
+                                                "Call disabled\n     by owner",
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 15),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -595,166 +635,3 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
     );
   }
 }
-
-// class PopupTicketPage extends StatefulWidget {
-//   String ticketOwnweMobileNumber;
-//   String title;
-//   String description;
-//   String id;
-//   bool markAsDone;
-//   String photo;
-//   PopupTicketPage(
-//     this.ticketOwnweMobileNumber,
-//     this.title,
-//     this.description,
-//     this.id,
-//     this.markAsDone,
-//     this.photo,
-//   );
-
-//   @override
-//   _PopupTicketPageState createState() => _PopupTicketPageState();
-// }
-
-// class _PopupTicketPageState extends State<PopupTicketPage> {
-//   DatabaseMethods databaseMethods = new DatabaseMethods();
-//   bool responded = false;
-//   @override
-//   Widget build(BuildContext context) {
-//     // Future checkBooleanInRespondedField() async {
-//     //   FirebaseFirestore.instance
-//     //       .collection("global_ticket")
-//     //       .doc(widget.id)
-//     //       .collection("responses")
-//     //       .where("utr_mobile",
-//     //           isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
-//     //       .get()
-//     //       .then((value) => {
-//     //             value.docs.forEach((doc) {
-//     //               responded = doc.get("responded");
-//     //             })
-//     //           });
-//     // }
-
-//     return Dialog(
-//       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-//       child: Container(
-//         color: Colors.amber,
-//         height: 400,
-//         child: Padding(
-//           padding: EdgeInsets.all(12.0),
-//           child: StreamBuilder(
-//             stream: FirebaseFirestore.instance
-//                 .collection('user_account')
-//                 .doc("${widget.ticketOwnweMobileNumber}")
-//                 .snapshots(),
-//             builder: (context, snapshot) {
-//               if (!snapshot.hasData) {
-//                 return Center(
-//                   child: CircularProgressIndicator(),
-//                 );
-//               } else {
-//                 var userDocument = snapshot.data;
-
-//                 return StreamBuilder(
-//                   stream: FirebaseFirestore.instance
-//                       .collection("global_ticket")
-//                       .doc(widget.id)
-//                       .collection("responses")
-//                       .doc(FirebaseAuth.instance.currentUser.phoneNumber)
-//                       .snapshots(),
-//                   builder: (context, snapshot2) {
-//                     var userTicketDocument = snapshot2.data;
-
-//                     try {
-//                       responded = userTicketDocument["responded"];
-//                     } catch (e) {
-//                       responded = false;
-//                     }
-//                     return Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       mainAxisAlignment: MainAxisAlignment.center,
-//                       children: [
-//                         Row(
-//                           children: [
-//                             CircleAvatar(
-//                               radius: 30.0,
-//                               backgroundImage: NetworkImage(widget.photo),
-//                             ),
-//                             SizedBox(
-//                               width: 20,
-//                             ),
-//                             Text(
-//                               userDocument['name'],
-//                               style: TextStyle(fontSize: 20),
-//                             )
-//                           ],
-//                         ),
-//                         SizedBox(
-//                           height: 50,
-//                         ),
-//                         Text(
-//                           "title:",
-//                           style: TextStyle(fontSize: 30),
-//                         ),
-//                         Text(
-//                           widget.title,
-//                           style: TextStyle(fontSize: 25),
-//                         ),
-//                         SizedBox(
-//                           height: 30,
-//                         ),
-//                         Text(
-//                           "Description:",
-//                           style: TextStyle(fontSize: 30),
-//                         ),
-//                         Text(
-//                           widget.description,
-//                           style: TextStyle(fontSize: 25),
-//                         ),
-//                         SizedBox(
-//                           height: 30,
-//                         ),
-//                         Visibility(
-//                             visible: widget.ticketOwnweMobileNumber !=
-//                                     FirebaseAuth
-//                                         .instance.currentUser.phoneNumber
-//                                 ? true
-//                                 : true,
-//                             child: !responded
-//                                 ? RaisedButton(
-//                                     child: Text("Response"),
-//                                     onPressed: () {
-//                                       setState(() {
-//                                         databaseMethods.uploadTicketResponse(
-//                                           "comment",
-//                                           widget.id,
-//                                           false,
-//                                           false,
-//                                           widget.ticketOwnweMobileNumber,
-//                                           true,
-//                                           userDocument["photo"],
-//                                           widget.title,
-//                                         );
-
-//                                         responded = true;
-//                                       });
-//                                     },
-//                                   )
-//                                 : Icon(
-//                                     Icons.done,
-//                                     size: 50,
-//                                     color: Colors.green,
-//                                   ))
-//                       ],
-//                     );
-//                   },
-//                 );
-//               }
-//             },
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

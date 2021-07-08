@@ -102,7 +102,6 @@ class _GetStartrdPageState extends State<GetStartrdPage> {
                     ),
                     FlatButton(
                       onPressed: () {
-                        print("this is slideIndex: $slideIndex");
                         controller.animateToPage(slideIndex + 1,
                             duration: Duration(milliseconds: 500),
                             curve: Curves.linear);

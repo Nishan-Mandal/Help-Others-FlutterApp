@@ -65,7 +65,6 @@ class _searchBoxState extends State<searchBox> {
 
   _onSearchChanged() {
     searchResultsList();
-    print(_searchController.text);
   }
 
   Future<void> searchResultsList() async {
@@ -97,12 +96,6 @@ class _searchBoxState extends State<searchBox> {
       for (var distance in _allResults) {
         double ticketLatitude = Search.fromSnapshot(distance).latitude;
         double ticketLongitude = Search.fromSnapshot(distance).longitude;
-        print("object==========================");
-
-        // print('${widget.latitudeData} 1');
-        // print('${widget.longitudeData} 2');
-        // print('${latitudeData1} 3');
-        // print('${latitudeData1} 4');
 
         double distanceInMeters = await Geolocator.distanceBetween(
             widget.latitudeData,
@@ -213,16 +206,6 @@ class _searchBoxState extends State<searchBox> {
                             scale = 1;
                           }
                         }
-                        String photoInListTile;
-                        var x = FirebaseFirestore.instance
-                            .collection("user_account")
-                            .doc(_resultsList[index]['ticket_owner'])
-                            .get()
-                            .then((value) =>
-                                {photoInListTile = value.get("photo")});
-                        // Future.delayed(const Duration(milliseconds: 500), () {
-
-                        // });
 
                         return Opacity(
                           opacity: scale,
@@ -245,11 +228,11 @@ class _searchBoxState extends State<searchBox> {
                                             _resultsList[index]['title'],
                                             _resultsList[index]['description'],
                                             _resultsList[index]['id'],
-                                            _resultsList[index]['mark_as_done'],
                                             _resultsList[index]['uplodedPhoto'],
                                             _resultsList[index]['latitude'],
                                             _resultsList[index]['longitude'],
                                             _resultsList[index]['date'],
+                                            _resultsList[index]['share_mobile'],
                                           ),
                                         ));
                                   },

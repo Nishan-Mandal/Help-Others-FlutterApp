@@ -76,10 +76,6 @@ class _drawerState extends State<drawer> {
                               style:
                                   TextStyle(fontSize: 22, color: Colors.white),
                             ),
-                            Text(
-                              userDocument['email'],
-                              style: TextStyle(color: Colors.white),
-                            )
                           ],
                         ),
                       ),

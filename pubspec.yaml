@@ -39,6 +39,8 @@ dependencies:
   geolocator: ^7.0.3
   url_launcher: ^6.0.6
   flutter_neumorphic: ^3.1.0
+  flutter_staggered_grid_view: ^0.4.0
+  flutter_icons: ^1.1.0
 
 
 
@@ -62,6 +64,7 @@ flutter:
   assets:
     - PicsArt_01-01-08.21.28.jpg
     - map.jpg
+    - shareNumber.jpg
    
       
 
