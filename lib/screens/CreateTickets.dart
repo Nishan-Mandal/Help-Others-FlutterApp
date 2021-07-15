@@ -4,7 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:help_others/main.dart';
 
 import 'package:help_others/screens/Dashboard.dart';
 import 'package:help_others/screens/NavigationBar.dart';
@@ -18,12 +21,74 @@ import 'package:url_launcher/url_launcher.dart';
 class categoryPage extends StatefulWidget {
   double latitudeData;
   double longitudeData;
-  categoryPage(this.latitudeData, this.longitudeData);
+
+  categoryPage(
+    this.latitudeData,
+    this.longitudeData,
+  );
   @override
   _categoryPageState createState() => _categoryPageState();
 }
 
 class _categoryPageState extends State<categoryPage> {
+  getCurrentLocation() async {
+    try {
+      final geoposition = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best);
+      setState(() {
+        latitudeData1 = geoposition.latitude;
+        longitudeData1 = geoposition.longitude;
+      });
+    } catch (e) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => navigationBar(),
+          ),
+          (route) => false);
+    }
+  }
+
+  _showDialog() async {
+    await Future.delayed(Duration(milliseconds: 50));
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        onWillPop: onBackPress,
+        child: AlertDialog(
+          // shape:
+          //     RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+          title: Text("This will need your location"),
+          // backgroundColor: Colors.amber[300],
+          actions: [
+            FlatButton(
+              child: Text("No, Thanks"),
+              onPressed: () => Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => navigationBar(),
+                  ),
+                  (route) => false),
+            ),
+            FlatButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.pop(context, false);
+                getCurrentLocation();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool isLocationServiceEnabled = false;
+  Future<void> checkLocationEnable() async {
+    isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+  }
+
   Future<bool> onBackPress() {
     Navigator.pushAndRemoveUntil(
         context,
@@ -31,6 +96,14 @@ class _categoryPageState extends State<categoryPage> {
           builder: (context) => navigationBar(),
         ),
         (route) => false);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkLocationEnable();
+    _showDialog();
   }
 
   @override
@@ -740,8 +813,6 @@ class _crreateTicketsState extends State<crreateTickets> {
   int countDescriptionChar = 0;
 
   DatabaseMethods databaseMethods = new DatabaseMethods();
-  final myLocation =
-      Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
   final titleKey = GlobalKey<FormState>();
   final discriptionKey = GlobalKey<FormState>();
@@ -825,6 +896,9 @@ class _crreateTicketsState extends State<crreateTickets> {
                         child: Form(
                           key: titleKey,
                           child: TextFormField(
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(70)
+                            ],
                             onChanged: (value) {
                               setState(() {
                                 countTitleChar = titleControler.text.length;
@@ -892,6 +966,9 @@ class _crreateTicketsState extends State<crreateTickets> {
                                       descriptionControler.text.length;
                                 });
                               },
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(4000)
+                              ],
                               decoration: InputDecoration(
                                 labelText: "Provide Description",
                                 // enabledBorder: OutlineInputBorder(
@@ -941,8 +1018,6 @@ class _crreateTicketsState extends State<crreateTickets> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => secondPage(
-                                    widget.latitude,
-                                    widget.longitude,
                                     titleControler.text,
                                     descriptionControler.text,
                                     widget.category),
@@ -966,14 +1041,11 @@ PickedFile imageFile;
 final ImagePicker picker = ImagePicker();
 
 class secondPage extends StatefulWidget {
-  double latitude;
-  double longitude;
   String title;
   String description;
   String category;
 
-  secondPage(this.latitude, this.longitude, this.title, this.description,
-      this.category);
+  secondPage(this.title, this.description, this.category);
 
   @override
   _secondPageState createState() => _secondPageState();
@@ -981,6 +1053,7 @@ class secondPage extends StatefulWidget {
 
 class _secondPageState extends State<secondPage> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
+
   final snackBar = SnackBar(
     content: Text('Choose photo'),
     duration: Duration(seconds: 1),
@@ -999,74 +1072,78 @@ class _secondPageState extends State<secondPage> {
         width: queryData.width,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                SizedBox(
+                  height: 100,
+                ),
                 Container(
+                  height: 400,
+                  width: 300,
+                  // color: Colors.amber,
                   child: imageFile == null
-                      ? IconButton(
-                          icon: Icon(
-                            Icons.add_a_photo,
-                            size: 50,
-                          ),
-                          onPressed: () => showModalBottomSheet(
-                            context: context,
-                            builder: (context) => bottomSheet(),
-                          ),
+                      ? Icon(
+                          Icons.add_photo_alternate,
+                          size: 200,
                         )
-                      : RaisedButton(
-                          onPressed: () => showModalBottomSheet(
-                            context: context,
-                            builder: (context) => bottomSheet(),
-                          ),
-                          child: Text("Change Photo"),
-                          color: Colors.greenAccent,
-                        ),
+                      : Container(
+                          // color: Colors.blue,
+                          height: 400,
+                          width: 300,
+                          child: imageFile != null
+                              ? Image(
+                                  image: imageFile == null
+                                      ? Icon(
+                                          Icons.person,
+                                        )
+                                      : FileImage(File(imageFile.path)),
+                                  // fit: BoxFit.cover,
+                                )
+                              : Text("")),
+                ),
+                SizedBox(
+                  height: 20,
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Container(
-                      height: 400,
-                      width: queryData.width,
-                      child: imageFile != null
-                          ? Image(
-                              image: imageFile == null
-                                  ? IconButton(
-                                      icon: Icon(Icons.person),
-                                      onPressed: () => showModalBottomSheet(
-                                        context: context,
-                                        builder: (context) => bottomSheet(),
-                                      ),
-                                    )
-                                  : FileImage(File(imageFile.path)),
-                            )
-                          : Text("")),
-                ),
+                    padding: const EdgeInsets.all(10.0),
+                    child: imageFile != null
+                        ? RaisedButton(
+                            onPressed: () => showModalBottomSheet(
+                              context: context,
+                              builder: (context) => bottomSheet(),
+                            ),
+                            child: Text("Change Photo"),
+                            color: Colors.lime,
+                          )
+                        : RaisedButton(
+                            onPressed: () => showModalBottomSheet(
+                              context: context,
+                              builder: (context) => bottomSheet(),
+                            ),
+                            child: Text("Upload Photo"),
+                            color: Colors.lime,
+                          )),
               ],
             ),
-            Container(
-              height: 50,
-              width: queryData.width,
-              child: RaisedButton(
-                color: Colors.greenAccent,
-                child: Text("Preview"),
-                onPressed: () {
-                  if (imageFile != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => preview(
-                            widget.latitude,
-                            widget.longitude,
-                            widget.title,
-                            widget.description,
-                            widget.category),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  }
-                },
+            Flexible(
+              child: Container(
+                height: 50,
+                width: queryData.width,
+                child: RaisedButton(
+                  color: Colors.greenAccent,
+                  child: Text("Preview"),
+                  onPressed: () {
+                    if (imageFile != null) {
+                      _tripEditModalBottomSheet(context);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    }
+                  },
+                ),
               ),
             )
           ],
@@ -1119,35 +1196,8 @@ class _secondPageState extends State<secondPage> {
     );
   }
 
-  void takePhoto(ImageSource source) async {
-    final pickerFile = await picker.getImage(source: source);
-
-    setState(() {
-      imageFile = pickerFile;
-      Navigator.pop(context);
-    });
-  }
-}
-
-// ===================================================================================================================================================================
-class preview extends StatefulWidget {
-  double latitude;
-  double longitude;
-  String title;
-  String description;
-  String category;
-
-  preview(this.latitude, this.longitude, this.title, this.description,
-      this.category);
-  @override
-  _previewState createState() => _previewState();
-}
-
-class _previewState extends State<preview> {
-  DatabaseMethods databaseMethods = new DatabaseMethods();
-
   void _tripEditModalBottomSheet(context) {
-    bool _switchValue = false;
+    bool _switchValue = true;
     var queryData = MediaQuery.of(context).size;
     showModalBottomSheet(
       context: context,
@@ -1161,10 +1211,10 @@ class _previewState extends State<preview> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      height: 210,
+                      height: 180,
                       width: 130,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
@@ -1173,12 +1223,16 @@ class _previewState extends State<preview> {
                             fit: BoxFit.fill),
                       ),
                     ),
+                    SizedBox(
+                      height: 20,
+                    ),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "I dont want to share my mobile number",
+                          "Enable direct calling from my ad (recommended)\n[NOTE: By enabling this your number will be share \nto public]",
                           style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold),
+                              fontSize: 11, fontWeight: FontWeight.bold),
                         ),
                         SizedBox(
                           width: 10,
@@ -1200,24 +1254,45 @@ class _previewState extends State<preview> {
                         ),
                       ],
                     ),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     SizedBox(
+                    //       width: 10,
+                    //     ),
+                    //     Text(
+                    //       "NOTE: By enabling this your number will be share to public",
+                    //       style: TextStyle(color: Colors.red, fontSize: 8),
+                    //     ),
+                    //   ],
+                    // )
                   ],
                 ),
                 SizedBox(
                   height: 50,
                   width: queryData.width,
                   child: FlatButton(
-                    onPressed: () {
-                      uploadImage(_switchValue);
-                      imageFile = null;
-
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => navigationBar(),
-                          ),
-                          (route) => false);
+                    onPressed: () async {
+                      final coordinates =
+                          new Coordinates(latitudeData1, longitudeData1);
+                      var addresses = await Geocoder.local
+                          .findAddressesFromCoordinates(coordinates);
+                      var first = addresses.first;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => preview(
+                              latitudeData1,
+                              longitudeData1,
+                              widget.title,
+                              widget.description,
+                              widget.category,
+                              _switchValue,
+                              first.locality),
+                        ),
+                      );
                     },
-                    child: Text("POST"),
+                    child: Text("Preview"),
                     color: Colors.greenAccent,
                   ),
                 )
@@ -1229,12 +1304,38 @@ class _previewState extends State<preview> {
     );
   }
 
+  void takePhoto(ImageSource source) async {
+    final pickerFile = await picker.getImage(source: source, imageQuality: 25);
+
+    setState(() {
+      imageFile = pickerFile;
+      Navigator.pop(context);
+    });
+  }
+}
+
+// ===================================================================================================================================================================
+class preview extends StatefulWidget {
+  double latitude;
+  double longitude;
+  String title;
+  String description;
+  String category;
+  bool shareNumber;
+  var address;
+
+  preview(this.latitude, this.longitude, this.title, this.description,
+      this.category, this.shareNumber, this.address);
+  @override
+  _previewState createState() => _previewState();
+}
+
+class _previewState extends State<preview> {
+  DatabaseMethods databaseMethods = new DatabaseMethods();
+
   uploadImage(bool shareMobileNumber) async {
     String userImageUrl;
-    bool shareMobile = true;
-    if (shareMobileNumber) {
-      shareMobile = false;
-    }
+
     File file = File(imageFile.path);
 
     try {
@@ -1249,14 +1350,16 @@ class _previewState extends State<preview> {
       print("error in uploding user image");
     }
     databaseMethods.uploadTicketInfo(
-        widget.title,
-        widget.description,
-        shareMobile,
-        FirebaseAuth.instance.currentUser.phoneNumber,
-        widget.latitude,
-        widget.longitude,
-        userImageUrl,
-        widget.category);
+      widget.title,
+      widget.description,
+      shareMobileNumber,
+      FirebaseAuth.instance.currentUser.phoneNumber,
+      widget.latitude,
+      widget.longitude,
+      userImageUrl,
+      widget.category,
+      widget.address,
+    );
   }
 
   Future<void> mapInBrowser(String url) async {
@@ -1270,6 +1373,21 @@ class _previewState extends State<preview> {
     } else {
       throw 'Could not launch $url';
     }
+  }
+
+  showOverlay(BuildContext context) async {
+    OverlayState overlayState = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(
+        builder: (context) => Center(
+              child:
+                  Positioned(child: Center(child: CircularProgressIndicator())),
+            ));
+
+    overlayState.insert(overlayEntry);
+
+    await Future.delayed(Duration(seconds: 3));
+
+    overlayEntry.remove();
   }
 
   @override
@@ -1294,134 +1412,240 @@ class _previewState extends State<preview> {
           ),
         ],
       ),
-      body: Container(
-          child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 60,
-            width: queryData.width,
-            decoration: BoxDecoration(boxShadow: [
-              BoxShadow(
-                color: Colors.cyan[800],
-                // spreadRadius: 10,
-                // blurRadius: 25.0,
-                offset: Offset(0, 0),
-              ),
-            ]),
-            alignment: Alignment.bottomLeft,
-            // child: IconButton(
-            //   icon: Icon(Icons.arrow_back),
-            //   onPressed: () => Navigator.of(context).pop(dashboard("")),
-            // ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Colors.white, Colors.grey])),
-                    height: 250,
-                    width: queryData.width,
-                    child: Image(
-                      image: FileImage(File(imageFile.path)),
+      body: StreamBuilder(
+          stream: FirebaseFirestore.instance
+              .collection("user_account")
+              .doc(FirebaseAuth.instance.currentUser.phoneNumber)
+              .snapshots(),
+          builder: (context, snapshot) {
+            var userAccount = snapshot.data;
+            return Container(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 60,
+                  width: queryData.width,
+                  decoration: BoxDecoration(boxShadow: [
+                    BoxShadow(
+                      color: Colors.cyan[800],
+                      // spreadRadius: 10,
+                      // blurRadius: 25.0,
+                      offset: Offset(0, 0),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(9.0),
-                    child: Text(
-                      widget.title,
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(9.0),
-                    child: Text("Description",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 12, right: 12),
-                    child: Container(
-                      width: queryData.width,
-                      height: queryData.height / 4,
-                      color: Colors.grey[300],
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Text(widget.description,
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.w400)),
-                      ),
-                    ),
-                  ),
-                  // https://www.google.com/maps/place/Newtown,+Kolkata,+West+Bengal/@22.5861408,88.4227606,12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d22.5753931!4d88.4797903
-                  // RaisedButton(
-                  //   child: Text("map"),
-                  //   onPressed: () {
-                  //     mapInBrowser(
-                  //         // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}");
-                  //         // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}/@${widget.latitude},${widget.longitude},12z");
-                  //         "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d${widget.latitude}!4d${widget.longitude}");
-                  //   },
+                  ]),
+                  alignment: Alignment.bottomLeft,
+                  // child: IconButton(
+                  //   icon: Icon(Icons.arrow_back),
+                  //   onPressed: () => Navigator.of(context).pop(dashboard("")),
                   // ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        right: 12.0, left: 12.0, top: 12.0),
-                    child: Text(
-                      "Ad posted at",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [Colors.white, Colors.grey])),
+                          height: 250,
+                          width: queryData.width,
+                          child: Image(
+                            image: FileImage(File(imageFile.path)),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(9.0),
+                          child: Text(
+                            widget.title,
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(9.0),
+                          child: Text("Description",
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12, right: 12),
+                          child: Flexible(
+                            child: Container(
+                              width: queryData.width,
+                              height: queryData.height / 4,
+                              color: Colors.grey[300],
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Text(widget.description,
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w400)),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              right: 12.0, left: 12.0, top: 12.0),
+                          child: Text(
+                            "Ad posted at",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Stack(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Container(
+                                height: 70,
+                                width: queryData.width,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  image: DecorationImage(
+                                      image: AssetImage("map.jpg"),
+                                      fit: BoxFit.fill),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                                left: 40,
+                                bottom: 25,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 12,
+                                  ),
+                                  child: Container(
+                                    width: queryData.width * 0.70,
+                                    height: 40,
+                                    color: Colors.black12,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Icon(
+                                          Icons.location_on,
+                                          color: Colors.red,
+                                          size: 25,
+                                        ),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "  Location",
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  color: Colors.black),
+                                            ),
+                                            Text(
+                                              widget.address,
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  color: Colors.blue),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )),
+                          ],
+                        ),
+                        Container(
+                          width: queryData.width,
+                          height: queryData.height * 0.07,
+                          color: Colors.grey,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 6, bottom: 6),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black12,
+                                // borderRadius: BorderRadius.circular(15)
+                              ),
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(3.0),
+                                    child: CircleAvatar(
+                                      minRadius: 40,
+                                      backgroundImage: NetworkImage(
+                                        userAccount["photo"],
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 5),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(userAccount["name"],
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold)),
+                                        SizedBox(
+                                          height: 2,
+                                        ),
+                                        Text("SEE PROFILE",
+                                            style: TextStyle(
+                                              color: Colors.blue,
+                                              fontSize: 15,
+                                            )),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                            height: 50,
+                            width: queryData.width,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                  image: widget.shareNumber
+                                      ? AssetImage("callTrue.jpg")
+                                      : AssetImage("callFalse.jpg"),
+                                  fit: BoxFit.cover),
+                            ))
+                      ],
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () => mapInBrowser(
-                        "https://www.google.com/maps/preview/@${widget.latitude},${widget.longitude},17z"
-                        // "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},${widget.latitude}${widget.longitude}"
-                        // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}"
-                        // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}"
-                        ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Container(
-                        height: 90,
-                        width: queryData.width,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          image: DecorationImage(
-                              image: AssetImage("map.jpg"), fit: BoxFit.fill),
-                        ),
-                      ),
-                    ),
+                ),
+                Container(
+                  height: 50,
+                  width: queryData.width,
+                  child: FlatButton(
+                    onPressed: () {
+                      uploadImage(widget.shareNumber);
+                      showOverlay(context);
+                      Future.delayed(const Duration(seconds: 3), () {
+                        imageFile = null;
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => navigationBar(),
+                            ),
+                            (route) => false);
+                      });
+                    },
+                    child: Text("Post"),
+                    color: Colors.greenAccent,
                   ),
-                ],
-              ),
-            ),
-          ),
-          Container(
-            height: 50,
-            width: queryData.width,
-            child: FlatButton(
-              onPressed: () {
-                _tripEditModalBottomSheet(context);
-              },
-              child: Text("Post"),
-              color: Colors.greenAccent,
-            ),
-          ),
-        ],
-      )),
+                ),
+              ],
+            ));
+          }),
     );
   }
 }

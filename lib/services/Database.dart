@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:geocoder/model.dart';
 import 'package:help_others/screens/MessageScren.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:intl/intl.dart';
@@ -34,6 +36,7 @@ class DatabaseMethods {
     double longitude,
     String uplodedPhoto,
     String category,
+    var address,
   ) {
     var ref = FirebaseFirestore.instance.collection("global_ticket").doc();
     List months = [
@@ -58,7 +61,7 @@ class DatabaseMethods {
       "title": title,
       "description": description,
       "time": DateTime.now().millisecondsSinceEpoch,
-      "share_mobile": false,
+      "share_mobile": shareMobile,
       "ticket_owner": ticketOwnerMobile,
       "latitude": latitude,
       "longitude": longitude,
@@ -66,11 +69,65 @@ class DatabaseMethods {
       "uplodedPhoto": uplodedPhoto,
       "category": category,
       "date": date,
+      "address": address,
     }).catchError((e) {
       print(e.toString());
     });
   }
 
+  deleteAccount(String reasonForDeletingAc) {
+    var ref = FirebaseFirestore.instance
+        .collection("user_account")
+        .doc(FirebaseAuth.instance.currentUser.phoneNumber);
+    ref.delete();
+
+    FirebaseFirestore.instance
+        .collection("global_ticket")
+        .where("ticket_owner",
+            isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
+        .get()
+        .then((value) => {
+              value.docs.forEach((doc) {
+                FirebaseFirestore.instance
+                    .collection("global_ticket")
+                    .doc(doc.id)
+                    .collection("responses")
+                    .doc()
+                    .delete();
+                FirebaseFirestore.instance
+                    .collection("global_ticket")
+                    .doc(doc.id)
+                    .delete();
+              })
+            });
+
+    FirebaseFirestore.instance
+        .collection("messages")
+        .where("ticket_creater_mobile",
+            isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
+        .get()
+        .then((value) => {
+              value.docs.forEach((doc) {
+                FirebaseFirestore.instance
+                    .collection("messages")
+                    .doc(doc.id)
+                    .delete();
+                FirebaseFirestore.instance
+                    .collection("messages")
+                    .doc(doc.id)
+                    .collection("chats")
+                    .doc()
+                    .delete();
+              })
+            });
+
+    var reason =
+        FirebaseFirestore.instance.collection("deactivated_accounts").doc();
+    reason.set({
+      "mobileNumber": FirebaseAuth.instance.currentUser.phoneNumber,
+      "reason": reasonForDeletingAc,
+    });
+  }
   // updateTicketInfo(String ticketDocumentId, String title, String description,
   //     bool is_reviewed, String ticket_owner) {
   //   DateTime now = new DateTime.now();
@@ -127,7 +184,6 @@ class DatabaseMethods {
     bool share_mobile,
     String ticket_creater_mobile,
     bool responded,
-    String ownerPic,
     String ticketTitle,
     String lastMessage,
   ) async {
@@ -141,14 +197,14 @@ class DatabaseMethods {
         FirebaseFirestore.instance.collection("messages").doc(ticketDocumentId);
     var messages2 = messages1.collection('chats').doc();
 
-    String photo;
-    var responder = await FirebaseFirestore.instance
-        .collection("user_account")
-        .doc(FirebaseAuth.instance.currentUser.phoneNumber)
-        .get()
-        .then((value) {
-      photo = value.get("photo");
-    });
+    // String photo;
+    // var responder = await FirebaseFirestore.instance
+    //     .collection("user_account")
+    //     .doc(FirebaseAuth.instance.currentUser.phoneNumber)
+    //     .get()
+    //     .then((value) {
+    //   photo = value.get("photo");
+    // });
 
     ref.set({
       "comment": comment,
@@ -177,8 +233,6 @@ class DatabaseMethods {
       ),
       "ownerMessageSeen": false,
       "responderMessageSeen": false,
-      "ownerPic": ownerPic,
-      "responderPic": photo,
       "ticketTitle": ticketTitle,
     }).catchError((e) {
       print(e.toString());
@@ -356,13 +410,27 @@ class DatabaseMethods {
         ["${FirebaseAuth.instance.currentUser.phoneNumber}"],
       ),
     });
-    // var ref = FirebaseFirestore.instance.collection("myFavourites").doc();
-    // return ref.set({
-    //   "ticketId": ticketId,
-    //   "mobileNumber": mobileNumber,
-    //   "isFavourite": true
-    // }).catchError((e) {
-    //   print(e.toString());
-    // });
+  }
+
+  undomyFavourite(String ticketId) {
+    var val = [];
+    val.add('${FirebaseAuth.instance.currentUser.phoneNumber}');
+    var ref =
+        FirebaseFirestore.instance.collection("global_ticket").doc(ticketId);
+    ref.update({"favourites": FieldValue.arrayRemove(val)});
+  }
+
+  updateUserProfilePhoto(String profilePic) {
+    var ref = FirebaseFirestore.instance
+        .collection("user_account")
+        .doc(FirebaseAuth.instance.currentUser.phoneNumber);
+    ref.update({"photo": profilePic});
+  }
+
+  updateUserName(String name) {
+    var ref = FirebaseFirestore.instance
+        .collection("user_account")
+        .doc(FirebaseAuth.instance.currentUser.phoneNumber);
+    ref.update({"name": name});
   }
 }
