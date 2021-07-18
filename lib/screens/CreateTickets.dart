@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,6 +12,7 @@ import 'package:help_others/main.dart';
 
 import 'package:help_others/screens/Dashboard.dart';
 import 'package:help_others/screens/NavigationBar.dart';
+import 'package:help_others/services/Constants.dart';
 
 import 'package:help_others/services/Database.dart';
 import 'package:image_picker/image_picker.dart';
@@ -40,12 +42,14 @@ class _categoryPageState extends State<categoryPage> {
         longitudeData1 = geoposition.longitude;
       });
     } catch (e) {
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => navigationBar(),
-          ),
-          (route) => false);
+      if (this.mounted) {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => navigationBar(),
+            ),
+            (route) => false);
+      }
     }
   }
 
@@ -84,9 +88,15 @@ class _categoryPageState extends State<categoryPage> {
     );
   }
 
-  bool isLocationServiceEnabled = false;
+  // bool isLocationServiceEnabled = false;
   Future<void> checkLocationEnable() async {
-    isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+    bool locationEnable = await Geolocator.isLocationServiceEnabled();
+
+    if (locationEnable) {
+      getCurrentLocation();
+    } else {
+      _showDialog();
+    }
   }
 
   Future<bool> onBackPress() {
@@ -98,12 +108,23 @@ class _categoryPageState extends State<categoryPage> {
         (route) => false);
   }
 
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   print("kkjjjjjjjjjjjjjjjjjjjjjj");
+  //   print(isLocationServiceEnabled);
+  //   if (!isLocationServiceEnabled) {
+  //     _showDialog();
+  //   } else {
+  //     getCurrentLocation();
+  //   }
+  // }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     checkLocationEnable();
-    _showDialog();
   }
 
   @override
@@ -1059,6 +1080,12 @@ class _secondPageState extends State<secondPage> {
     duration: Duration(seconds: 1),
     backgroundColor: Colors.redAccent,
   );
+  final imageSizeisTooLarge = SnackBar(
+    content: Text('Image size is too large'),
+    duration: Duration(seconds: 3),
+    backgroundColor: Colors.redAccent,
+  );
+
   @override
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
@@ -1196,6 +1223,15 @@ class _secondPageState extends State<secondPage> {
     );
   }
 
+  getCurrentLocation() async {
+    final geoposition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best);
+    setState(() {
+      latitudeData1 = geoposition.latitude;
+      longitudeData1 = geoposition.longitude;
+    });
+  }
+
   void _tripEditModalBottomSheet(context) {
     bool _switchValue = true;
     var queryData = MediaQuery.of(context).size;
@@ -1273,24 +1309,29 @@ class _secondPageState extends State<secondPage> {
                   width: queryData.width,
                   child: FlatButton(
                     onPressed: () async {
-                      final coordinates =
-                          new Coordinates(latitudeData1, longitudeData1);
-                      var addresses = await Geocoder.local
-                          .findAddressesFromCoordinates(coordinates);
-                      var first = addresses.first;
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => preview(
-                              latitudeData1,
-                              longitudeData1,
-                              widget.title,
-                              widget.description,
-                              widget.category,
-                              _switchValue,
-                              first.locality),
-                        ),
-                      );
+                      if (latitudeData1 == null || longitudeData1 == null) {
+                        getCurrentLocation();
+                      } else {
+                        final coordinates =
+                            new Coordinates(latitudeData1, longitudeData1);
+                        var addresses = await Geocoder.local
+                            .findAddressesFromCoordinates(coordinates);
+                        var first = addresses.first;
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => preview(
+                                latitudeData1,
+                                longitudeData1,
+                                widget.title,
+                                widget.description,
+                                widget.category,
+                                _switchValue,
+                                first.locality),
+                          ),
+                        );
+                      }
                     },
                     child: Text("Preview"),
                     color: Colors.greenAccent,
@@ -1306,11 +1347,19 @@ class _secondPageState extends State<secondPage> {
 
   void takePhoto(ImageSource source) async {
     final pickerFile = await picker.getImage(source: source, imageQuality: 25);
+    var bytes = new File(pickerFile.path);
+    var enc = await bytes.readAsBytes();
 
-    setState(() {
-      imageFile = pickerFile;
+    if (enc.length >= 500000) {
       Navigator.pop(context);
-    });
+      ScaffoldMessenger.of(context).showSnackBar(imageSizeisTooLarge);
+    } else {
+      setState(() {
+        imageFile = pickerFile;
+
+        Navigator.pop(context);
+      });
+    }
   }
 }
 
@@ -1428,7 +1477,7 @@ class _previewState extends State<preview> {
                   width: queryData.width,
                   decoration: BoxDecoration(boxShadow: [
                     BoxShadow(
-                      color: Colors.cyan[800],
+                      color: Constants.tscaffoldBackground,
                       // spreadRadius: 10,
                       // blurRadius: 25.0,
                       offset: Offset(0, 0),
@@ -1445,15 +1494,12 @@ class _previewState extends State<preview> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          height: 20,
-                        ),
                         Container(
                           decoration: BoxDecoration(
                               gradient: LinearGradient(
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
-                                  colors: [Colors.white, Colors.grey])),
+                                  colors: Constants.adPhotoContainer)),
                           height: 250,
                           width: queryData.width,
                           child: Image(
@@ -1465,7 +1511,9 @@ class _previewState extends State<preview> {
                           child: Text(
                             widget.title,
                             style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
+                                color: Constants.tTitleText,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                         SizedBox(
@@ -1474,22 +1522,24 @@ class _previewState extends State<preview> {
                         Padding(
                           padding: const EdgeInsets.all(9.0),
                           child: Text("Description",
-                              style: TextStyle(fontWeight: FontWeight.bold)),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Constants.tDescriptionBoxString)),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(left: 12, right: 12),
-                          child: Flexible(
-                            child: Container(
-                              width: queryData.width,
-                              height: queryData.height / 4,
-                              color: Colors.grey[300],
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Text(widget.description,
-                                    style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w400)),
-                              ),
+                          child: Container(
+                            constraints:
+                                BoxConstraints(minHeight: queryData.height / 4),
+                            width: queryData.width,
+                            color: Constants.tDescriptionBox,
+                            child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Text(widget.description,
+                                  style: TextStyle(
+                                      color: Constants.tDescriptionText,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w400)),
                             ),
                           ),
                         ),
@@ -1498,7 +1548,9 @@ class _previewState extends State<preview> {
                               right: 12.0, left: 12.0, top: 12.0),
                           child: Text(
                             "Ad posted at",
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Constants.tAdpostAt),
                           ),
                         ),
                         Stack(
@@ -1526,14 +1578,14 @@ class _previewState extends State<preview> {
                                   child: Container(
                                     width: queryData.width * 0.70,
                                     height: 40,
-                                    color: Colors.black12,
+                                    color: Constants.tlocationSticker,
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: [
                                         Icon(
                                           Icons.location_on,
-                                          color: Colors.red,
+                                          color: Constants.tlocationIcon,
                                           size: 25,
                                         ),
                                         Column(
@@ -1544,13 +1596,15 @@ class _previewState extends State<preview> {
                                               "  Location",
                                               style: TextStyle(
                                                   fontSize: 15,
-                                                  color: Colors.black),
+                                                  color: Constants
+                                                      .tlocationTextString),
                                             ),
                                             Text(
                                               widget.address,
                                               style: TextStyle(
                                                   fontSize: 15,
-                                                  color: Colors.blue),
+                                                  color:
+                                                      Constants.tlocationText),
                                             ),
                                           ],
                                         ),
@@ -1563,12 +1617,12 @@ class _previewState extends State<preview> {
                         Container(
                           width: queryData.width,
                           height: queryData.height * 0.07,
-                          color: Colors.grey,
+                          color: Constants.tSeeProfileContainer,
                           child: Padding(
                             padding: const EdgeInsets.only(top: 6, bottom: 6),
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.black12,
+                                color: Constants.tSeeProfileSticker,
                                 // borderRadius: BorderRadius.circular(15)
                               ),
                               child: Row(
@@ -1590,6 +1644,8 @@ class _previewState extends State<preview> {
                                       children: [
                                         Text(userAccount["name"],
                                             style: TextStyle(
+                                                color:
+                                                    Constants.tNameInSeeProfile,
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.bold)),
                                         SizedBox(
@@ -1597,7 +1653,7 @@ class _previewState extends State<preview> {
                                         ),
                                         Text("SEE PROFILE",
                                             style: TextStyle(
-                                              color: Colors.blue,
+                                              color: Constants.tSeeProfileText,
                                               fontSize: 15,
                                             )),
                                       ],

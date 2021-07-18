@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:help_others/screens/CheckInternetConnection.dart';
 import 'package:help_others/screens/CreateTickets.dart';
 import 'package:help_others/screens/Dashboard.dart';
 import 'package:help_others/screens/GetOtpScreen.dart';
@@ -16,11 +19,11 @@ import 'package:sms_autofill/sms_autofill.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  // ErrorWidget.builder = (FlutterErrorDetails details) => Scaffold(
-  //       body: Center(
-  //         child: CircularProgressIndicator(),
-  //       ),
-  //     );
+  ErrorWidget.builder = (FlutterErrorDetails details) => Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
 
   runApp(MyApp());
 }
@@ -75,11 +78,25 @@ double latitudeData1;
 double longitudeData1;
 
 class _LandingPageState extends State<LandingPage> {
+  final connectivity = SnackBar(
+    content: Text('No internet connection'),
+    duration: Duration(seconds: 5),
+    backgroundColor: Colors.redAccent,
+  );
+  Future<bool> checkInternetConnectivity() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {}
+    } on SocketException catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(connectivity);
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    // getCurrentLocation();
+    checkInternetConnectivity();
   }
 
   @override
@@ -160,7 +177,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           labelText: "+91"),
                       validator: (value) {
-                        return value.isEmpty ? "Please provide UserName" : null;
+                        return value.isEmpty
+                            ? "Please provide valid number"
+                            : null;
                       },
                       controller: _phoneNumberController,
                     ),

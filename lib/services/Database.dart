@@ -103,8 +103,8 @@ class DatabaseMethods {
 
     FirebaseFirestore.instance
         .collection("messages")
-        .where("ticket_creater_mobile",
-            isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
+        .where("participants",
+            arrayContains: FirebaseAuth.instance.currentUser.phoneNumber)
         .get()
         .then((value) => {
               value.docs.forEach((doc) {
@@ -232,7 +232,7 @@ class DatabaseMethods {
         ],
       ),
       "ownerMessageSeen": false,
-      "responderMessageSeen": false,
+      "responderMessageSeen": true,
       "ticketTitle": ticketTitle,
     }).catchError((e) {
       print(e.toString());

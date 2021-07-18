@@ -1,7 +1,11 @@
+import 'dart:ui';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:help_others/screens/ChatRoom.dart';
+import 'package:help_others/services/Constants.dart';
 
 import 'NavigationBar.dart';
 
@@ -24,35 +28,33 @@ class _messagePageState extends State<messagePage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: onBackPress,
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: DefaultTabController(
-          length: 3,
-          child: Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.blueGrey,
-              bottom: TabBar(
-                tabs: [
-                  Tab(
-                    text: "ALL",
-                  ),
-                  Tab(
-                    text: "BUYING",
-                  ),
-                  Tab(
-                    text: "SELLING",
-                  ),
-                ],
-              ),
-              title: Text('Chats'),
-            ),
-            body: TabBarView(
-              children: [
-                allMessages(),
-                buyingMessages(),
-                sellingMessages(),
+      child: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.grey[900],
+            bottom: TabBar(
+              labelColor: Constants.searchIcon,
+              tabs: [
+                Tab(
+                  text: "ALL",
+                ),
+                Tab(
+                  text: "BUYING",
+                ),
+                Tab(
+                  text: "SELLING",
+                ),
               ],
             ),
+            title: Text('Chats', style: TextStyle(color: Colors.amber)),
+          ),
+          body: TabBarView(
+            children: [
+              allMessages(),
+              buyingMessages(),
+              sellingMessages(),
+            ],
           ),
         ),
       ),
@@ -70,6 +72,7 @@ class _allMessagesState extends State<allMessages> {
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Container(
+      color: Colors.white,
       child: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection("messages")
@@ -118,18 +121,7 @@ class _allMessagesState extends State<allMessages> {
                                 child: Stack(
                                   children: [
                                     Card(
-                                      color: snapshot.data.docs[index]
-                                                  ['responderNumber'] ==
-                                              FirebaseAuth.instance.currentUser
-                                                  .phoneNumber
-                                          ? (snapshot.data.docs[index]
-                                                  ['responderMessageSeen']
-                                              ? Colors.white
-                                              : Colors.black12)
-                                          : (snapshot.data.docs[index]
-                                                  ['ownerMessageSeen']
-                                              ? Colors.white
-                                              : Colors.black12),
+                                      // color: Colors.grey[700],
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -145,26 +137,46 @@ class _allMessagesState extends State<allMessages> {
                                                       padding:
                                                           const EdgeInsets.all(
                                                               8.0),
-                                                      child: CircleAvatar(
-                                                          radius: 30,
-                                                          backgroundImage:
-                                                              (NetworkImage(
-                                                                  userDocument2[
-                                                                      "uplodedPhoto"]))
-                                                          //  snapshot.data
-                                                          //                 .docs[index][
-                                                          //             'responderNumber'] ==
-                                                          //         FirebaseAuth
-                                                          //             .instance
-                                                          //             .currentUser
-                                                          //             .phoneNumber
-                                                          //     ? (NetworkImage(snapshot
-                                                          //             .data.docs[index]
-                                                          //         ['ownerPic']))
-                                                          //     : NetworkImage((snapshot
-                                                          //             .data.docs[index]
-                                                          //         ['responderPic'])),
+
+                                                      // borderRadius:
+                                                      //     BorderRadius
+                                                      //         .all(Radius
+                                                      //             .circular(
+                                                      //                 10)),
+                                                      child: ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
+                                                        child: SizedBox(
+                                                          height: 60,
+                                                          width: 50,
+                                                          child:
+                                                              CachedNetworkImage(
+                                                            fit: BoxFit.cover,
+                                                            imageUrl: userDocument2[
+                                                                "uplodedPhoto"],
+                                                            errorWidget:
+                                                                (context, url,
+                                                                        error) =>
+                                                                    Icon(Icons
+                                                                        .error),
                                                           ),
+                                                        ),
+                                                      ),
+
+                                                      //  snapshot.data
+                                                      //                 .docs[index][
+                                                      //             'responderNumber'] ==
+                                                      //         FirebaseAuth
+                                                      //             .instance
+                                                      //             .currentUser
+                                                      //             .phoneNumber
+                                                      //     ? (NetworkImage(snapshot
+                                                      //             .data.docs[index]
+                                                      //         ['ownerPic']))
+                                                      //     : NetworkImage((snapshot
+                                                      //             .data.docs[index]
+                                                      //         ['responderPic'])),
                                                     ),
                                                     Column(
                                                       crossAxisAlignment:
@@ -180,6 +192,28 @@ class _allMessagesState extends State<allMessages> {
                                                             fontWeight:
                                                                 FontWeight.bold,
                                                             fontSize: 17,
+                                                            color: snapshot.data
+                                                                            .docs[index][
+                                                                        'responderNumber'] ==
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .phoneNumber
+                                                                ? (snapshot.data
+                                                                            .docs[index]
+                                                                        [
+                                                                        'responderMessageSeen']
+                                                                    ? Colors
+                                                                        .white54
+                                                                    : Colors
+                                                                        .white)
+                                                                : (snapshot.data
+                                                                            .docs[index][
+                                                                        'ownerMessageSeen']
+                                                                    ? Colors
+                                                                        .black45
+                                                                    : Colors
+                                                                        .black),
                                                           ),
                                                         ),
                                                         Text(
@@ -189,12 +223,32 @@ class _allMessagesState extends State<allMessages> {
                                                                   "..."
                                                               : title,
                                                           style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 17,
-                                                              color: Colors
-                                                                  .black38),
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 17,
+                                                            color: snapshot.data
+                                                                            .docs[index][
+                                                                        'responderNumber'] ==
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .phoneNumber
+                                                                ? (snapshot.data
+                                                                            .docs[index]
+                                                                        [
+                                                                        'responderMessageSeen']
+                                                                    ? Colors
+                                                                        .white70
+                                                                    : Colors
+                                                                        .white)
+                                                                : (snapshot.data
+                                                                            .docs[index][
+                                                                        'ownerMessageSeen']
+                                                                    ? Colors
+                                                                        .black45
+                                                                    : Colors
+                                                                        .black),
+                                                          ),
                                                         ),
                                                         SizedBox(
                                                           height: 5,
@@ -251,8 +305,7 @@ class _allMessagesState extends State<allMessages> {
                                       builder: (context) => chatRoom(
                                             snapshot.data.docs[index]
                                                 ['ticketId'],
-                                            snapshot.data.docs[index]
-                                                ['responderNumber'],
+                                            mobile,
                                             snapshot.data.docs[index]
                                                 ['ticketTitle'],
                                             snapshot.data.docs[index]['id'],
@@ -348,18 +401,7 @@ class _buyingMessagesState extends State<buyingMessages> {
                                 child: Stack(
                                   children: [
                                     Card(
-                                      color: snapshot.data.docs[index]
-                                                  ['responderNumber'] ==
-                                              FirebaseAuth.instance.currentUser
-                                                  .phoneNumber
-                                          ? (snapshot.data.docs[index]
-                                                  ['responderMessageSeen']
-                                              ? Colors.white
-                                              : Colors.black12)
-                                          : (snapshot.data.docs[index]
-                                                  ['ownerMessageSeen']
-                                              ? Colors.white
-                                              : Colors.black12),
+                                      color: Colors.white,
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -375,26 +417,27 @@ class _buyingMessagesState extends State<buyingMessages> {
                                                       padding:
                                                           const EdgeInsets.all(
                                                               8.0),
-                                                      child: CircleAvatar(
-                                                          radius: 30,
-                                                          backgroundImage:
-                                                              (NetworkImage(
-                                                                  userDocument2[
-                                                                      "uplodedPhoto"]))
-                                                          //  snapshot.data
-                                                          //                 .docs[index][
-                                                          //             'responderNumber'] ==
-                                                          //         FirebaseAuth
-                                                          //             .instance
-                                                          //             .currentUser
-                                                          //             .phoneNumber
-                                                          //     ? (NetworkImage(snapshot
-                                                          //             .data.docs[index]
-                                                          //         ['ownerPic']))
-                                                          //     : NetworkImage((snapshot
-                                                          //             .data.docs[index]
-                                                          //         ['responderPic'])),
+                                                      child: SizedBox(
+                                                        width: 50,
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          10)),
+                                                          child:
+                                                              CachedNetworkImage(
+                                                            fit: BoxFit.cover,
+                                                            imageUrl: userDocument2[
+                                                                "uplodedPhoto"],
+                                                            errorWidget:
+                                                                (context, url,
+                                                                        error) =>
+                                                                    Icon(Icons
+                                                                        .error),
                                                           ),
+                                                        ),
+                                                      ),
                                                     ),
                                                     Column(
                                                       crossAxisAlignment:
@@ -407,10 +450,32 @@ class _buyingMessagesState extends State<buyingMessages> {
                                                         Text(
                                                           userDocument["name"],
                                                           style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 17),
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 17,
+                                                            color: snapshot.data
+                                                                            .docs[index][
+                                                                        'responderNumber'] ==
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .phoneNumber
+                                                                ? (snapshot.data
+                                                                            .docs[index]
+                                                                        [
+                                                                        'responderMessageSeen']
+                                                                    ? Colors
+                                                                        .black45
+                                                                    : Colors
+                                                                        .black)
+                                                                : (snapshot.data
+                                                                            .docs[index][
+                                                                        'ownerMessageSeen']
+                                                                    ? Colors
+                                                                        .black45
+                                                                    : Colors
+                                                                        .black),
+                                                          ),
                                                         ),
                                                         Text(
                                                           title.length > 34
@@ -419,12 +484,32 @@ class _buyingMessagesState extends State<buyingMessages> {
                                                                   "..."
                                                               : title,
                                                           style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 17,
-                                                              color: Colors
-                                                                  .black38),
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 17,
+                                                            color: snapshot.data
+                                                                            .docs[index][
+                                                                        'responderNumber'] ==
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .phoneNumber
+                                                                ? (snapshot.data
+                                                                            .docs[index]
+                                                                        [
+                                                                        'responderMessageSeen']
+                                                                    ? Colors
+                                                                        .black45
+                                                                    : Colors
+                                                                        .black)
+                                                                : (snapshot.data
+                                                                            .docs[index][
+                                                                        'ownerMessageSeen']
+                                                                    ? Colors
+                                                                        .black45
+                                                                    : Colors
+                                                                        .black),
+                                                          ),
                                                         ),
                                                         SizedBox(
                                                           height: 5,
@@ -555,18 +640,7 @@ class _sellingMessagesState extends State<sellingMessages> {
                                 child: Stack(
                                   children: [
                                     Card(
-                                      color: snapshot.data.docs[index]
-                                                  ['responderNumber'] ==
-                                              FirebaseAuth.instance.currentUser
-                                                  .phoneNumber
-                                          ? (snapshot.data.docs[index]
-                                                  ['responderMessageSeen']
-                                              ? Colors.white
-                                              : Colors.black12)
-                                          : (snapshot.data.docs[index]
-                                                  ['ownerMessageSeen']
-                                              ? Colors.white
-                                              : Colors.black12),
+                                      color: Colors.white,
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -582,26 +656,27 @@ class _sellingMessagesState extends State<sellingMessages> {
                                                       padding:
                                                           const EdgeInsets.all(
                                                               8.0),
-                                                      child: CircleAvatar(
-                                                          radius: 30,
-                                                          backgroundImage:
-                                                              (NetworkImage(
-                                                                  userDocument2[
-                                                                      "uplodedPhoto"]))
-                                                          // snapshot.data
-                                                          //                 .docs[index][
-                                                          //             'responderNumber'] ==
-                                                          //         FirebaseAuth
-                                                          //             .instance
-                                                          //             .currentUser
-                                                          //             .phoneNumber
-                                                          //     ? (NetworkImage(snapshot
-                                                          //             .data.docs[index]
-                                                          //         ['ownerPic']))
-                                                          //     : NetworkImage((snapshot
-                                                          //             .data.docs[index]
-                                                          //         ['responderPic'])),
+                                                      child: SizedBox(
+                                                        width: 50,
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          10)),
+                                                          child:
+                                                              CachedNetworkImage(
+                                                            fit: BoxFit.cover,
+                                                            imageUrl: userDocument2[
+                                                                "uplodedPhoto"],
+                                                            errorWidget:
+                                                                (context, url,
+                                                                        error) =>
+                                                                    Icon(Icons
+                                                                        .error),
                                                           ),
+                                                        ),
+                                                      ),
                                                     ),
                                                     Column(
                                                       crossAxisAlignment:
@@ -614,10 +689,32 @@ class _sellingMessagesState extends State<sellingMessages> {
                                                         Text(
                                                           userDocument["name"],
                                                           style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 17),
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 17,
+                                                            color: snapshot.data
+                                                                            .docs[index][
+                                                                        'responderNumber'] ==
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .phoneNumber
+                                                                ? (snapshot.data
+                                                                            .docs[index]
+                                                                        [
+                                                                        'responderMessageSeen']
+                                                                    ? Colors
+                                                                        .black45
+                                                                    : Colors
+                                                                        .black)
+                                                                : (snapshot.data
+                                                                            .docs[index][
+                                                                        'ownerMessageSeen']
+                                                                    ? Colors
+                                                                        .black45
+                                                                    : Colors
+                                                                        .black),
+                                                          ),
                                                         ),
                                                         Text(
                                                           title.length > 34
@@ -626,10 +723,32 @@ class _sellingMessagesState extends State<sellingMessages> {
                                                                   "..."
                                                               : title,
                                                           style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 17),
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 17,
+                                                            color: snapshot.data
+                                                                            .docs[index][
+                                                                        'responderNumber'] ==
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .phoneNumber
+                                                                ? (snapshot.data
+                                                                            .docs[index]
+                                                                        [
+                                                                        'responderMessageSeen']
+                                                                    ? Colors
+                                                                        .black45
+                                                                    : Colors
+                                                                        .black)
+                                                                : (snapshot.data
+                                                                            .docs[index][
+                                                                        'ownerMessageSeen']
+                                                                    ? Colors
+                                                                        .black45
+                                                                    : Colors
+                                                                        .black),
+                                                          ),
                                                         ),
                                                         SizedBox(
                                                           height: 5,

@@ -113,269 +113,293 @@ class _dashboardState extends State<dashboard> {
                   .orderBy("time", descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
-                return Padding(
-                  padding: const EdgeInsets.only(left: 8, right: 8),
-                  child: Container(
-                    child: StaggeredGridView.countBuilder(
-                      crossAxisCount: 4,
-                      itemCount: snapshot.data.docs.length,
-                      physics: BouncingScrollPhysics(),
-                      itemBuilder: (BuildContext context, int index) {
-                        String title = snapshot.data.docs[index]["title"];
-                        String description =
-                            snapshot.data.docs[index]["description"];
-                        bool myFavFlag = false;
+                if (snapshot.hasData) {
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 8, right: 8),
+                    child: Container(
+                      child: StaggeredGridView.countBuilder(
+                        crossAxisCount: 4,
+                        itemCount: snapshot.data.docs.length,
+                        physics: BouncingScrollPhysics(),
+                        itemBuilder: (BuildContext context, int index) {
+                          String title = snapshot.data.docs[index]["title"];
+                          String description =
+                              snapshot.data.docs[index]["description"];
+                          bool myFavFlag = false;
 
-                        try {
-                          List l = snapshot.data.docs[index]["favourites"];
-                          if (l.contains(
-                              FirebaseAuth.instance.currentUser.phoneNumber)) {
-                            myFavFlag = true;
+                          try {
+                            List l = snapshot.data.docs[index]["favourites"];
+                            if (l.contains(FirebaseAuth
+                                .instance.currentUser.phoneNumber)) {
+                              myFavFlag = true;
+                            }
+                          } catch (e) {
+                            myFavFlag = false;
                           }
-                        } catch (e) {
-                          myFavFlag = false;
-                        }
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ticketViewScreen(
-                                    snapshot.data.docs[index]["ticket_owner"],
-                                    snapshot.data.docs[index]["title"],
-                                    snapshot.data.docs[index]["description"],
-                                    snapshot.data.docs[index]["id"],
-                                    snapshot.data.docs[index]["uplodedPhoto"],
-                                    snapshot.data.docs[index]["latitude"],
-                                    snapshot.data.docs[index]["longitude"],
-                                    snapshot.data.docs[index]["date"],
-                                    snapshot.data.docs[index]["share_mobile"],
-                                    myFavFlag,
-                                    snapshot.data.docs[index]["address"],
-                                    snapshot.data.docs[index]["category"],
-                                  ),
-                                ));
-                          },
-                          child: Stack(
-                            children: [
-                              new Container(
-                                  // height: queryData.height,
-                                  decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: Constants.gradientColorOnAd),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(20))),
-                                  child: new Center(
-                                    child: Column(
-                                      children: [
-                                        Flexible(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8),
-                                            child: Stack(
-                                              children: [
-                                                Container(
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.only(
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ticketViewScreen(
+                                      snapshot.data.docs[index]["ticket_owner"],
+                                      snapshot.data.docs[index]["title"],
+                                      snapshot.data.docs[index]["description"],
+                                      snapshot.data.docs[index]["id"],
+                                      snapshot.data.docs[index]["uplodedPhoto"],
+                                      snapshot.data.docs[index]["latitude"],
+                                      snapshot.data.docs[index]["longitude"],
+                                      snapshot.data.docs[index]["date"],
+                                      snapshot.data.docs[index]["share_mobile"],
+                                      myFavFlag,
+                                      snapshot.data.docs[index]["address"],
+                                      snapshot.data.docs[index]["category"],
+                                    ),
+                                  ));
+                            },
+                            child: Stack(
+                              children: [
+                                new Container(
+                                    // height: queryData.height,
+                                    decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors:
+                                                Constants.gradientColorOnAd),
+                                        // color: Colors.grey[800],
+
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(20))),
+                                    child: new Center(
+                                      child: Column(
+                                        children: [
+                                          Flexible(
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(8),
+                                              child: Stack(
+                                                children: [
+                                                  Container(
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.only(
+                                                        topLeft:
+                                                            Radius.circular(20),
+                                                        topRight:
+                                                            Radius.circular(20),
+                                                      ),
+                                                      child: CachedNetworkImage(
+                                                        fit: BoxFit.cover,
+                                                        imageUrl: snapshot.data
+                                                                .docs[index]
+                                                            ["uplodedPhoto"],
+                                                        errorWidget: (context,
+                                                                url, error) =>
+                                                            Icon(Icons.error),
+                                                      ),
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius.only(
                                                       topLeft:
                                                           Radius.circular(20),
                                                       topRight:
                                                           Radius.circular(20),
-                                                    ),
-                                                    child: CachedNetworkImage(
-                                                      fit: BoxFit.cover,
-                                                      imageUrl: snapshot
-                                                              .data.docs[index]
-                                                          ["uplodedPhoto"],
-                                                      // placeholder: (context,
-                                                      //         url) =>
-                                                      //     Center(
-                                                      //         child:
-                                                      //             CircularProgressIndicator()),
-                                                      errorWidget: (context,
-                                                              url, error) =>
-                                                          Icon(Icons.error),
-                                                    ),
+                                                    )),
+                                                    height: queryData.height,
+                                                    width: queryData.width,
                                                   ),
-                                                  decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.only(
-                                                    topLeft:
-                                                        Radius.circular(20),
-                                                    topRight:
-                                                        Radius.circular(20),
-                                                  )),
-                                                  height: queryData.height,
-                                                  width: queryData.width,
-                                                ),
-                                                Positioned(
-                                                  right: 5,
-                                                  bottom: 0,
-                                                  child: Text(
-                                                    snapshot.data.docs[index]
-                                                        ["date"],
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Constants.date),
-                                                  ),
-                                                )
-                                              ],
+                                                  Positioned(
+                                                    right: 5,
+                                                    bottom: 0,
+                                                    child: Text(
+                                                      snapshot.data.docs[index]
+                                                          ["date"],
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color:
+                                                              Constants.date),
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        Divider(
-                                          thickness: 1,
-                                          color: Constants.divider,
-                                        ),
-                                        Container(
-                                          height: 70,
-                                          width: queryData.width,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                  title.length > 20
-                                                      ? "  " +
-                                                          title.substring(
-                                                              0, 20) +
-                                                          "..."
-                                                      : "  " + title,
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Constants.titleText,
-                                                  )),
-                                              SizedBox(
-                                                height: 5,
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 8),
-                                                child: Text(
-                                                  description.length > 22
-                                                      ? description.substring(
-                                                              0, 22) +
-                                                          "..."
-                                                      : description,
-                                                  style: TextStyle(
-                                                      color: Constants
-                                                          .descriptionText),
+                                          Divider(
+                                            thickness: 1,
+                                            color: Constants.divider,
+                                          ),
+                                          Container(
+                                            height: 70,
+                                            width: queryData.width,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                    title.length > 23
+                                                        ? "  " +
+                                                            title.substring(
+                                                                0, 23) +
+                                                            ".."
+                                                        : "  " + title,
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color:
+                                                          Constants.titleText,
+                                                    )),
+                                                SizedBox(
+                                                  height: 5,
                                                 ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 8),
+                                                  child: Text(
+                                                    description.length > 20
+                                                        ? description.substring(
+                                                                0, 20) +
+                                                            ".."
+                                                        : description,
+                                                    style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: Constants
+                                                            .descriptionText),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    )),
+                                Positioned(
+                                    right: 0,
+                                    child: snapshot.data.docs[index]
+                                                ["ticket_owner"] !=
+                                            FirebaseAuth.instance.currentUser
+                                                .phoneNumber
+                                        ? Padding(
+                                            padding: const EdgeInsets.all(3.0),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                  // gradient: LinearGradient(
+                                                  //     begin: Alignment.topLeft,
+                                                  //     end: Alignment.bottomRight,
+                                                  //     colors: Constants
+                                                  //         .gradientColorOnAd),
+                                                  color: Colors.grey[800],
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100)),
+                                              child: IconButton(
+                                                icon: myFavFlag
+                                                    ? Icon(
+                                                        Icons.favorite,
+                                                        color: Constants
+                                                            .myFavIconTrue,
+                                                        size: 20,
+                                                      )
+                                                    : Icon(
+                                                        Icons.favorite_border,
+                                                        size: 20,
+                                                        color: Constants
+                                                            .myFavIconFalse,
+                                                      ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    if (myFavFlag) {
+                                                      databaseMethods
+                                                          .undomyFavourite(
+                                                        snapshot.data
+                                                            .docs[index]["id"],
+                                                      );
+                                                      myFavFlag = false;
+                                                    } else {
+                                                      databaseMethods
+                                                          .myFavourites(
+                                                        snapshot.data
+                                                            .docs[index]["id"],
+                                                      );
+                                                      myFavFlag = true;
+                                                    }
+                                                  });
+                                                },
                                               ),
+                                            ),
+                                          )
+                                        : Text("")),
+                                Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        bottom: 5, right: 10),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                              top: 8, left: 8),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.location_on_outlined,
+                                                color: Constants.locationMarker,
+                                                size: 15,
+                                              ),
+                                              Text(
+                                                snapshot.data.docs[index]
+                                                    ["address"],
+                                                style: TextStyle(
+                                                    color:
+                                                        Constants.addressText,
+                                                    fontSize: 12),
+                                              )
                                             ],
                                           ),
+                                        ),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.add_ic_call,
+                                              size: 22,
+                                              color: Constants.callIcon,
+                                            ),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            Icon(
+                                              FontAwesome.comments_o,
+                                              color: Constants.chatIcon,
+                                              size: 22,
+                                            ),
+                                          ],
                                         )
                                       ],
                                     ),
-                                  )),
-                              Positioned(
-                                  right: 0,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors:
-                                                Constants.gradientColorOnAd),
-                                        borderRadius:
-                                            BorderRadius.circular(100)),
-                                    child: IconButton(
-                                      icon: myFavFlag
-                                          ? Icon(
-                                              Icons.favorite,
-                                              color: Constants.myFavIconTrue,
-                                              size: 20,
-                                            )
-                                          : Icon(
-                                              Icons.favorite_border,
-                                              size: 20,
-                                              color: Constants.myFavIconFalse,
-                                            ),
-                                      onPressed: () {
-                                        setState(() {
-                                          if (myFavFlag) {
-                                            databaseMethods.undomyFavourite(
-                                              snapshot.data.docs[index]["id"],
-                                            );
-                                            myFavFlag = false;
-                                          } else {
-                                            databaseMethods.myFavourites(
-                                              snapshot.data.docs[index]["id"],
-                                            );
-                                            myFavFlag = true;
-                                          }
-                                        });
-                                      },
-                                    ),
-                                  )),
-                              Align(
-                                alignment: Alignment.bottomRight,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      bottom: 5, right: 10),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 8, left: 8),
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.location_on_outlined,
-                                              color: Constants.addressText,
-                                              size: 15,
-                                            ),
-                                            Text(
-                                              snapshot.data.docs[index]
-                                                  ["address"],
-                                              style: TextStyle(
-                                                  color:
-                                                      Constants.locationMarker,
-                                                  fontSize: 12),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.add_ic_call,
-                                            size: 22,
-                                            color: Constants.callIcon,
-                                          ),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          Icon(
-                                            FontAwesome.comments_o,
-                                            color: Constants.chatIcon,
-                                            size: 22,
-                                          ),
-                                        ],
-                                      )
-                                    ],
                                   ),
                                 ),
-                              ),
-                              // Positioned(
-                              //     child:
-                              //         Text(address == null ? " null" : address))
-                            ],
-                          ),
-                        );
-                      },
-                      staggeredTileBuilder: (int index) =>
-                          new StaggeredTile.count(2, index.isEven ? 3.2 : 3.8),
-                      mainAxisSpacing: 4.0,
-                      crossAxisSpacing: 4.0,
+                                // Positioned(
+                                //     child:
+                                //         Text(address == null ? " null" : address))
+                              ],
+                            ),
+                          );
+                        },
+                        staggeredTileBuilder: (int index) =>
+                            new StaggeredTile.count(
+                                2, index.isEven ? 3.2 : 3.8),
+                        mainAxisSpacing: 4.0,
+                        crossAxisSpacing: 4.0,
+                      ),
                     ),
-                  ),
-                );
+                  );
+                }
+                return Center(child: CircularProgressIndicator());
               })),
     );
   }
@@ -435,7 +459,7 @@ class _searchBarState extends State<searchBar> {
             Container(
               height: 40,
               width: queryData.width,
-              color: Colors.white,
+              color: Colors.grey[900],
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -548,7 +572,7 @@ class _searchBarState extends State<searchBar> {
                         value: value,
                         child: Text(
                           value,
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(color: Colors.amber),
                         ),
                       );
                     }).toList(),
@@ -560,6 +584,7 @@ class _searchBarState extends State<searchBar> {
                     onChanged: (String value) {
                       setState(() {
                         searchController.text = value;
+                        textFieldTextLength = searchController.text.length;
                       });
                     },
                   ),
@@ -592,7 +617,7 @@ class _searchBarState extends State<searchBar> {
                         value: value,
                         child: Text(
                           value,
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(color: Colors.amber),
                         ),
                       );
                     }).toList(),
@@ -606,6 +631,7 @@ class _searchBarState extends State<searchBar> {
                     onChanged: (String value) {
                       setState(() {
                         searchController.text = value;
+                        textFieldTextLength = searchController.text.length;
                       });
                     },
                   ),
@@ -638,7 +664,7 @@ class _searchBarState extends State<searchBar> {
                         value: value,
                         child: Text(
                           value,
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(color: Colors.amber),
                         ),
                       );
                     }).toList(),
@@ -650,6 +676,7 @@ class _searchBarState extends State<searchBar> {
                     onChanged: (String value) {
                       setState(() {
                         searchController.text = value;
+                        textFieldTextLength = searchController.text.length;
                       });
                     },
                   ),

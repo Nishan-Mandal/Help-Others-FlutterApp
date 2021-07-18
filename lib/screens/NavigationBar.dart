@@ -90,10 +90,10 @@ class _navigationBarState extends State<navigationBar> {
                 },
                 backgroundColor: Colors.grey[900],
                 // selectedIconTheme: IconThemeData(color: Colors.yellow[100]),
-                selectedItemColor: Colors.yellow[200],
+                selectedItemColor: Colors.amber,
                 // selectedLabelStyle: TextStyle(color: Colors.blue),
 
-                unselectedItemColor: Colors.yellow[200],
+                unselectedItemColor: Colors.amber,
                 type: BottomNavigationBarType.fixed,
                 items: <BottomNavigationBarItem>[
                   BottomNavigationBarItem(

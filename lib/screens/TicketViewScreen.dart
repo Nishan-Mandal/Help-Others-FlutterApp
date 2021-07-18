@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:help_others/screens/ChatRoom.dart';
 import 'package:help_others/screens/Dashboard.dart';
 import 'package:help_others/screens/NavigationBar.dart';
@@ -50,7 +51,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
   final TextEditingController messageControler = TextEditingController();
   bool responded = false;
-  bool relatedAds = true;
 
   callTicketOwner() async {
     String phoneNo =
@@ -75,21 +75,20 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
     }
   }
 
-  void sendMessageFromGivenKeywords(
+  Future<void> sendMessageFromGivenKeywords(
     String text,
-  ) {
+  ) async {
     var name;
-    setState(() {
-      var data = FirebaseFirestore.instance
-          .collection("user_account")
-          .doc(widget.ticketOwnweMobileNumber)
-          .get()
-          .then((value) => {name = value.get("name")});
-    });
-    Future.delayed(const Duration(seconds: 3), () {
-      databaseMethods.uploadTicketResponse("comment", widget.id, false,
-          widget.ticketOwnweMobileNumber, true, widget.title, text);
-    });
+
+    var data = await FirebaseFirestore.instance
+        .collection("user_account")
+        .doc(widget.ticketOwnweMobileNumber)
+        .get()
+        .then((value) async => {name = await value.get("name")});
+
+    databaseMethods.uploadTicketResponse("comment", widget.id, false,
+        widget.ticketOwnweMobileNumber, true, widget.title, text);
+
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -259,546 +258,596 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
             .snapshots(),
         builder: (context, snapshot) {
           var userAccount = snapshot.data;
-          return Scaffold(
-            floatingActionButton: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Align(
-                        alignment: Alignment.topLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20, top: 80),
-                          child: IconButton(
-                            icon: Icon(Icons.arrow_back),
-                            onPressed: () =>
-                                Navigator.of(context).pop(navigationBar()),
-                          ),
-                        )),
-                    SizedBox(
-                      width: queryData.width * 0.6,
-                    ),
-                    Align(
-                        alignment: Alignment.topLeft,
-                        child: widget.ticketOwnweMobileNumber !=
-                                FirebaseAuth.instance.currentUser.phoneNumber
-                            ? Padding(
-                                padding: const EdgeInsets.only(top: 80),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(90)),
-                                  child: IconButton(
-                                    icon: widget.myFavFlag
-                                        ? Icon(
-                                            Icons.favorite,
-                                            color: Constants.myFavIconTrue,
-                                            size: 20,
-                                          )
-                                        : Icon(
-                                            Icons.favorite_border,
-                                            size: 20,
-                                            color: Constants.myFavIconFalse,
-                                          ),
-                                    onPressed: () {
-                                      setState(() {
-                                        if (widget.myFavFlag) {
-                                          databaseMethods.undomyFavourite(
-                                            widget.id,
-                                          );
-                                          widget.myFavFlag = false;
-                                        } else {
-                                          databaseMethods.myFavourites(
-                                            widget.id,
-                                          );
-                                          widget.myFavFlag = true;
-                                        }
-                                      });
-                                    },
-                                  ),
-                                ),
-                              )
-                            : Text("              "))
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 38),
-                  child: Row(
+          return StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection("global_ticket")
+                  .doc(widget.id)
+                  .collection("responses")
+                  .doc(FirebaseAuth.instance.currentUser.phoneNumber)
+                  .snapshots(),
+              builder: (context, snapshot2) {
+                var userTicketDocument = snapshot2.data;
+                try {
+                  responded = userTicketDocument["responded"];
+                } catch (e) {
+                  responded = false;
+                }
+                return Scaffold(
+                  backgroundColor: Constants.tscaffoldBackground,
+                  floatingActionButton: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Visibility(
-                              visible: widget.ticketOwnweMobileNumber !=
+                          Align(
+                              alignment: Alignment.topLeft,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 20, top: 80),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.arrow_back,
+                                  ),
+                                  onPressed: () => Navigator.of(context)
+                                      .pop(navigationBar()),
+                                ),
+                              )),
+                          SizedBox(
+                            width: queryData.width * 0.6,
+                          ),
+                          Align(
+                              alignment: Alignment.topLeft,
+                              child: widget.ticketOwnweMobileNumber !=
                                       FirebaseAuth
                                           .instance.currentUser.phoneNumber
-                                  ? true
-                                  : false,
-                              child: !responded
-                                  ? SizedBox(
-                                      width: queryData.width * 0.35,
-                                      height: 50,
-                                      child: RaisedButton(
-                                        shape: RoundedRectangleBorder(
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(top: 80),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            color:
+                                                Constants.tmyFavIconBackground,
                                             borderRadius:
-                                                BorderRadius.circular(15)),
-                                        color: Colors.black,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.chat,
-                                              color: Colors.white,
-                                            ),
-                                            Text(
-                                              "  Chat",
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ],
+                                                BorderRadius.circular(90)),
+                                        child: IconButton(
+                                          icon: widget.myFavFlag
+                                              ? Icon(
+                                                  Icons.favorite,
+                                                  color:
+                                                      Constants.tmyFavIconTrue,
+                                                  size: 20,
+                                                )
+                                              : Icon(
+                                                  Icons.favorite_border,
+                                                  size: 20,
+                                                  color:
+                                                      Constants.tmyFavIconFalse,
+                                                ),
+                                          onPressed: () {
+                                            setState(() {
+                                              if (widget.myFavFlag) {
+                                                databaseMethods.undomyFavourite(
+                                                  widget.id,
+                                                );
+                                                widget.myFavFlag = false;
+                                              } else {
+                                                databaseMethods.myFavourites(
+                                                  widget.id,
+                                                );
+                                                widget.myFavFlag = true;
+                                              }
+                                            });
+                                          },
                                         ),
-                                        onPressed: () {
-                                          setState(() {
-                                            _tripEditModalBottomSheet(context);
-                                          });
-                                        },
                                       ),
                                     )
-                                  : SizedBox(
-                                      width: queryData.width * 0.35,
-                                      height: 50,
-                                      child: RaisedButton(
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(15)),
-                                        color: Colors.green,
-                                        child: Text(
-                                          "Chat History",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 13),
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) => chatRoom(
-                                                      widget.id,
-                                                      widget
-                                                          .ticketOwnweMobileNumber,
-                                                      widget.title,
-                                                      widget.id,
-                                                      userAccount["name"],
-                                                      widget.photo),
-                                                ));
-                                          });
-                                        },
-                                      ),
-                                    )),
-                          SizedBox(
-                            width: queryData.width * 0.15,
-                          ),
-                          Visibility(
-                            visible: widget.ticketOwnweMobileNumber !=
-                                    FirebaseAuth
-                                        .instance.currentUser.phoneNumber
-                                ? true
-                                : false,
-                            child: Stack(
-                              alignment: Alignment.center,
+                                  : Text("              "))
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 38),
+                        child: Row(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: SizedBox(
-                                    width: queryData.width * 0.35,
-                                    height: 50,
-                                    child: FlatButton(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15)),
-                                      onPressed: () {
-                                        if (widget.shareMobileNumber) {
-                                          callTicketOwner();
-                                          databaseMethods
-                                              .uploadTicketResponseByCall(
-                                                  "",
-                                                  widget.id,
-                                                  false,
-                                                  widget
-                                                      .ticketOwnweMobileNumber,
-                                                  false);
-                                        }
-                                      },
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.call,
-                                            color: Colors.white,
+                                Visibility(
+                                    visible: widget.ticketOwnweMobileNumber !=
+                                            FirebaseAuth.instance.currentUser
+                                                .phoneNumber
+                                        ? true
+                                        : false,
+                                    child: !responded
+                                        ? SizedBox(
+                                            width: queryData.width * 0.35,
+                                            height: 50,
+                                            child: RaisedButton(
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15)),
+                                              color: Constants.tChatbutton,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(
+                                                    Icons.chat,
+                                                    color: Constants
+                                                        .tChatbuttonText,
+                                                  ),
+                                                  Text(
+                                                    "  Chat",
+                                                    style: TextStyle(
+                                                        color: Constants
+                                                            .tChatbuttonText),
+                                                  ),
+                                                ],
+                                              ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  _tripEditModalBottomSheet(
+                                                      context);
+                                                });
+                                              },
+                                            ),
+                                          )
+                                        : SizedBox(
+                                            width: queryData.width * 0.35,
+                                            height: 50,
+                                            child: RaisedButton(
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15)),
+                                              color: Constants.tChatbutton,
+                                              child: Text(
+                                                "Chat History",
+                                                style: TextStyle(
+                                                    color: Constants
+                                                        .tChatbuttonText,
+                                                    fontSize: 13),
+                                              ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            chatRoom(
+                                                                widget.id,
+                                                                widget
+                                                                    .ticketOwnweMobileNumber,
+                                                                widget.title,
+                                                                widget.id,
+                                                                userAccount[
+                                                                    "name"],
+                                                                widget.photo),
+                                                      ));
+                                                });
+                                              },
+                                            ),
+                                          )),
+                                SizedBox(
+                                  width: queryData.width * 0.15,
+                                ),
+                                Visibility(
+                                  visible: widget.ticketOwnweMobileNumber !=
+                                          FirebaseAuth
+                                              .instance.currentUser.phoneNumber
+                                      ? true
+                                      : false,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: SizedBox(
+                                          width: queryData.width * 0.35,
+                                          height: 50,
+                                          child: FlatButton(
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(15)),
+                                            onPressed: () {
+                                              if (widget.shareMobileNumber) {
+                                                callTicketOwner();
+                                                databaseMethods
+                                                    .uploadTicketResponseByCall(
+                                                        "",
+                                                        widget.id,
+                                                        false,
+                                                        widget
+                                                            .ticketOwnweMobileNumber,
+                                                        false);
+                                              }
+                                            },
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Icons.call,
+                                                    color: widget.shareMobileNumber
+                                                        ? Constants
+                                                            .tChatbuttonText
+                                                        : Constants
+                                                            .tDisableCallButtonText),
+                                                Text(
+                                                  "   Call",
+                                                  style: TextStyle(
+                                                    color: widget.shareMobileNumber
+                                                        ? Constants
+                                                            .tChatbuttonText
+                                                        : Constants
+                                                            .tDisableCallButtonText,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            color: widget.shareMobileNumber
+                                                ? Constants.tChatbutton
+                                                : Constants.tDisableCallButton,
                                           ),
-                                          Text(
-                                            "   Call",
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
-                                        ],
+                                        ),
                                       ),
-                                      color: widget.shareMobileNumber
-                                          ? Colors.black
-                                          : Colors.black38,
-                                    ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      )
                     ],
                   ),
-                )
-              ],
-            ),
-            body: Container(
-              child:
-                  // StreamBuilder(
-                  //     stream: FirebaseFirestore.instance
-                  //         .collection("user_account")
-                  //         .doc(widget.ticketOwnweMobileNumber)
-                  //         .snapshots(),
-                  //     builder: (context, snapshot) {
-                  //       var userAccount = snapshot.data;
+                  body: Container(
+                    child:
+                        // StreamBuilder(
+                        //     stream: FirebaseFirestore.instance
+                        //         .collection("user_account")
+                        //         .doc(widget.ticketOwnweMobileNumber)
+                        //         .snapshots(),
+                        //     builder: (context, snapshot) {
+                        //       var userAccount = snapshot.data;
 
-                  //       return
-                  StreamBuilder(
-                      stream: FirebaseFirestore.instance
-                          .collection("global_ticket")
-                          .doc(widget.id)
-                          .collection("responses")
-                          .doc(FirebaseAuth.instance.currentUser.phoneNumber)
-                          .snapshots(),
-                      builder: (context, snapshot2) {
-                        var userTicketDocument = snapshot2.data;
-                        try {
-                          responded = userTicketDocument["responded"];
-                        } catch (e) {
-                          responded = false;
-                        }
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 60,
-                              width: queryData.width,
-                              decoration: BoxDecoration(boxShadow: [
-                                BoxShadow(
-                                  color: Colors.cyan[800],
-                                  // spreadRadius: 10,
-                                  // blurRadius: 25.0,
-                                  offset: Offset(0, 0),
-                                ),
-                              ]),
-                              alignment: Alignment.bottomLeft,
-                              // child: IconButton(
-                              //   icon: Icon(Icons.arrow_back),
-                              //   onPressed: () => Navigator.of(context).pop(dashboard("")),
-                              // ),
+                        //       return
+                        // StreamBuilder(
+                        //     stream: FirebaseFirestore.instance
+                        //         .collection("global_ticket")
+                        //         .doc(widget.id)
+                        //         .collection("responses")
+                        //         .doc(FirebaseAuth.instance.currentUser.phoneNumber)
+                        //         .snapshots(),
+                        //     builder: (context, snapshot2) {
+                        //       var userTicketDocument = snapshot2.data;
+                        //       try {
+                        //         responded = userTicketDocument["responded"];
+                        //       } catch (e) {
+                        //         responded = false;
+                        //       }
+                        Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 60,
+                          width: queryData.width,
+                          decoration: BoxDecoration(boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey[900],
+                              // spreadRadius: 10,
+                              // blurRadius: 25.0,
+                              offset: Offset(0, 0),
                             ),
-                            Expanded(
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                          ]),
+                          alignment: Alignment.bottomLeft,
+                          // child: IconButton(
+                          //   icon: Icon(Icons.arrow_back),
+                          //   onPressed: () => Navigator.of(context).pop(dashboard("")),
+                          // ),
+                        ),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: Constants.adPhotoContainer)),
+                                  height: 250,
+                                  width: queryData.width,
+                                  child: CachedNetworkImage(
+                                    imageUrl: widget.photo,
+                                    placeholder: (context, url) => Center(
+                                        child: CircularProgressIndicator()),
+                                    errorWidget: (context, url, error) =>
+                                        Icon(Icons.error),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(9.0),
+                                  child: Text(
+                                    widget.title,
+                                    style: TextStyle(
+                                        color: Constants.tTitleText,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    SizedBox(
-                                      height: 20,
+                                    Text(
+                                      widget.date,
+                                      style: TextStyle(fontSize: 15),
                                     ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                              begin: Alignment.topCenter,
-                                              end: Alignment.bottomCenter,
-                                              colors: [
-                                            Colors.white,
-                                            Colors.grey
-                                          ])),
-                                      height: 250,
+                                    SizedBox(
+                                      width: 15,
+                                    )
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(9.0),
+                                  child: Text("Description",
+                                      style: TextStyle(
+                                          color:
+                                              Constants.tDescriptionBoxString,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 12, right: 12),
+                                  child: Flexible(
+                                    child: Container(
+                                      constraints: BoxConstraints(
+                                          minHeight: queryData.height / 4),
                                       width: queryData.width,
-                                      child: CachedNetworkImage(
-                                        imageUrl: widget.photo,
-                                        placeholder: (context, url) => Center(
-                                            child: CircularProgressIndicator()),
-                                        errorWidget: (context, url, error) =>
-                                            Icon(Icons.error),
+                                      color: Constants.tDescriptionBox,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: Text(widget.description,
+                                            style: TextStyle(
+                                                color:
+                                                    Constants.tDescriptionText,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w400)),
                                       ),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(9.0),
-                                      child: Text(
-                                        widget.title,
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                // https://www.google.com/maps/place/Newtown,+Kolkata,+West+Bengal/@22.5861408,88.4227606,12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d22.5753931!4d88.4797903
+                                // RaisedButton(
+                                //   child: Text("map"),
+                                //   onPressed: () {
+                                //     mapInBrowser(
+                                //         // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}");
+                                //         // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}/@${widget.latitude},${widget.longitude},12z");
+                                //         "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d${widget.latitude}!4d${widget.longitude}");
+                                //   },
+                                // ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      right: 12.0, left: 12.0, top: 12.0),
+                                  child: Text(
+                                    "Ad posted at",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Constants.tAdpostAt),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () => mapInBrowser(
+                                      "https://www.google.com/maps/preview/@${widget.latitude},${widget.longitude},17z"
+                                      // "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},${widget.latitude}${widget.longitude}"
+                                      // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}"
+                                      // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}"
                                       ),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          widget.date,
-                                          style: TextStyle(fontSize: 15),
-                                        ),
-                                        SizedBox(
-                                          width: 15,
-                                        )
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(9.0),
-                                      child: Text("Description",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 12, right: 12),
-                                      child: Flexible(
+                                  child: Stack(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(12.0),
                                         child: Container(
+                                          height: 70,
                                           width: queryData.width,
-                                          height: queryData.height / 4,
-                                          color: Colors.grey[300],
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(10.0),
-                                            child: Text(widget.description,
-                                                style: TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight:
-                                                        FontWeight.w400)),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(5),
+                                            image: DecorationImage(
+                                                image: AssetImage("map.jpg"),
+                                                fit: BoxFit.fill),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    // https://www.google.com/maps/place/Newtown,+Kolkata,+West+Bengal/@22.5861408,88.4227606,12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d22.5753931!4d88.4797903
-                                    // RaisedButton(
-                                    //   child: Text("map"),
-                                    //   onPressed: () {
-                                    //     mapInBrowser(
-                                    //         // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}");
-                                    //         // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}/@${widget.latitude},${widget.longitude},12z");
-                                    //         "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d${widget.latitude}!4d${widget.longitude}");
-                                    //   },
-                                    // ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 12.0, left: 12.0, top: 12.0),
-                                      child: Text(
-                                        "Ad posted at",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () => mapInBrowser(
-                                          "https://www.google.com/maps/preview/@${widget.latitude},${widget.longitude},17z"
-                                          // "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},${widget.latitude}${widget.longitude}"
-                                          // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}"
-                                          // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}"
-                                          ),
-                                      child: Stack(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(12.0),
-                                            child: Container(
-                                              height: 70,
-                                              width: queryData.width,
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                                image: DecorationImage(
-                                                    image:
-                                                        AssetImage("map.jpg"),
-                                                    fit: BoxFit.fill),
-                                              ),
+                                      Positioned(
+                                          left: 40,
+                                          bottom: 25,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                              left: 12,
                                             ),
-                                          ),
-                                          Positioned(
-                                              left: 40,
-                                              bottom: 25,
-                                              child: Padding(
-                                                padding: const EdgeInsets.only(
-                                                  left: 12,
-                                                ),
-                                                child: Container(
-                                                  width: queryData.width * 0.70,
-                                                  height: 40,
-                                                  color: Colors.black12,
-                                                  child: Row(
+                                            child: Container(
+                                              width: queryData.width * 0.70,
+                                              height: 40,
+                                              color: Constants.tlocationSticker,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  Icon(
+                                                    Icons.location_on,
+                                                    color:
+                                                        Constants.tlocationIcon,
+                                                    size: 25,
+                                                  ),
+                                                  Column(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment.start,
                                                     children: [
-                                                      Icon(
-                                                        Icons.location_on,
-                                                        color: Colors.red,
-                                                        size: 25,
+                                                      Text(
+                                                        "  Location",
+                                                        style: TextStyle(
+                                                            fontSize: 15,
+                                                            color: Constants
+                                                                .tlocationTextString),
                                                       ),
-                                                      Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            "  Location",
-                                                            style: TextStyle(
-                                                                fontSize: 15,
-                                                                color: Colors
-                                                                    .black),
-                                                          ),
-                                                          Text(
-                                                            widget.address,
-                                                            style: TextStyle(
-                                                                fontSize: 15,
-                                                                color: Colors
-                                                                    .blue),
-                                                          ),
-                                                        ],
+                                                      Text(
+                                                        widget.address,
+                                                        style: TextStyle(
+                                                            fontSize: 15,
+                                                            color: Constants
+                                                                .tlocationText),
                                                       ),
                                                     ],
                                                   ),
+                                                ],
+                                              ),
+                                            ),
+                                          )),
+                                    ],
+                                  ),
+                                ),
+
+                                // Visibility(
+                                //   visible: userAccount["mobile_number"] !=
+                                //           FirebaseAuth
+                                //               .instance.currentUser.phoneNumber
+                                //       ? true
+                                //       : false,
+                                // child:
+                                // Padding(
+                                //   padding: const EdgeInsets.all(12.0),
+                                // child:
+                                Container(
+                                  width: queryData.width,
+                                  height: queryData.height * 0.07,
+                                  color: Constants.tSeeProfileContainer,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 6, bottom: 6),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Constants.tSeeProfileSticker,
+                                        // borderRadius: BorderRadius.circular(15)
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(3.0),
+                                            child: CircleAvatar(
+                                              minRadius: 40,
+                                              backgroundImage: NetworkImage(
+                                                userAccount["photo"],
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 5),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(userAccount["name"],
+                                                    style: TextStyle(
+                                                        color: Constants
+                                                            .tNameInSeeProfile,
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                SizedBox(
+                                                  height: 2,
                                                 ),
-                                              )),
+                                                InkWell(
+                                                  onTap: () => Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            seeProfileOfTicketOwner(
+                                                                userAccount[
+                                                                    "photo"],
+                                                                userAccount[
+                                                                    "name"],
+                                                                widget
+                                                                    .ticketOwnweMobileNumber),
+                                                      )),
+                                                  child: Text("SEE PROFILE",
+                                                      style: TextStyle(
+                                                        color: Constants
+                                                            .tSeeProfileText,
+                                                        fontSize: 15,
+                                                      )),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),
+                                  ),
+                                ),
+                                // ),
+                                // )
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 10, right: 10, top: 10),
+                                  child: Divider(
+                                    thickness: 3,
+                                    color: Constants.tdivider,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 50,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 10),
+                                    child: Text(
+                                      "   Related Advertisement:",
+                                      style: TextStyle(
+                                          color: Constants.tRelatedAds,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  height: 300,
+                                  width: queryData.width,
+                                  child: StreamBuilder(
+                                      stream: FirebaseFirestore.instance
+                                          .collection('global_ticket')
+                                          .where("category",
+                                              isEqualTo: widget.category)
+                                          // .where(
+                                          //   "id",
+                                          //   isNotEqualTo: (widget.id),
+                                          // )
+                                          // .orderBy("time", descending: true)
+                                          .snapshots(),
+                                      builder: (context, snapshot3) {
+                                        if (snapshot3.hasData) {
+                                          return ListView.builder(
+                                            shrinkWrap: true,
+                                            scrollDirection: Axis.horizontal,
+                                            itemCount:
+                                                snapshot3.data.docs.length,
+                                            itemBuilder: (context, index) {
+                                              String title = snapshot3
+                                                  .data.docs[index]["title"];
+                                              String description = snapshot3
+                                                  .data
+                                                  .docs[index]["description"];
 
-                                    // Visibility(
-                                    //   visible: userAccount["mobile_number"] !=
-                                    //           FirebaseAuth
-                                    //               .instance.currentUser.phoneNumber
-                                    //       ? true
-                                    //       : false,
-                                    // child:
-                                    // Padding(
-                                    //   padding: const EdgeInsets.all(12.0),
-                                    // child:
-                                    Container(
-                                      width: queryData.width,
-                                      height: queryData.height * 0.07,
-                                      color: Colors.grey,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 6, bottom: 6),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.black12,
-                                            // borderRadius: BorderRadius.circular(15)
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(3.0),
-                                                child: CircleAvatar(
-                                                  minRadius: 40,
-                                                  backgroundImage: NetworkImage(
-                                                    userAccount["photo"],
-                                                  ),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    top: 5),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(userAccount["name"],
-                                                        style: TextStyle(
-                                                            fontSize: 15,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold)),
-                                                    SizedBox(
-                                                      height: 2,
-                                                    ),
-                                                    InkWell(
-                                                      onTap: () =>
-                                                          Navigator.push(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                builder: (context) => seeProfileOfTicketOwner(
-                                                                    userAccount[
-                                                                        "photo"],
-                                                                    userAccount[
-                                                                        "name"],
-                                                                    widget
-                                                                        .ticketOwnweMobileNumber),
-                                                              )),
-                                                      child: Text("SEE PROFILE",
-                                                          style: TextStyle(
-                                                            color: Colors.blue,
-                                                            fontSize: 15,
-                                                          )),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    // ),
-                                    // )
-                                    SizedBox(
-                                      height: 50,
-                                    ),
-                                    Visibility(
-                                      visible: relatedAds,
-                                      child: Container(
-                                        height: 250,
-                                        width: queryData.width,
-                                        child: StreamBuilder(
-                                            stream: FirebaseFirestore.instance
-                                                .collection('global_ticket')
-                                                .where("category",
-                                                    isEqualTo: widget.category)
-                                                // .where(
-                                                //   "id",
-                                                //   isNotEqualTo: (widget.id),
-                                                // )
-                                                // .orderBy("time", descending: true)
-                                                .snapshots(),
-                                            builder: (context, snapshot3) {
-                                              if (snapshot3.hasData) {
-                                                return ListView.builder(
-                                                  shrinkWrap: true,
-                                                  scrollDirection:
-                                                      Axis.horizontal,
-                                                  itemCount: snapshot3
-                                                      .data.docs.length,
-                                                  itemBuilder:
-                                                      (context, index) {
-                                                    String title = snapshot3
-                                                        .data
-                                                        .docs[index]["title"];
-                                                    String description =
-                                                        snapshot3.data
-                                                                .docs[index]
-                                                            ["description"];
-                                                    if (snapshot3
-                                                            .data.docs.length ==
-                                                        1) {
-                                                      setState(() {
-                                                        relatedAds = false;
-                                                      });
-                                                    }
-                                                    return Padding(
+                                              return snapshot3.data.docs[index]
+                                                          ["id"] !=
+                                                      widget.id
+                                                  ? Padding(
                                                       padding:
                                                           const EdgeInsets.all(
                                                               8.0),
@@ -841,12 +890,19 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                             height: 50,
                                                             width: 180,
                                                             decoration: BoxDecoration(
+                                                                gradient: LinearGradient(
+                                                                    begin: Alignment
+                                                                        .topLeft,
+                                                                    end: Alignment
+                                                                        .bottomRight,
+                                                                    colors: Constants
+                                                                        .gradientColorOnAd),
                                                                 border: Border
                                                                     .all(),
                                                                 borderRadius:
                                                                     BorderRadius
                                                                         .circular(
-                                                                            15)),
+                                                                            20)),
                                                             child: Column(
                                                               mainAxisAlignment:
                                                                   MainAxisAlignment
@@ -862,15 +918,26 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                                           8.0),
                                                                   child:
                                                                       Container(
-                                                                    height: 140,
+                                                                    height: 180,
                                                                     width: 160,
                                                                     child:
-                                                                        Image(
-                                                                      fit: BoxFit
-                                                                          .cover,
-                                                                      image: NetworkImage(snapshot3
-                                                                          .data
-                                                                          .docs[index]["uplodedPhoto"]),
+                                                                        ClipRRect(
+                                                                      borderRadius:
+                                                                          BorderRadius
+                                                                              .only(
+                                                                        topLeft:
+                                                                            Radius.circular(20),
+                                                                        topRight:
+                                                                            Radius.circular(20),
+                                                                      ),
+                                                                      child:
+                                                                          Image(
+                                                                        fit: BoxFit
+                                                                            .cover,
+                                                                        image: NetworkImage(snapshot3
+                                                                            .data
+                                                                            .docs[index]["uplodedPhoto"]),
+                                                                      ),
                                                                     ),
                                                                   ),
                                                                 ),
@@ -887,6 +954,8 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                                             "..."
                                                                         : title,
                                                                     style: TextStyle(
+                                                                        color: Constants
+                                                                            .titleText,
                                                                         fontWeight:
                                                                             FontWeight.bold),
                                                                   ),
@@ -896,42 +965,66 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                                           .only(
                                                                       left: 8),
                                                                   child: Text(
-                                                                    description.length >
-                                                                            20
-                                                                        ? description.substring(0,
-                                                                                20) +
-                                                                            "..."
-                                                                        : description,
-                                                                    style:
-                                                                        TextStyle(),
-                                                                  ),
+                                                                      description.length >
+                                                                              20
+                                                                          ? description.substring(0, 20) +
+                                                                              "..."
+                                                                          : description,
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: Constants
+                                                                            .descriptionText,
+                                                                      )),
                                                                 ),
                                                                 Padding(
                                                                   padding: const EdgeInsets
                                                                           .only(
                                                                       left: 8,
-                                                                      top: 8),
+                                                                      top: 15),
                                                                   child: Row(
                                                                     mainAxisAlignment:
                                                                         MainAxisAlignment
-                                                                            .start,
+                                                                            .spaceBetween,
                                                                     children: [
-                                                                      Icon(
-                                                                        Icons
-                                                                            .location_on_outlined,
-                                                                        color: Constants
-                                                                            .addressText,
-                                                                        size:
-                                                                            15,
-                                                                      ),
-                                                                      Text(
-                                                                        snapshot3
-                                                                            .data
-                                                                            .docs[index]["address"],
-                                                                        style: TextStyle(
+                                                                      Row(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.start,
+                                                                        children: [
+                                                                          Icon(
+                                                                            Icons.location_on_outlined,
                                                                             color:
-                                                                                Constants.locationMarker,
-                                                                            fontSize: 12),
+                                                                                Constants.addressText,
+                                                                            size:
+                                                                                15,
+                                                                          ),
+                                                                          Text(
+                                                                            snapshot3.data.docs[index]["address"],
+                                                                            style:
+                                                                                TextStyle(color: Constants.locationMarker, fontSize: 12),
+                                                                          )
+                                                                        ],
+                                                                      ),
+                                                                      Padding(
+                                                                        padding:
+                                                                            const EdgeInsets.only(right: 20),
+                                                                        child:
+                                                                            Row(
+                                                                          children: [
+                                                                            Icon(
+                                                                              Icons.add_ic_call,
+                                                                              size: 22,
+                                                                              color: Constants.callIcon,
+                                                                            ),
+                                                                            SizedBox(
+                                                                              width: 5,
+                                                                            ),
+                                                                            Icon(
+                                                                              FontAwesome.comments_o,
+                                                                              color: Constants.chatIcon,
+                                                                              size: 22,
+                                                                            ),
+                                                                          ],
+                                                                        ),
                                                                       )
                                                                     ],
                                                                   ),
@@ -939,30 +1032,27 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                               ],
                                                             )),
                                                       ),
-                                                    );
-                                                  },
-                                                );
-                                              } else if (snapshot3
-                                                          .connectionState ==
-                                                      ConnectionState.done &&
-                                                  !snapshot3.hasData) {
-                                                setState(() {
-                                                  relatedAds = false;
-                                                });
-                                              }
-                                            }),
-                                      ),
-                                    ),
-                                  ],
+                                                    )
+                                                  : Text("");
+                                            },
+                                          );
+                                        }
+                                      }),
                                 ),
-                              ),
+                                SizedBox(
+                                  height: 70,
+                                )
+                              ],
                             ),
-                          ],
-                        );
-                      }),
-              // }),
-            ),
-          );
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // }),
+                  ),
+                );
+              });
         });
   }
 }

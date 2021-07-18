@@ -29,7 +29,7 @@ class _drawerState extends State<drawer> {
   @override
   void initState() {
     super.initState();
-
+    // _signOut();
     _editingController = TextEditingController(text: initialText);
   }
 
@@ -132,6 +132,7 @@ class _drawerState extends State<drawer> {
             child: Text("Yes"),
             onPressed: () {
               if (reasonKey.currentState.validate()) {
+                _signOut();
                 databaseMethods.deleteAccount(reasonControler.text);
                 Navigator.pushAndRemoveUntil(
                     context,
@@ -192,7 +193,7 @@ class _drawerState extends State<drawer> {
                         child: Column(
                           children: [
                             Container(
-                              margin: EdgeInsets.only(top: 20),
+                              margin: EdgeInsets.only(top: 40),
                               width: 120,
                               height: 120,
                               child: Stack(

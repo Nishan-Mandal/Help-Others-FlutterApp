@@ -35,31 +35,28 @@ class _myTicketsState extends State<myTickets> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: onBackPress,
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: DefaultTabController(
-          length: 2,
-          child: Scaffold(
-            appBar: AppBar(
-              backgroundColor: Constants.appBar,
-              bottom: TabBar(
-                tabs: [
-                  Tab(
-                    text: "ADS",
-                  ),
-                  Tab(
-                    text: "FAVOURITES",
-                  ),
-                ],
-              ),
-              title: Text('My Ads'),
-            ),
-            body: TabBarView(
-              children: [
-                ads(),
-                favourites(),
+      child: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Constants.appBar,
+            bottom: TabBar(
+              tabs: [
+                Tab(
+                  text: "ADS",
+                ),
+                Tab(
+                  text: "FAVOURITES",
+                ),
               ],
             ),
+            title: Text('My Ads'),
+          ),
+          body: TabBarView(
+            children: [
+              ads(),
+              favourites(),
+            ],
           ),
         ),
       ),
@@ -162,10 +159,6 @@ class _adsState extends State<ads> {
                                                 imageUrl:
                                                     snapshot.data.docs[index]
                                                         ["uplodedPhoto"],
-                                                placeholder: (context, url) =>
-                                                    Center(
-                                                        child:
-                                                            CircularProgressIndicator()),
                                                 errorWidget:
                                                     (context, url, error) =>
                                                         Icon(Icons.error),
@@ -395,10 +388,6 @@ class _favouritesState extends State<favourites> {
                                                 imageUrl:
                                                     snapshot.data.docs[index]
                                                         ["uplodedPhoto"],
-                                                placeholder: (context, url) =>
-                                                    Center(
-                                                        child:
-                                                            CircularProgressIndicator()),
                                                 errorWidget:
                                                     (context, url, error) =>
                                                         Icon(Icons.error),

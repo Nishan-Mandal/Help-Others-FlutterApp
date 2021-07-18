@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:help_others/screens/CreateTickets.dart';
 
 import 'package:help_others/screens/Dashboard.dart';
@@ -11,6 +12,7 @@ import 'package:help_others/services/Database.dart';
 import 'package:image_picker/image_picker.dart';
 // import 'package:path/path.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path_provider/path_provider.dart';
 
 class checkUserExistance extends StatefulWidget {
   checkUserExistance({Key key}) : super(key: key);
@@ -108,7 +110,7 @@ class _userSignupPageState extends State<userSignupPage> {
                 CircleAvatar(
                   radius: 80.0,
                   backgroundImage: imageFile == null
-                      ? AssetImage("PicsArt_01-01-08.21.28.jpg")
+                      ? AssetImage("personIcon.png")
                       : FileImage(File(imageFile.path)),
                 ),
                 Positioned(
@@ -178,13 +180,14 @@ class _userSignupPageState extends State<userSignupPage> {
               child: Text("Save"),
               onPressed: () {
                 signUp();
-
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => navigationBar(),
-                    ),
-                    (route) => false);
+                if (nameformKey.currentState.validate()) {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => navigationBar(),
+                      ),
+                      (route) => false);
+                }
               },
             )
           ],
