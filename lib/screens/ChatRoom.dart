@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:help_others/screens/SeeProfileOfTicketOwner.dart';
+import 'package:help_others/services/Constants.dart';
 import 'package:help_others/services/Database.dart';
 
 class chatRoom extends StatefulWidget {
@@ -11,6 +12,7 @@ class chatRoom extends StatefulWidget {
   String docIdInMessageCollection;
   String name;
   String photo;
+  String notCurrentUserNumber;
 
   chatRoom(
     this.ticketUniqueId,
@@ -19,6 +21,7 @@ class chatRoom extends StatefulWidget {
     this.docIdInMessageCollection,
     this.name,
     this.photo,
+    this.notCurrentUserNumber,
   );
 
   @override
@@ -49,12 +52,14 @@ class _chatRoomState extends State<chatRoom> {
     return StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection("user_account")
-            .doc(widget.responderMobileNumber)
+            .doc(widget.notCurrentUserNumber)
             .snapshots(),
         builder: (context, snapshot3) {
           var userAccount = snapshot3.data;
           return Scaffold(
+            backgroundColor: Colors.black,
             appBar: AppBar(
+              backgroundColor: Constants.appBar,
               title: Row(
                 children: [
                   CircleAvatar(
@@ -64,7 +69,8 @@ class _chatRoomState extends State<chatRoom> {
                     width: 10,
                   ),
                   InkWell(
-                      child: Text(widget.name),
+                      child: Text(widget.name,
+                          style: TextStyle(color: Colors.white)),
                       onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -116,7 +122,6 @@ class _chatRoomState extends State<chatRoom> {
                               Flexible(
                                 child: Container(
                                   height: 650,
-                                  // color: Colors.white,
                                   child: ListView.builder(
                                     controller: _scrollController,
                                     itemCount: snapshot.data.docs.length,
@@ -149,8 +154,8 @@ class _chatRoomState extends State<chatRoom> {
                                                                 .instance
                                                                 .currentUser
                                                                 .phoneNumber
-                                                        ? Colors.blue[300]
-                                                        : Colors.grey),
+                                                        ? Colors.grey
+                                                        : Constants.searchIcon),
                                               ),
                                               padding: EdgeInsets.all(10),
                                               child: RichText(
@@ -158,8 +163,9 @@ class _chatRoomState extends State<chatRoom> {
                                                 TextSpan(
                                                   text: snapshot.data
                                                       .docs[index]['message'],
-                                                  style:
-                                                      TextStyle(fontSize: 20),
+                                                  style: TextStyle(
+                                                      fontSize: 20,
+                                                      color: Colors.black),
                                                 ),
                                                 TextSpan(
                                                   text: " " +
@@ -202,19 +208,23 @@ class _chatRoomState extends State<chatRoom> {
                                           controller: messageControler,
                                           decoration: InputDecoration(
                                             hintText: "Type a message...",
+                                            hintStyle: TextStyle(
+                                                color: Constants.searchIcon),
                                             enabledBorder: OutlineInputBorder(
                                               borderSide: BorderSide(
-                                                  color: Colors.black),
+                                                  color: Constants.searchIcon),
                                               borderRadius:
                                                   BorderRadius.circular(30),
                                             ),
                                             focusedBorder: OutlineInputBorder(
                                               borderSide: BorderSide(
-                                                  color: Colors.black),
+                                                  color: Constants.searchIcon),
                                               borderRadius:
                                                   BorderRadius.circular(30),
                                             ),
                                           ),
+                                          style: TextStyle(
+                                              color: Constants.searchIcon),
                                         ),
                                       ),
                                       SizedBox(
@@ -249,10 +259,10 @@ class _chatRoomState extends State<chatRoom> {
                                         },
                                         child: Icon(
                                           Icons.send,
-                                          color: Colors.white,
+                                          color: Colors.black,
                                           size: 18,
                                         ),
-                                        backgroundColor: Colors.blue,
+                                        backgroundColor: Constants.searchIcon,
                                         elevation: 0,
                                       ),
                                     ],

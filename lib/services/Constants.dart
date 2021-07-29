@@ -5,7 +5,7 @@ class Constants {
   // Dashboard colors---------------------------------
   static List<Color> gradientColorOnAd = [
     Colors.grey[900],
-    Colors.grey[400],
+    Colors.grey[500],
     Colors.grey[900]
   ];
   static Color scaffoldBackground = Colors.black54;
@@ -17,6 +17,7 @@ class Constants {
   static Color divider = Colors.black12;
   static Color titleText = Colors.white70;
   static Color descriptionText = Colors.white70;
+  static Color myFavIconBackground = Colors.grey[800];
   static Color myFavIconTrue = Colors.red;
   static Color myFavIconFalse = Colors.white70;
   static Color callIcon = Colors.white70;

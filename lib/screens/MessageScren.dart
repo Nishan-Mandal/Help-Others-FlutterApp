@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:help_others/screens/ChatRoom.dart';
+import 'package:help_others/services/AdMob.dart';
 import 'package:help_others/services/Constants.dart';
 
 import 'NavigationBar.dart';
@@ -72,7 +73,7 @@ class _allMessagesState extends State<allMessages> {
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Container(
-      color: Colors.white,
+      color: Constants.scaffoldBackground,
       child: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection("messages")
@@ -100,6 +101,7 @@ class _allMessagesState extends State<allMessages> {
                     FirebaseAuth.instance.currentUser.phoneNumber) {
                   mobile = snapshot.data.docs[index]['ticket_creater_mobile'];
                 }
+                print(mobile);
 
                 return StreamBuilder(
                     stream: FirebaseFirestore.instance
@@ -121,7 +123,7 @@ class _allMessagesState extends State<allMessages> {
                                 child: Stack(
                                   children: [
                                     Card(
-                                      // color: Colors.grey[700],
+                                      color: Constants.scaffoldBackground,
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -146,20 +148,27 @@ class _allMessagesState extends State<allMessages> {
                                                       child: ClipRRect(
                                                         borderRadius:
                                                             BorderRadius
-                                                                .circular(10),
+                                                                .circular(50),
                                                         child: SizedBox(
                                                           height: 60,
-                                                          width: 50,
-                                                          child:
-                                                              CachedNetworkImage(
+                                                          width: 60,
+                                                          // child:
+                                                          //     CachedNetworkImage(
+                                                          //   fit: BoxFit.cover,
+                                                          //   imageUrl: userDocument2[
+                                                          //       "uplodedPhoto"],
+                                                          //   errorWidget:
+                                                          //       (context, url,
+                                                          //               error) =>
+                                                          //           Icon(Icons
+                                                          //               .error),
+                                                          // ),
+                                                          child: Image(
                                                             fit: BoxFit.cover,
-                                                            imageUrl: userDocument2[
-                                                                "uplodedPhoto"],
-                                                            errorWidget:
-                                                                (context, url,
-                                                                        error) =>
-                                                                    Icon(Icons
-                                                                        .error),
+                                                            image: NetworkImage(
+                                                              userDocument2[
+                                                                  "uplodedPhoto"],
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
@@ -211,15 +220,15 @@ class _allMessagesState extends State<allMessages> {
                                                                             .docs[index][
                                                                         'ownerMessageSeen']
                                                                     ? Colors
-                                                                        .black45
+                                                                        .white54
                                                                     : Colors
-                                                                        .black),
+                                                                        .white),
                                                           ),
                                                         ),
                                                         Text(
-                                                          title.length > 34
+                                                          title.length > 30
                                                               ? title.substring(
-                                                                      0, 34) +
+                                                                      0, 30) +
                                                                   "..."
                                                               : title,
                                                           style: TextStyle(
@@ -238,16 +247,16 @@ class _allMessagesState extends State<allMessages> {
                                                                         [
                                                                         'responderMessageSeen']
                                                                     ? Colors
-                                                                        .white70
+                                                                        .white54
                                                                     : Colors
                                                                         .white)
                                                                 : (snapshot.data
                                                                             .docs[index][
                                                                         'ownerMessageSeen']
                                                                     ? Colors
-                                                                        .black45
+                                                                        .white54
                                                                     : Colors
-                                                                        .black),
+                                                                        .white),
                                                           ),
                                                         ),
                                                         SizedBox(
@@ -255,7 +264,28 @@ class _allMessagesState extends State<allMessages> {
                                                         ),
                                                         Text(snapshot.data
                                                                 .docs[index]
-                                                            ['lastMessage']),
+                                                            ['lastMessage'],style: TextStyle(color: snapshot.data
+                                                                            .docs[index][
+                                                                        'responderNumber'] ==
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .phoneNumber
+                                                                ? (snapshot.data
+                                                                            .docs[index]
+                                                                        [
+                                                                        'responderMessageSeen']
+                                                                    ? Colors
+                                                                        .white70
+                                                                    : Colors
+                                                                        .white)
+                                                                : (snapshot.data
+                                                                            .docs[index][
+                                                                        'ownerMessageSeen']
+                                                                    ? Colors
+                                                                        .white70
+                                                                    : Colors
+                                                                        .white),),),
                                                       ],
                                                     )
                                                   ],
@@ -300,17 +330,21 @@ class _allMessagesState extends State<allMessages> {
                                   //     ? (snapshot.data.docs[index]['ownerPic'])
                                   //     : NetworkImage(snapshot.data.docs[index]
                                   //         ['responderPic']);
+                                  AdMobService.createInterstitialAd();
+                                        AdMobService.showInterstitialAd();
                                   showDialog(
                                       context: context,
                                       builder: (context) => chatRoom(
                                             snapshot.data.docs[index]
                                                 ['ticketId'],
-                                            mobile,
+                                            snapshot.data.docs[index]
+                                                ['responderNumber'],
                                             snapshot.data.docs[index]
                                                 ['ticketTitle'],
                                             snapshot.data.docs[index]['id'],
                                             userDocument["name"],
                                             userDocument2["uplodedPhoto"],
+                                            mobile,
                                           ));
                                 },
                               ),
@@ -367,7 +401,7 @@ class _buyingMessagesState extends State<buyingMessages> {
                     FirebaseAuth.instance.currentUser.phoneNumber) {
                   mobile = snapshot.data.docs[index]['ticket_creater_mobile'];
                 }
-
+                print(mobile);
                 return StreamBuilder(
                     stream: FirebaseFirestore.instance
                         .collection("user_account")
@@ -386,22 +420,27 @@ class _buyingMessagesState extends State<buyingMessages> {
                               heightFactor: 0.92,
                               child: GestureDetector(
                                 onTap: () {
+                                  AdMobService.createInterstitialAd();
+                                        AdMobService.showInterstitialAd();
                                   showDialog(
                                       context: context,
                                       builder: (context) => chatRoom(
-                                          snapshot.data.docs[index]['ticketId'],
-                                          snapshot.data.docs[index]
-                                              ['responderNumber'],
-                                          snapshot.data.docs[index]
-                                              ['ticketTitle'],
-                                          snapshot.data.docs[index]['id'],
-                                          userDocument["name"],
-                                          userDocument2["uplodedPhoto"]));
+                                            snapshot.data.docs[index]
+                                                ['ticketId'],
+                                            snapshot.data.docs[index]
+                                                ['responderNumber'],
+                                            snapshot.data.docs[index]
+                                                ['ticketTitle'],
+                                            snapshot.data.docs[index]['id'],
+                                            userDocument["name"],
+                                            userDocument2["uplodedPhoto"],
+                                            mobile,
+                                          ));
                                 },
                                 child: Stack(
                                   children: [
                                     Card(
-                                      color: Colors.white,
+                                      color: Constants.scaffoldBackground,
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -418,23 +457,31 @@ class _buyingMessagesState extends State<buyingMessages> {
                                                           const EdgeInsets.all(
                                                               8.0),
                                                       child: SizedBox(
-                                                        width: 50,
+                                                        width: 60,
+                                                        height: 60,
                                                         child: ClipRRect(
                                                           borderRadius:
                                                               BorderRadius.all(
                                                                   Radius
                                                                       .circular(
-                                                                          10)),
-                                                          child:
-                                                              CachedNetworkImage(
+                                                                          30)),
+                                                          // child:
+                                                          //     CachedNetworkImage(
+                                                          //   fit: BoxFit.cover,
+                                                          //   imageUrl: userDocument2[
+                                                          //       "uplodedPhoto"],
+                                                          //   errorWidget:
+                                                          //       (context, url,
+                                                          //               error) =>
+                                                          //           Icon(Icons
+                                                          //               .error),
+                                                          // ),
+                                                          child: Image(
                                                             fit: BoxFit.cover,
-                                                            imageUrl: userDocument2[
-                                                                "uplodedPhoto"],
-                                                            errorWidget:
-                                                                (context, url,
-                                                                        error) =>
-                                                                    Icon(Icons
-                                                                        .error),
+                                                            image: NetworkImage(
+                                                              userDocument2[
+                                                                  "uplodedPhoto"],
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
@@ -465,22 +512,22 @@ class _buyingMessagesState extends State<buyingMessages> {
                                                                         [
                                                                         'responderMessageSeen']
                                                                     ? Colors
-                                                                        .black45
+                                                                        .white54
                                                                     : Colors
-                                                                        .black)
+                                                                        .white)
                                                                 : (snapshot.data
                                                                             .docs[index][
                                                                         'ownerMessageSeen']
                                                                     ? Colors
-                                                                        .black45
+                                                                        .white54
                                                                     : Colors
-                                                                        .black),
+                                                                        .white),
                                                           ),
                                                         ),
                                                         Text(
-                                                          title.length > 34
+                                                          title.length > 30
                                                               ? title.substring(
-                                                                      0, 34) +
+                                                                      0, 30) +
                                                                   "..."
                                                               : title,
                                                           style: TextStyle(
@@ -499,16 +546,16 @@ class _buyingMessagesState extends State<buyingMessages> {
                                                                         [
                                                                         'responderMessageSeen']
                                                                     ? Colors
-                                                                        .black45
+                                                                        .white54
                                                                     : Colors
-                                                                        .black)
+                                                                        .white)
                                                                 : (snapshot.data
                                                                             .docs[index][
                                                                         'ownerMessageSeen']
                                                                     ? Colors
-                                                                        .black45
+                                                                        .white54
                                                                     : Colors
-                                                                        .black),
+                                                                        .white),
                                                           ),
                                                         ),
                                                         SizedBox(
@@ -516,7 +563,28 @@ class _buyingMessagesState extends State<buyingMessages> {
                                                         ),
                                                         Text(snapshot.data
                                                                 .docs[index]
-                                                            ['lastMessage']),
+                                                            ['lastMessage'],style: TextStyle(color: snapshot.data
+                                                                            .docs[index][
+                                                                        'responderNumber'] ==
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .phoneNumber
+                                                                ? (snapshot.data
+                                                                            .docs[index]
+                                                                        [
+                                                                        'responderMessageSeen']
+                                                                    ? Colors
+                                                                        .white70
+                                                                    : Colors
+                                                                        .white)
+                                                                : (snapshot.data
+                                                                            .docs[index][
+                                                                        'ownerMessageSeen']
+                                                                    ? Colors
+                                                                        .white70
+                                                                    : Colors
+                                                                        .white),),),
                                                       ],
                                                     )
                                                   ],
@@ -607,6 +675,7 @@ class _sellingMessagesState extends State<sellingMessages> {
                     FirebaseAuth.instance.currentUser.phoneNumber) {
                   mobile = snapshot.data.docs[index]['ticket_creater_mobile'];
                 }
+                print(mobile);
                 return StreamBuilder(
                     stream: FirebaseFirestore.instance
                         .collection("user_account")
@@ -625,22 +694,27 @@ class _sellingMessagesState extends State<sellingMessages> {
                               heightFactor: 0.92,
                               child: GestureDetector(
                                 onTap: () {
+                                  AdMobService.createInterstitialAd();
+                                        AdMobService.showInterstitialAd();
                                   showDialog(
                                       context: context,
                                       builder: (context) => chatRoom(
-                                          snapshot.data.docs[index]['ticketId'],
-                                          snapshot.data.docs[index]
-                                              ['responderNumber'],
-                                          snapshot.data.docs[index]
-                                              ['ticketTitle'],
-                                          snapshot.data.docs[index]['id'],
-                                          userDocument["name"],
-                                          userDocument2["uplodedPhoto"]));
+                                            snapshot.data.docs[index]
+                                                ['ticketId'],
+                                            snapshot.data.docs[index]
+                                                ['responderNumber'],
+                                            snapshot.data.docs[index]
+                                                ['ticketTitle'],
+                                            snapshot.data.docs[index]['id'],
+                                            userDocument["name"],
+                                            userDocument2["uplodedPhoto"],
+                                            mobile,
+                                          ));
                                 },
                                 child: Stack(
                                   children: [
                                     Card(
-                                      color: Colors.white,
+                                      color: Constants.scaffoldBackground,
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -657,23 +731,31 @@ class _sellingMessagesState extends State<sellingMessages> {
                                                           const EdgeInsets.all(
                                                               8.0),
                                                       child: SizedBox(
-                                                        width: 50,
+                                                        height: 60,
+                                                        width: 60,
                                                         child: ClipRRect(
                                                           borderRadius:
                                                               BorderRadius.all(
                                                                   Radius
                                                                       .circular(
-                                                                          10)),
-                                                          child:
-                                                              CachedNetworkImage(
+                                                                          30)),
+                                                          // child:
+                                                          //     CachedNetworkImage(
+                                                          //   fit: BoxFit.cover,
+                                                          //   imageUrl: userDocument2[
+                                                          //       "uplodedPhoto"],
+                                                          //   errorWidget:
+                                                          //       (context, url,
+                                                          //               error) =>
+                                                          //           Icon(Icons
+                                                          //               .error),
+                                                          // ),
+                                                          child: Image(
                                                             fit: BoxFit.cover,
-                                                            imageUrl: userDocument2[
-                                                                "uplodedPhoto"],
-                                                            errorWidget:
-                                                                (context, url,
-                                                                        error) =>
-                                                                    Icon(Icons
-                                                                        .error),
+                                                            image: NetworkImage(
+                                                              userDocument2[
+                                                                  "uplodedPhoto"],
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
@@ -704,22 +786,22 @@ class _sellingMessagesState extends State<sellingMessages> {
                                                                         [
                                                                         'responderMessageSeen']
                                                                     ? Colors
-                                                                        .black45
+                                                                        .white54
                                                                     : Colors
-                                                                        .black)
+                                                                        .white)
                                                                 : (snapshot.data
                                                                             .docs[index][
                                                                         'ownerMessageSeen']
                                                                     ? Colors
-                                                                        .black45
+                                                                        .white54
                                                                     : Colors
-                                                                        .black),
+                                                                        .white),
                                                           ),
                                                         ),
                                                         Text(
-                                                          title.length > 34
+                                                          title.length > 30
                                                               ? title.substring(
-                                                                      0, 34) +
+                                                                      0, 30) +
                                                                   "..."
                                                               : title,
                                                           style: TextStyle(
@@ -738,16 +820,16 @@ class _sellingMessagesState extends State<sellingMessages> {
                                                                         [
                                                                         'responderMessageSeen']
                                                                     ? Colors
-                                                                        .black45
+                                                                        .white54
                                                                     : Colors
-                                                                        .black)
+                                                                        .white)
                                                                 : (snapshot.data
                                                                             .docs[index][
                                                                         'ownerMessageSeen']
                                                                     ? Colors
-                                                                        .black45
+                                                                        .white54
                                                                     : Colors
-                                                                        .black),
+                                                                        .white),
                                                           ),
                                                         ),
                                                         SizedBox(
@@ -755,7 +837,28 @@ class _sellingMessagesState extends State<sellingMessages> {
                                                         ),
                                                         Text(snapshot.data
                                                                 .docs[index]
-                                                            ['lastMessage']),
+                                                            ['lastMessage'],style: TextStyle(color: snapshot.data
+                                                                            .docs[index][
+                                                                        'responderNumber'] ==
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser
+                                                                        .phoneNumber
+                                                                ? (snapshot.data
+                                                                            .docs[index]
+                                                                        [
+                                                                        'responderMessageSeen']
+                                                                    ? Colors
+                                                                        .white70
+                                                                    : Colors
+                                                                        .white)
+                                                                : (snapshot.data
+                                                                            .docs[index][
+                                                                        'ownerMessageSeen']
+                                                                    ? Colors
+                                                                        .white70
+                                                                    : Colors
+                                                                        .white),),),
                                                       ],
                                                     )
                                                   ],

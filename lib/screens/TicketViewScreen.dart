@@ -5,16 +5,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:help_others/screens/ChatRoom.dart';
-import 'package:help_others/screens/Dashboard.dart';
+
 import 'package:help_others/screens/NavigationBar.dart';
 import 'package:help_others/screens/SeeProfileOfTicketOwner.dart';
+import 'package:help_others/services/AdMob.dart';
 import 'package:help_others/services/Constants.dart';
 import 'package:help_others/services/Database.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:help_others/services/BannerAds.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'MessageScren.dart';
-import 'NotificationsInBell.dart';
 
 class ticketViewScreen extends StatefulWidget {
   String ticketOwnweMobileNumber;
@@ -49,8 +50,15 @@ class ticketViewScreen extends StatefulWidget {
 
 class _ticketViewScreenState extends State<ticketViewScreen> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
+  AdMobService adMobService = new AdMobService();
   final TextEditingController messageControler = TextEditingController();
   bool responded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    adMobService.loadRewardedAd();
+  }
 
   callTicketOwner() async {
     String phoneNo =
@@ -79,13 +87,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
     String text,
   ) async {
     var name;
-
-    var data = await FirebaseFirestore.instance
-        .collection("user_account")
-        .doc(widget.ticketOwnweMobileNumber)
-        .get()
-        .then((value) async => {name = await value.get("name")});
-
     databaseMethods.uploadTicketResponse("comment", widget.id, false,
         widget.ticketOwnweMobileNumber, true, widget.title, text);
 
@@ -99,6 +100,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
             widget.id,
             name,
             widget.photo,
+            widget.ticketOwnweMobileNumber,
           ),
         ));
   }
@@ -113,7 +115,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                 .doc(FirebaseAuth.instance.currentUser.phoneNumber)
                 .snapshots(),
             builder: (context, snapshot) {
-              var userAccount = snapshot.data;
               return Container(
                 height: MediaQuery.of(context).size.height * .40,
                 child: Padding(
@@ -149,10 +150,12 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                           ),
                           Row(
                             children: [
-                              RaisedButton(
+                              ElevatedButton(
                                 child: Text("Hello"),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6)),
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6)),
+                                ),
                                 onPressed: () {
                                   sendMessageFromGivenKeywords("Hello");
                                 },
@@ -160,10 +163,12 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                               SizedBox(
                                 width: 10,
                               ),
-                              RaisedButton(
+                              ElevatedButton(
                                 child: Text("Are you available"),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6)),
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6)),
+                                ),
                                 onPressed: () {
                                   sendMessageFromGivenKeywords(
                                       "Are you available");
@@ -172,10 +177,12 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                               SizedBox(
                                 width: 10,
                               ),
-                              RaisedButton(
+                              ElevatedButton(
                                 child: Text("Let's talk"),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6)),
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6)),
+                                ),
                                 onPressed: () {
                                   sendMessageFromGivenKeywords("Let's talk");
                                 },
@@ -184,10 +191,12 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                           ),
                           Row(
                             children: [
-                              RaisedButton(
+                              ElevatedButton(
                                 child: Text("Let's meet"),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6)),
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6)),
+                                ),
                                 onPressed: () {
                                   sendMessageFromGivenKeywords("Let's meet");
                                 },
@@ -248,6 +257,23 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
     );
   }
 
+  BannerAd banner;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final adState = Provider.of<BannerAds>(context);
+    adState.initialization.then((value) {
+      setState(() {
+        banner = BannerAd(
+            size: AdSize.banner,
+            adUnitId: adState.bannerAdUnit,
+            listener: adState.adListener,
+            request: AdRequest())
+          ..load();
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
@@ -273,6 +299,15 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                   responded = false;
                 }
                 return Scaffold(
+                  // bottomSheet: Container(
+                  //   color: Colors.red,
+                  //   height: 50,
+                  //   width: 300,
+                  //   child: AdWidget(
+                  //     key: UniqueKey(),
+                  //     ad: AdMobService.createBannerAd()..load(),
+                  //   ),
+                  // ),
                   backgroundColor: Constants.tscaffoldBackground,
                   floatingActionButton: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -361,12 +396,14 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                         ? SizedBox(
                                             width: queryData.width * 0.35,
                                             height: 50,
-                                            child: RaisedButton(
-                                              shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          15)),
-                                              color: Constants.tChatbutton,
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                primary: Constants.tChatbutton,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15)),
+                                              ),
                                               child: Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
@@ -385,6 +422,8 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                 ],
                                               ),
                                               onPressed: () {
+                                                // adMobService.loadRewardedAd();
+                                                // adMobService.showRewardedAd();
                                                 setState(() {
                                                   _tripEditModalBottomSheet(
                                                       context);
@@ -395,12 +434,14 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                         : SizedBox(
                                             width: queryData.width * 0.35,
                                             height: 50,
-                                            child: RaisedButton(
-                                              shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          15)),
-                                              color: Constants.tChatbutton,
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                primary: Constants.tChatbutton,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15)),
+                                              ),
                                               child: Text(
                                                 "Chat History",
                                                 style: TextStyle(
@@ -415,14 +456,16 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                       MaterialPageRoute(
                                                         builder: (context) =>
                                                             chatRoom(
-                                                                widget.id,
-                                                                widget
-                                                                    .ticketOwnweMobileNumber,
-                                                                widget.title,
-                                                                widget.id,
-                                                                userAccount[
-                                                                    "name"],
-                                                                widget.photo),
+                                                          widget.id,
+                                                          widget
+                                                              .ticketOwnweMobileNumber,
+                                                          widget.title,
+                                                          widget.id,
+                                                          userAccount["name"],
+                                                          widget.photo,
+                                                          widget
+                                                              .ticketOwnweMobileNumber,
+                                                        ),
                                                       ));
                                                 });
                                               },
@@ -445,12 +488,21 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                         child: SizedBox(
                                           width: queryData.width * 0.35,
                                           height: 50,
-                                          child: FlatButton(
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(15)),
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15)),
+                                              primary: widget.shareMobileNumber
+                                                  ? Constants.tChatbutton
+                                                  : Constants
+                                                      .tDisableCallButton,
+                                            ),
                                             onPressed: () {
                                               if (widget.shareMobileNumber) {
+                                                adMobService.loadRewardedAd();
+                                                adMobService.showRewardedAd();
                                                 callTicketOwner();
                                                 databaseMethods
                                                     .uploadTicketResponseByCall(
@@ -484,9 +536,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                 ),
                                               ],
                                             ),
-                                            color: widget.shareMobileNumber
-                                                ? Constants.tChatbutton
-                                                : Constants.tDisableCallButton,
                                           ),
                                         ),
                                       ),
@@ -555,19 +604,21 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                 ),
                                 Container(
                                   decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                          image: NetworkImage(widget.photo)),
                                       gradient: LinearGradient(
                                           begin: Alignment.topCenter,
                                           end: Alignment.bottomCenter,
                                           colors: Constants.adPhotoContainer)),
                                   height: 250,
                                   width: queryData.width,
-                                  child: CachedNetworkImage(
-                                    imageUrl: widget.photo,
-                                    placeholder: (context, url) => Center(
-                                        child: CircularProgressIndicator()),
-                                    errorWidget: (context, url, error) =>
-                                        Icon(Icons.error),
-                                  ),
+                                  // child: CachedNetworkImage(
+                                  //   imageUrl: widget.photo,
+                                  //   placeholder: (context, url) => Center(
+                                  //       child: CircularProgressIndicator()),
+                                  //   errorWidget: (context, url, error) =>
+                                  //       Icon(Icons.error),
+                                  // ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(9.0),
@@ -579,6 +630,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                         fontWeight: FontWeight.bold),
                                   ),
                                 ),
+
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
@@ -605,34 +657,50 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                 Padding(
                                   padding: const EdgeInsets.only(
                                       left: 12, right: 12),
-                                  child: Flexible(
-                                    child: Container(
-                                      constraints: BoxConstraints(
-                                          minHeight: queryData.height / 4),
-                                      width: queryData.width,
-                                      color: Constants.tDescriptionBox,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(10.0),
-                                        child: Text(widget.description,
-                                            style: TextStyle(
-                                                color:
-                                                    Constants.tDescriptionText,
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w400)),
-                                      ),
+                                  child: Container(
+                                    constraints: BoxConstraints(
+                                        minHeight: queryData.height / 4),
+                                    width: queryData.width,
+                                    color: Constants.tDescriptionBox,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Text(widget.description,
+                                          style: TextStyle(
+                                              color: Constants.tDescriptionText,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w400)),
                                     ),
                                   ),
                                 ),
-                                // https://www.google.com/maps/place/Newtown,+Kolkata,+West+Bengal/@22.5861408,88.4227606,12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d22.5753931!4d88.4797903
-                                // RaisedButton(
-                                //   child: Text("map"),
-                                //   onPressed: () {
-                                //     mapInBrowser(
-                                //         // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}");
-                                //         // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}/@${widget.latitude},${widget.longitude},12z");
-                                //         "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d${widget.latitude}!4d${widget.longitude}");
-                                //   },
+                                //     // https://www.google.com/maps/place/Newtown,+Kolkata,+West+Bengal/@22.5861408,88.4227606,12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d22.5753931!4d88.4797903
+                                //     // RaisedButton(
+                                //     //   child: Text("map"),
+                                //     //   onPressed: () {
+                                //     //     mapInBrowser(
+                                //     //         // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}");
+                                //     //         // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}/@${widget.latitude},${widget.longitude},12z");
+                                //     //         "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d${widget.latitude}!4d${widget.longitude}");
+                                //     //   },
+                                //     // ),
+                                // SizedBox(
+                                //   height: 50,
+                                //   width: queryData.width,
+                                //   child: AdWidget(
+                                //     // key: UniqueKey(),
+                                //     ad: AdMobService.createBannerAd3()..load(),
+                                //   ),
                                 // ),
+                                banner != null
+                                    ? SizedBox(
+                                        height: 60,
+                                        width: queryData.width,
+                                        child: AdWidget(
+                                          // key: UniqueKey(),
+                                          ad: banner,
+                                        ),
+                                      )
+                                    : SizedBox(),
+
                                 Padding(
                                   padding: const EdgeInsets.only(
                                       right: 12.0, left: 12.0, top: 12.0),
@@ -715,16 +783,16 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                   ),
                                 ),
 
-                                // Visibility(
-                                //   visible: userAccount["mobile_number"] !=
-                                //           FirebaseAuth
-                                //               .instance.currentUser.phoneNumber
-                                //       ? true
-                                //       : false,
-                                // child:
-                                // Padding(
-                                //   padding: const EdgeInsets.all(12.0),
-                                // child:
+                                //     // Visibility(
+                                //     //   visible: userAccount["mobile_number"] !=
+                                //     //           FirebaseAuth
+                                //     //               .instance.currentUser.phoneNumber
+                                //     //       ? true
+                                //     //       : false,
+                                //     // child:
+                                //     // Padding(
+                                //     //   padding: const EdgeInsets.all(12.0),
+                                //     // child:
                                 Container(
                                   width: queryData.width,
                                   height: queryData.height * 0.07,
@@ -766,18 +834,20 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                   height: 2,
                                                 ),
                                                 InkWell(
-                                                  onTap: () => Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            seeProfileOfTicketOwner(
-                                                                userAccount[
-                                                                    "photo"],
-                                                                userAccount[
-                                                                    "name"],
-                                                                widget
-                                                                    .ticketOwnweMobileNumber),
-                                                      )),
+                                                  onTap: () {
+                                                    Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              seeProfileOfTicketOwner(
+                                                                  userAccount[
+                                                                      "photo"],
+                                                                  userAccount[
+                                                                      "name"],
+                                                                  widget
+                                                                      .ticketOwnweMobileNumber),
+                                                        ));
+                                                  },
                                                   child: Text("SEE PROFILE",
                                                       style: TextStyle(
                                                         color: Constants
@@ -793,8 +863,17 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                     ),
                                   ),
                                 ),
-                                // ),
-                                // )
+                                // banner != null
+                                //     ? SizedBox(
+                                //         height: 60,
+                                //         width: queryData.width,
+                                //         child: AdWidget(
+                                //           // key: UniqueKey(),
+                                //           ad: banner,
+                                //         ),
+                                //       )
+                                //     : SizedBox(),
+
                                 Padding(
                                   padding: const EdgeInsets.only(
                                       left: 10, right: 10, top: 10),
@@ -980,7 +1059,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                                   padding: const EdgeInsets
                                                                           .only(
                                                                       left: 8,
-                                                                      top: 15),
+                                                                      top: 12),
                                                                   child: Row(
                                                                     mainAxisAlignment:
                                                                         MainAxisAlignment

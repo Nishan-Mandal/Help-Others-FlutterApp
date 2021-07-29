@@ -1,19 +1,9 @@
-import 'dart:developer';
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:geocoder/geocoder.dart';
-import 'package:geocoder/model.dart';
-import 'package:help_others/screens/MessageScren.dart';
-import 'package:sms_autofill/sms_autofill.dart';
-import 'package:intl/intl.dart';
 
 class DatabaseMethods {
-  uploadUserInfo(String name, String mobileNumber, String photo, String uid) {
+  uploadUserInfo(String name, String mobileNumber, String photo, String uid,
+      bool acceptAllTermsAndConditions, bool iam18Plus) {
     FirebaseFirestore.instance
         .collection("user_account")
         .doc(FirebaseAuth.instance.currentUser.phoneNumber)
@@ -21,7 +11,9 @@ class DatabaseMethods {
       "name": name,
       "mobile_number": mobileNumber,
       "photo": photo,
-      "uid": uid
+      "uid": uid,
+      "accepted_all_terms_and_conditions": acceptAllTermsAndConditions,
+      "i'm_18+": iam18Plus,
     }).catchError((e) {
       print(e.toString());
     });
@@ -197,15 +189,6 @@ class DatabaseMethods {
         FirebaseFirestore.instance.collection("messages").doc(ticketDocumentId);
     var messages2 = messages1.collection('chats').doc();
 
-    // String photo;
-    // var responder = await FirebaseFirestore.instance
-    //     .collection("user_account")
-    //     .doc(FirebaseAuth.instance.currentUser.phoneNumber)
-    //     .get()
-    //     .then((value) {
-    //   photo = value.get("photo");
-    // });
-
     ref.set({
       "comment": comment,
       "ticket_unique_id": ticketDocumentId,
@@ -232,7 +215,7 @@ class DatabaseMethods {
         ],
       ),
       "ownerMessageSeen": false,
-      "responderMessageSeen": true,
+      "responderMessageSeen": false,
       "ticketTitle": ticketTitle,
     }).catchError((e) {
       print(e.toString());
@@ -310,31 +293,6 @@ class DatabaseMethods {
     );
   }
 
-  // updateMessageSeenStatus(
-  //   String docIdInMessageCollection,
-  // ) {
-  //   var seenStatus = FirebaseFirestore.instance
-  //       .collection("messages")
-  //       .doc(docIdInMessageCollection)
-  //       .collection("chats")
-  //       .where("sender",
-  //           isNotEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
-  //       .orderBy("timeStamp", descending: true)
-  //       .limit(1)
-  //       .get()
-  //       .then((value) {
-  //     value.docs.forEach((element) {
-  //       FirebaseFirestore.instance
-  //           .collection("messages")
-  //           .doc(docIdInMessageCollection)
-  //           .collection("chats")
-  //           .doc(element.id)
-  //           .update({"seenStatus": true});
-  //     });
-  //   }).catchError((e) {
-  //     print(e.toString());
-  //   });
-  // }
   countUnseenMessages(String field) {
     int count = 0;
     var data = FirebaseFirestore.instance
@@ -389,18 +347,6 @@ class DatabaseMethods {
       print(e.toString());
     });
   }
-
-  // updateTicketStatus(
-  //   String ticketDocumentId,
-  //   bool markAsDone,
-  // ) {
-  //   var ref = FirebaseFirestore.instance
-  //       .collection("global_ticket")
-  //       .doc("$ticketDocumentId");
-  //   return ref.update({"mark_as_done": markAsDone}).catchError((e) {
-  //     print(e.toString());
-  //   });
-  // }
 
   myFavourites(String ticketId) {
     var ref =

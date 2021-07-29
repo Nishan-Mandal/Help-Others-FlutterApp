@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:geolocator/geolocator.dart';
 
 import '../main.dart';
 import 'Dashboard.dart';
@@ -103,9 +102,7 @@ class _navigationBarState extends State<navigationBar> {
                           : MaterialCommunityIcons.view_dashboard_outline,
                       // color: Colors.white,
                     ),
-                    title: Text(
-                      'Home',
-                    ),
+                    label: 'Home',
                   ),
                   BottomNavigationBarItem(
                     icon: Stack(
@@ -136,10 +133,7 @@ class _navigationBarState extends State<navigationBar> {
                         ),
                       ],
                     ),
-                    title: Text(
-                      'Chats',
-                      // style: TextStyle(color: Colors.white),
-                    ),
+                    label: 'Chats',
                   ),
                   BottomNavigationBarItem(
                     icon: Icon(
@@ -150,10 +144,7 @@ class _navigationBarState extends State<navigationBar> {
                       color: Colors.redAccent[400],
                       // size: 30,
                     ),
-                    title: Text(
-                      'Post Ad',
-                      // style: TextStyle(color: Colors.white),
-                    ),
+                    label: 'Post Ad',
                   ),
                   BottomNavigationBarItem(
                     icon: Icon(navBarIndex == 3
@@ -161,10 +152,7 @@ class _navigationBarState extends State<navigationBar> {
                             : Icons.favorite_outline
                         // color: Colors.white,
                         ),
-                    title: Text(
-                      'My Ads',
-                      // style: TextStyle(color: Colors.white),
-                    ),
+                    label: 'My Ads',
                   ),
                   BottomNavigationBarItem(
                     icon: Icon(
@@ -172,10 +160,7 @@ class _navigationBarState extends State<navigationBar> {
                           ? Icons.account_circle
                           : Icons.account_circle_outlined,
                     ),
-                    title: Text(
-                      'Account',
-                      // style: TextStyle(color: Colors.white),
-                    ),
+                    label: 'Account',
                   ),
                 ],
               ),

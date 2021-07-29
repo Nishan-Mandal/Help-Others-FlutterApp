@@ -1,7 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:help_others/screens/EditTicket.dart';
+
 import 'package:help_others/services/Database.dart';
 
 class myTicketsResponses extends StatefulWidget {
@@ -44,11 +42,11 @@ class _myTicketsResponsesState extends State<myTicketsResponses> {
         title: Text("Do you want to delete your post ?"),
         // backgroundColor: Colors.amber[300],
         actions: [
-          FlatButton(
+          ElevatedButton(
             child: Text("No"),
             onPressed: () => Navigator.pop(context, false),
           ),
-          FlatButton(
+          ElevatedButton(
             child: Text("Yes"),
             onPressed: () {
               Navigator.pop(context);

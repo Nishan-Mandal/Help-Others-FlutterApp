@@ -10,7 +10,7 @@ import 'package:help_others/services/Database.dart';
 import 'package:help_others/services/Modals.dart';
 
 import '../main.dart';
-import 'NavigationBar.dart';
+
 import 'TicketViewScreen.dart';
 
 class searchBox extends StatefulWidget {
@@ -50,10 +50,11 @@ class _searchBoxState extends State<searchBox> {
     controller.addListener(() {
       double value = controller.offset / 140;
 
-      setState(() {
-        topContainer = value;
-        closeTopContainer = controller.offset > 50;
-      });
+      // setState(() {
+      //   topContainer = value;
+      //   closeTopContainer = controller.offset > 50;
+      // }
+      // );
     });
   }
 
@@ -86,7 +87,7 @@ class _searchBoxState extends State<searchBox> {
         var category = Search.fromSnapshot(tripSnapshot).category.toLowerCase();
         double ticketLatitude = Search.fromSnapshot(tripSnapshot).latitude;
         double ticketLongitude = Search.fromSnapshot(tripSnapshot).longitude;
-        double distanceInMeters = await Geolocator.distanceBetween(
+        double distanceInMeters = Geolocator.distanceBetween(
             latitudeData1, longitudeData1, ticketLatitude, ticketLongitude);
         if ((title.contains(_searchController.text.toLowerCase()) ||
                 description.contains(_searchController.text.toLowerCase()) ||
@@ -102,7 +103,7 @@ class _searchBoxState extends State<searchBox> {
         double ticketLatitude = Search.fromSnapshot(distance).latitude;
         double ticketLongitude = Search.fromSnapshot(distance).longitude;
 
-        double distanceInMeters = await Geolocator.distanceBetween(
+        double distanceInMeters = Geolocator.distanceBetween(
             latitudeData1, longitudeData1, ticketLatitude, ticketLongitude);
 
         if (distanceInMeters <= ticketsWithinDistance) {
@@ -160,7 +161,7 @@ class _searchBoxState extends State<searchBox> {
       child: Scaffold(
           backgroundColor: Constants.scaffoldBackground,
           appBar: AppBar(
-            backgroundColor: Colors.blueGrey,
+            backgroundColor: Constants.appBar,
             title: Container(
               // decoration: BoxDecoration(
               //     border: Border.all(color: Colors.white),
@@ -179,7 +180,7 @@ class _searchBoxState extends State<searchBox> {
                   enabledBorder: InputBorder.none,
                   errorBorder: InputBorder.none,
                   disabledBorder: InputBorder.none,
-                  hintText: "Search...",
+                  hintText: widget.searchText,
                   hintStyle: TextStyle(color: Colors.white),
                 ),
               ),
@@ -256,34 +257,37 @@ class _searchBoxState extends State<searchBox> {
                                                   topLeft: Radius.circular(20),
                                                   topRight: Radius.circular(20),
                                                 ),
-                                                child: CachedNetworkImage(
+                                                // child: CachedNetworkImage(
+                                                //   fit: BoxFit.cover,
+                                                //   imageUrl: _resultsList[index]
+                                                //       ['uplodedPhoto'],
+                                                //   progressIndicatorBuilder:
+                                                //       (context, url,
+                                                //               downloadProgress) =>
+                                                //           Center(
+                                                //     child:
+                                                //         CircularProgressIndicator(
+                                                //             value:
+                                                //                 downloadProgress
+                                                //                     .progress),
+                                                //   ),
+                                                //   errorWidget:
+                                                //       (context, url, error) =>
+                                                //           Icon(Icons.error),
+                                                // ),
+                                                child: Image(
                                                   fit: BoxFit.cover,
-                                                  imageUrl: _resultsList[index]
-                                                      ['uplodedPhoto'],
-                                                  progressIndicatorBuilder:
-                                                      (context, url,
-                                                              downloadProgress) =>
-                                                          Center(
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                            value:
-                                                                downloadProgress
-                                                                    .progress),
-                                                  ),
-                                                  errorWidget:
-                                                      (context, url, error) =>
-                                                          Icon(Icons.error),
+                                                  image: NetworkImage(
+                                                      _resultsList[index]
+                                                          ["uplodedPhoto"]),
                                                 ),
                                               ),
                                               decoration: BoxDecoration(
-                                                  color: Colors.blue,
                                                   borderRadius:
                                                       BorderRadius.only(
-                                                    topLeft:
-                                                        Radius.circular(20),
-                                                    topRight:
-                                                        Radius.circular(20),
-                                                  )),
+                                                topLeft: Radius.circular(20),
+                                                topRight: Radius.circular(20),
+                                              )),
                                               height: queryData.height,
                                               width: queryData.width,
                                             ),
@@ -332,44 +336,48 @@ class _searchBoxState extends State<searchBox> {
                                     ),
                                   )),
                               Positioned(
-                                  left: 120,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors:
-                                                Constants.gradientColorOnAd),
-                                        borderRadius:
-                                            BorderRadius.circular(90)),
-                                    child: IconButton(
-                                      icon: (myFavFlag)
-                                          ? Icon(
-                                              Icons.favorite,
-                                              color: Constants.myFavIconTrue,
-                                              size: 20,
-                                            )
-                                          : Icon(
-                                              Icons.favorite_border,
-                                              color: Constants.myFavIconFalse,
-                                              size: 20,
-                                            ),
-                                      onPressed: () {
-                                        setState(() {
-                                          if (myFavFlag) {
-                                            databaseMethods.undomyFavourite(
-                                              _resultsList[index]["id"],
-                                            );
-                                          } else {
-                                            databaseMethods.myFavourites(
-                                              _resultsList[index]["id"],
-                                            );
-                                          }
-                                          myFavFlag = true;
-                                        });
-                                      },
-                                    ),
-                                  )),
+                                  right: 0,
+                                  child: _resultsList[index]["ticket_owner"] !=
+                                          FirebaseAuth
+                                              .instance.currentUser.phoneNumber
+                                      ? Container(
+                                          decoration: BoxDecoration(
+                                              color:
+                                                  Constants.myFavIconBackground,
+                                              borderRadius:
+                                                  BorderRadius.circular(90)),
+                                          child: IconButton(
+                                            icon: (myFavFlag)
+                                                ? Icon(
+                                                    Icons.favorite,
+                                                    color:
+                                                        Constants.myFavIconTrue,
+                                                    size: 20,
+                                                  )
+                                                : Icon(
+                                                    Icons.favorite_border,
+                                                    color: Constants
+                                                        .myFavIconFalse,
+                                                    size: 20,
+                                                  ),
+                                            onPressed: () {
+                                              setState(() {
+                                                if (myFavFlag) {
+                                                  databaseMethods
+                                                      .undomyFavourite(
+                                                    _resultsList[index]["id"],
+                                                  );
+                                                } else {
+                                                  databaseMethods.myFavourites(
+                                                    _resultsList[index]["id"],
+                                                  );
+                                                }
+                                                myFavFlag = true;
+                                              });
+                                            },
+                                          ),
+                                        )
+                                      : Text("")),
                               Align(
                                 alignment: Alignment.bottomRight,
                                 child: Padding(

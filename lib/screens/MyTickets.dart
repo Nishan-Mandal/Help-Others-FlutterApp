@@ -4,12 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:help_others/screens/Dashboard.dart';
-import 'package:help_others/screens/MessageScren.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-import 'package:help_others/screens/MyTicketsResponses.dart';
 import 'package:help_others/screens/NavigationBar.dart';
-import 'package:help_others/screens/NotificationsInBell.dart';
+import 'package:help_others/services/AdMob.dart';
+
 import 'package:help_others/services/Constants.dart';
 import 'package:help_others/services/Database.dart';
 
@@ -41,6 +40,7 @@ class _myTicketsState extends State<myTickets> {
           appBar: AppBar(
             backgroundColor: Constants.appBar,
             bottom: TabBar(
+              labelColor: Constants.searchIcon,
               tabs: [
                 Tab(
                   text: "ADS",
@@ -50,7 +50,10 @@ class _myTicketsState extends State<myTickets> {
                 ),
               ],
             ),
-            title: Text('My Ads'),
+            title: Text(
+              'My Ads',
+              style: TextStyle(color: Constants.searchIcon),
+            ),
           ),
           body: TabBarView(
             children: [
@@ -76,6 +79,14 @@ class _adsState extends State<ads> {
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Scaffold(
+      bottomSheet: SizedBox(
+        height: 50,
+        width: queryData.width,
+        child: AdWidget(
+          key: UniqueKey(),
+          ad: AdMobService.createBannerAd3()..load(),
+        ),
+      ),
       backgroundColor: Constants.scaffoldBackground,
       body: Container(
         child: StreamBuilder(
@@ -101,17 +112,17 @@ class _adsState extends State<ads> {
                       String title = snapshot.data.docs[index]["title"];
                       String description =
                           snapshot.data.docs[index]["description"];
-                      bool myFavFlag = false;
+                      // bool myFavFlag = false;
 
-                      try {
-                        List l = snapshot.data.docs[index]["favourites"];
-                        if (l.contains(
-                            FirebaseAuth.instance.currentUser.phoneNumber)) {
-                          myFavFlag = true;
-                        }
-                      } catch (e) {
-                        myFavFlag = false;
-                      }
+                      // try {
+                      //   List l = snapshot.data.docs[index]["favourites"];
+                      //   if (l.contains(
+                      //       FirebaseAuth.instance.currentUser.phoneNumber)) {
+                      //     myFavFlag = true;
+                      //   }
+                      // } catch (e) {
+                      //   myFavFlag = false;
+                      // }
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -154,14 +165,20 @@ class _adsState extends State<ads> {
                                                 topLeft: Radius.circular(20),
                                                 topRight: Radius.circular(20),
                                               ),
-                                              child: CachedNetworkImage(
+                                              // child: CachedNetworkImage(
+                                              //   fit: BoxFit.cover,
+                                              //   imageUrl:
+                                              //       snapshot.data.docs[index]
+                                              //           ["uplodedPhoto"],
+                                              //   errorWidget:
+                                              //       (context, url, error) =>
+                                              //           Icon(Icons.error),
+                                              // ),
+                                              child: Image(
                                                 fit: BoxFit.cover,
-                                                imageUrl:
+                                                image: NetworkImage(
                                                     snapshot.data.docs[index]
-                                                        ["uplodedPhoto"],
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        Icon(Icons.error),
+                                                        ["uplodedPhoto"]),
                                               ),
                                             ),
                                             decoration: BoxDecoration(
@@ -383,14 +400,20 @@ class _favouritesState extends State<favourites> {
                                                 topLeft: Radius.circular(20),
                                                 topRight: Radius.circular(20),
                                               ),
-                                              child: CachedNetworkImage(
+                                              // child: CachedNetworkImage(
+                                              //   fit: BoxFit.cover,
+                                              //   imageUrl:
+                                              //       snapshot.data.docs[index]
+                                              //           ["uplodedPhoto"],
+                                              //   errorWidget:
+                                              //       (context, url, error) =>
+                                              //           Icon(Icons.error),
+                                              // ),
+                                              child: Image(
                                                 fit: BoxFit.cover,
-                                                imageUrl:
+                                                image: NetworkImage(
                                                     snapshot.data.docs[index]
-                                                        ["uplodedPhoto"],
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        Icon(Icons.error),
+                                                        ["uplodedPhoto"]),
                                               ),
                                             ),
                                             decoration: BoxDecoration(
@@ -445,13 +468,10 @@ class _favouritesState extends State<favourites> {
                                   ),
                                 )),
                             Positioned(
-                                left: 120,
+                                right: 0,
                                 child: Container(
                                   decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: Constants.gradientColorOnAd),
+                                      color: Constants.myFavIconBackground,
                                       borderRadius: BorderRadius.circular(90)),
                                   child: IconButton(
                                     icon: myFavFlag

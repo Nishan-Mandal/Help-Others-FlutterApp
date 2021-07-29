@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:help_others/screens/TicketViewScreen.dart';
 import 'package:help_others/services/Constants.dart';
 
@@ -21,11 +22,12 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Constants.scaffoldBackground,
       appBar: AppBar(
         iconTheme: IconThemeData(
-          color: Colors.black,
+          color: Colors.white,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Constants.appBar,
       ),
       body: Container(
         child: Column(
@@ -67,9 +69,7 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                 )
               ],
             ),
-            Container(
-              height: 4,
-              width: queryData.width,
+            Divider(
               color: Colors.grey[400],
             ),
             Padding(
@@ -80,7 +80,7 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
               ),
             ),
             Container(
-                height: 250,
+                height: 300,
                 width: queryData.width,
                 child: StreamBuilder(
                     stream: FirebaseFirestore.instance
@@ -157,9 +157,14 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                                           height: 50,
                                           width: 180,
                                           decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                  colors: Constants
+                                                      .gradientColorOnAd),
                                               border: Border.all(),
                                               borderRadius:
-                                                  BorderRadius.circular(15)),
+                                                  BorderRadius.circular(20)),
                                           child: Column(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.start,
@@ -170,13 +175,23 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                                                 padding:
                                                     const EdgeInsets.all(8.0),
                                                 child: Container(
-                                                  height: 140,
+                                                  height: 180,
                                                   width: 160,
-                                                  child: Image(
-                                                    fit: BoxFit.cover,
-                                                    image: NetworkImage(snapshot
-                                                            .data.docs[index]
-                                                        ["uplodedPhoto"]),
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                      topLeft:
+                                                          Radius.circular(20),
+                                                      topRight:
+                                                          Radius.circular(20),
+                                                    ),
+                                                    child: Image(
+                                                      fit: BoxFit.cover,
+                                                      image: NetworkImage(
+                                                          snapshot.data
+                                                                  .docs[index]
+                                                              ["uplodedPhoto"]),
+                                                    ),
                                                   ),
                                                 ),
                                               ),
@@ -189,6 +204,8 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                                                           "..."
                                                       : title,
                                                   style: TextStyle(
+                                                      color:
+                                                          Constants.titleText,
                                                       fontWeight:
                                                           FontWeight.bold),
                                                 ),
@@ -202,30 +219,67 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                                                               0, 20) +
                                                           "..."
                                                       : description,
-                                                  style: TextStyle(),
+                                                  style: TextStyle(
+                                                      color: Constants
+                                                          .descriptionText),
                                                 ),
                                               ),
                                               Padding(
                                                 padding: const EdgeInsets.only(
-                                                    left: 8, top: 8),
+                                                    left: 8, top: 12),
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment.start,
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
-                                                    Icon(
-                                                      Icons
-                                                          .location_on_outlined,
-                                                      color:
-                                                          Constants.addressText,
-                                                      size: 15,
-                                                    ),
-                                                    Text(
-                                                      snapshot.data.docs[index]
-                                                          ["address"],
-                                                      style: TextStyle(
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Icon(
+                                                          Icons
+                                                              .location_on_outlined,
                                                           color: Constants
-                                                              .locationMarker,
-                                                          fontSize: 12),
+                                                              .addressText,
+                                                          size: 15,
+                                                        ),
+                                                        Text(
+                                                          snapshot.data
+                                                                  .docs[index]
+                                                              ["address"],
+                                                          style: TextStyle(
+                                                              color: Constants
+                                                                  .locationMarker,
+                                                              fontSize: 12),
+                                                        )
+                                                      ],
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                        right: 20,
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons.add_ic_call,
+                                                            size: 22,
+                                                            color: Constants
+                                                                .callIcon,
+                                                          ),
+                                                          SizedBox(
+                                                            width: 5,
+                                                          ),
+                                                          Icon(
+                                                            FontAwesome
+                                                                .comments_o,
+                                                            color: Constants
+                                                                .chatIcon,
+                                                            size: 22,
+                                                          ),
+                                                        ],
+                                                      ),
                                                     )
                                                   ],
                                                 ),

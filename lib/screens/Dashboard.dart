@@ -1,31 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:flutter/material.dart';
-import 'package:geocoder/geocoder.dart';
-import 'package:geocoder/model.dart';
 
 import 'package:geolocator/geolocator.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:help_others/main.dart';
-import 'package:help_others/screens/CreateTickets.dart';
-import 'package:help_others/screens/Drawer.dart';
-import 'package:help_others/screens/MessageScren.dart';
-import 'package:help_others/screens/MyTickets.dart';
-import 'package:help_others/screens/NotificationsInBell.dart';
+
 import 'package:help_others/screens/SearchBar.dart';
+import 'package:help_others/services/AdMob.dart';
 import 'package:help_others/services/Constants.dart';
-import 'package:help_others/services/DashboardList.dart';
 import 'package:help_others/services/Database.dart';
-import 'package:help_others/services/Modals.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:help_others/screens/ProfilePage.dart';
-import 'PrivacyPolicy.dart';
+import 'package:provider/provider.dart';
+
 import 'TicketViewScreen.dart' show ticketViewScreen;
-import 'package:intl/intl.dart';
+import 'package:help_others/services/BannerAds.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 String sc;
 
@@ -40,28 +31,28 @@ class dashboard extends StatefulWidget {
 int ticketsWithinDistance = 30000;
 
 class _dashboardState extends State<dashboard> {
-  // final geo = Geoflutterfire();
   DatabaseMethods databaseMethods = new DatabaseMethods();
-  // final CategoriesScroller categoriesScroller = CategoriesScroller();
-  // ScrollController controller = ScrollController();
-  // bool closeTopContainer = false;
-  // double topContainer = 0;
+  AdMobService adMobService = new AdMobService();
+
   int notificationCounter = 0;
   int messageCounter = 0;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-
-  //   controller.addListener(() {
-  //     double value = controller.offset / 140;
-
-  //     setState(() {
-  //       topContainer = value;
-  //       closeTopContainer = controller.offset > 50;
-  //     });
-  //   });
-  // }
+  BannerAd banner;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final adState = Provider.of<BannerAds>(context);
+    adState.initialization.then((value) {
+      setState(() {
+        banner = BannerAd(
+            size: AdSize.banner,
+            adUnitId: adState.bannerAdUnit,
+            listener: adState.adListener,
+            request: AdRequest())
+          ..load();
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,12 +98,28 @@ class _dashboardState extends State<dashboard> {
               ),
             ),
           ),
+          bottomSheet: banner != null
+              ? SizedBox(
+                  height: 50,
+                  width: queryData.width,
+                  child: AdWidget(
+                    // key: UniqueKey(),
+                    ad: banner,
+                  ),
+                )
+              : SizedBox(),
           body: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection('global_ticket')
                   .orderBy("time", descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
+                // if (snapshot.connectionState == ConnectionState.waiting) {
+                //   return Center(
+                //     child: CircularProgressIndicator(),
+                //   );
+                // }
+                // else
                 if (snapshot.hasData) {
                   return Padding(
                     padding: const EdgeInsets.only(left: 8, right: 8),
@@ -136,8 +143,360 @@ class _dashboardState extends State<dashboard> {
                           } catch (e) {
                             myFavFlag = false;
                           }
+                          if (index % 4 == 0) {
+                            return Container(
+                              color: Constants.scaffoldBackground,
+                              child: Column(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(20))),
+                                    height: 280,
+                                    width: queryData.width / 2,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        AdMobService.createInterstitialAd();
+                                        AdMobService.showInterstitialAd();
+                                        // adMobService.loadRewardedAd();
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ticketViewScreen(
+                                                snapshot.data.docs[index]
+                                                    ["ticket_owner"],
+                                                snapshot.data.docs[index]
+                                                    ["title"],
+                                                snapshot.data.docs[index]
+                                                    ["description"],
+                                                snapshot.data.docs[index]["id"],
+                                                snapshot.data.docs[index]
+                                                    ["uplodedPhoto"],
+                                                snapshot.data.docs[index]
+                                                    ["latitude"],
+                                                snapshot.data.docs[index]
+                                                    ["longitude"],
+                                                snapshot.data.docs[index]
+                                                    ["date"],
+                                                snapshot.data.docs[index]
+                                                    ["share_mobile"],
+                                                myFavFlag,
+                                                snapshot.data.docs[index]
+                                                    ["address"],
+                                                snapshot.data.docs[index]
+                                                    ["category"],
+                                              ),
+                                            ));
+                                      },
+                                      child: Stack(
+                                        children: [
+                                          new Container(
+                                              // height: queryData.height,
+                                              decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                      begin: Alignment.topLeft,
+                                                      end:
+                                                          Alignment.bottomRight,
+                                                      colors: Constants
+                                                          .gradientColorOnAd),
+                                                  // color: Colors.grey[800],
+
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                              child: new Center(
+                                                child: Column(
+                                                  children: [
+                                                    Flexible(
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8),
+                                                        child: Stack(
+                                                          children: [
+                                                            Container(
+                                                              child: ClipRRect(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .only(
+                                                                  topLeft: Radius
+                                                                      .circular(
+                                                                          20),
+                                                                  topRight: Radius
+                                                                      .circular(
+                                                                          20),
+                                                                ),
+                                                                // child: CachedNetworkImage(
+                                                                //   fit: BoxFit.cover,
+                                                                //   imageUrl: snapshot.data
+                                                                //           .docs[index]
+                                                                //       ["uplodedPhoto"],
+                                                                //   errorWidget: (context,
+                                                                //           url, error) =>
+                                                                //       Icon(Icons.error),
+                                                                // ),
+                                                                child: Image(
+                                                                  fit: BoxFit
+                                                                      .cover,
+                                                                  image: NetworkImage(snapshot
+                                                                          .data
+                                                                          .docs[index]
+                                                                      [
+                                                                      "uplodedPhoto"]),
+                                                                ),
+                                                              ),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                      borderRadius:
+                                                                          BorderRadius
+                                                                              .only(
+                                                                topLeft: Radius
+                                                                    .circular(
+                                                                        20),
+                                                                topRight: Radius
+                                                                    .circular(
+                                                                        20),
+                                                              )),
+                                                              height: queryData
+                                                                  .height,
+                                                              width: queryData
+                                                                  .width,
+                                                            ),
+                                                            Positioned(
+                                                              right: 5,
+                                                              bottom: 0,
+                                                              child: Text(
+                                                                snapshot.data
+                                                                            .docs[
+                                                                        index]
+                                                                    ["date"],
+                                                                style: TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    color: Constants
+                                                                        .date),
+                                                              ),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Divider(
+                                                      thickness: 1,
+                                                      color: Constants.divider,
+                                                    ),
+                                                    Container(
+                                                      height: 70,
+                                                      width: queryData.width,
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                              title.length > 23
+                                                                  ? "  " +
+                                                                      title.substring(
+                                                                          0,
+                                                                          23) +
+                                                                      ".."
+                                                                  : "  " +
+                                                                      title,
+                                                              style: TextStyle(
+                                                                fontSize: 13,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: Constants
+                                                                    .titleText,
+                                                              )),
+                                                          SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                        .only(
+                                                                    left: 8),
+                                                            child: Text(
+                                                              description.length >
+                                                                      20
+                                                                  ? description
+                                                                          .substring(
+                                                                              0,
+                                                                              20) +
+                                                                      ".."
+                                                                  : description,
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Constants
+                                                                      .descriptionText),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              )),
+                                          Positioned(
+                                              right: 0,
+                                              child: snapshot.data.docs[index]
+                                                          ["ticket_owner"] !=
+                                                      FirebaseAuth
+                                                          .instance
+                                                          .currentUser
+                                                          .phoneNumber
+                                                  ? Container(
+                                                      decoration: BoxDecoration(
+                                                          // gradient: LinearGradient(
+                                                          //     begin: Alignment.topLeft,
+                                                          //     end: Alignment.bottomRight,
+                                                          //     colors: Constants
+                                                          //         .gradientColorOnAd),
+                                                          color: Constants
+                                                              .myFavIconBackground,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      100)),
+                                                      child: IconButton(
+                                                        icon: myFavFlag
+                                                            ? Icon(
+                                                                Icons.favorite,
+                                                                color: Constants
+                                                                    .myFavIconTrue,
+                                                                size: 20,
+                                                              )
+                                                            : Icon(
+                                                                Icons
+                                                                    .favorite_border,
+                                                                size: 20,
+                                                                color: Constants
+                                                                    .myFavIconFalse,
+                                                              ),
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            if (myFavFlag) {
+                                                              databaseMethods
+                                                                  .undomyFavourite(
+                                                                snapshot.data
+                                                                        .docs[
+                                                                    index]["id"],
+                                                              );
+                                                              myFavFlag = false;
+                                                            } else {
+                                                              databaseMethods
+                                                                  .myFavourites(
+                                                                snapshot.data
+                                                                        .docs[
+                                                                    index]["id"],
+                                                              );
+                                                              myFavFlag = true;
+                                                            }
+                                                          });
+                                                        },
+                                                      ),
+                                                    )
+                                                  : Text("")),
+                                          Align(
+                                            alignment: Alignment.bottomRight,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 5, right: 10),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 8, left: 8),
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons
+                                                              .location_on_outlined,
+                                                          color: Constants
+                                                              .locationMarker,
+                                                          size: 15,
+                                                        ),
+                                                        Text(
+                                                          snapshot.data
+                                                                  .docs[index]
+                                                              ["address"],
+                                                          style: TextStyle(
+                                                              color: Constants
+                                                                  .addressText,
+                                                              fontSize: 12),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.add_ic_call,
+                                                        size: 22,
+                                                        color:
+                                                            Constants.callIcon,
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Icon(
+                                                        FontAwesome.comments_o,
+                                                        color:
+                                                            Constants.chatIcon,
+                                                        size: 22,
+                                                      ),
+                                                    ],
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          // Positioned(
+                                          //     child:
+                                          //         Text(address == null ? " null" : address))
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 5),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors:
+                                                Constants.gradientColorOnAd),
+                                        // color: Colors.grey[800],
+
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(20))),
+                                    // color: Colors.blue,
+                                    height: 280,
+                                    width: queryData.width / 2,
+                                    child: AdWidget(
+                                      // key: UniqueKey(),
+                                      ad: AdMobService.createBannerAd2()
+                                        ..load(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
                           return GestureDetector(
                             onTap: () {
+                              AdMobService.createInterstitialAd();
+                              // AdMobService.showInterstitialAd();
+
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -163,8 +522,8 @@ class _dashboardState extends State<dashboard> {
                                     // height: queryData.height,
                                     decoration: BoxDecoration(
                                         gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
                                             colors:
                                                 Constants.gradientColorOnAd),
                                         // color: Colors.grey[800],
@@ -188,14 +547,22 @@ class _dashboardState extends State<dashboard> {
                                                         topRight:
                                                             Radius.circular(20),
                                                       ),
-                                                      child: CachedNetworkImage(
+                                                      // child: CachedNetworkImage(
+                                                      //   fit: BoxFit.cover,
+                                                      //   imageUrl: snapshot.data
+                                                      //           .docs[index]
+                                                      //       ["uplodedPhoto"],
+                                                      //   errorWidget: (context,
+                                                      //           url, error) =>
+                                                      //       Icon(Icons.error),
+                                                      // ),
+                                                      child: Image(
                                                         fit: BoxFit.cover,
-                                                        imageUrl: snapshot.data
-                                                                .docs[index]
-                                                            ["uplodedPhoto"],
-                                                        errorWidget: (context,
-                                                                url, error) =>
-                                                            Icon(Icons.error),
+                                                        image: NetworkImage(
+                                                            snapshot.data
+                                                                    .docs[index]
+                                                                [
+                                                                "uplodedPhoto"]),
                                                       ),
                                                     ),
                                                     decoration: BoxDecoration(
@@ -282,53 +649,50 @@ class _dashboardState extends State<dashboard> {
                                                 ["ticket_owner"] !=
                                             FirebaseAuth.instance.currentUser
                                                 .phoneNumber
-                                        ? Padding(
-                                            padding: const EdgeInsets.all(3.0),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                  // gradient: LinearGradient(
-                                                  //     begin: Alignment.topLeft,
-                                                  //     end: Alignment.bottomRight,
-                                                  //     colors: Constants
-                                                  //         .gradientColorOnAd),
-                                                  color: Colors.grey[800],
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100)),
-                                              child: IconButton(
-                                                icon: myFavFlag
-                                                    ? Icon(
-                                                        Icons.favorite,
-                                                        color: Constants
-                                                            .myFavIconTrue,
-                                                        size: 20,
-                                                      )
-                                                    : Icon(
-                                                        Icons.favorite_border,
-                                                        size: 20,
-                                                        color: Constants
-                                                            .myFavIconFalse,
-                                                      ),
-                                                onPressed: () {
-                                                  setState(() {
-                                                    if (myFavFlag) {
-                                                      databaseMethods
-                                                          .undomyFavourite(
-                                                        snapshot.data
-                                                            .docs[index]["id"],
-                                                      );
-                                                      myFavFlag = false;
-                                                    } else {
-                                                      databaseMethods
-                                                          .myFavourites(
-                                                        snapshot.data
-                                                            .docs[index]["id"],
-                                                      );
-                                                      myFavFlag = true;
-                                                    }
-                                                  });
-                                                },
-                                              ),
+                                        ? Container(
+                                            decoration: BoxDecoration(
+                                                // gradient: LinearGradient(
+                                                //     begin: Alignment.topLeft,
+                                                //     end: Alignment.bottomRight,
+                                                //     colors: Constants
+                                                //         .gradientColorOnAd),
+                                                color: Constants
+                                                    .myFavIconBackground,
+                                                borderRadius:
+                                                    BorderRadius.circular(100)),
+                                            child: IconButton(
+                                              icon: myFavFlag
+                                                  ? Icon(
+                                                      Icons.favorite,
+                                                      color: Constants
+                                                          .myFavIconTrue,
+                                                      size: 20,
+                                                    )
+                                                  : Icon(
+                                                      Icons.favorite_border,
+                                                      size: 20,
+                                                      color: Constants
+                                                          .myFavIconFalse,
+                                                    ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  if (myFavFlag) {
+                                                    databaseMethods
+                                                        .undomyFavourite(
+                                                      snapshot.data.docs[index]
+                                                          ["id"],
+                                                    );
+                                                    myFavFlag = false;
+                                                  } else {
+                                                    databaseMethods
+                                                        .myFavourites(
+                                                      snapshot.data.docs[index]
+                                                          ["id"],
+                                                    );
+                                                    myFavFlag = true;
+                                                  }
+                                                });
+                                              },
                                             ),
                                           )
                                         : Text("")),
@@ -392,7 +756,14 @@ class _dashboardState extends State<dashboard> {
                         },
                         staggeredTileBuilder: (int index) =>
                             new StaggeredTile.count(
-                                2, index.isEven ? 3.2 : 3.8),
+                                2,
+                                index.isEven
+                                    ? index % 4 == 0
+                                        ? 7.1
+                                        : 3.2
+                                    : index % 4 == 0
+                                        ? 7.5
+                                        : 3.8),
                         mainAxisSpacing: 4.0,
                         crossAxisSpacing: 4.0,
                       ),
@@ -421,10 +792,10 @@ class _searchBarState extends State<searchBar> {
   int kms = 0;
   @override
   void initState() {
-    super.initState();
     ticketsWithinDistance = 30;
     searchController.selection = TextSelection.fromPosition(
         TextPosition(offset: searchController.text.length));
+    super.initState();
   }
 
   getCurrentLocation() async {
@@ -442,9 +813,8 @@ class _searchBarState extends State<searchBar> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    super.dispose();
     searchController.clear();
+    super.dispose();
   }
 
   int textFieldTextLength = 0;
@@ -463,89 +833,87 @@ class _searchBarState extends State<searchBar> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Flexible(
-                child: Container(
-                  width: queryData.width,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Constants.textFieldBorder),
-                      borderRadius: BorderRadius.circular(15)),
-                  child: TextField(
-                    onChanged: (value) {
-                      setState(() {
-                        textFieldTextLength = searchController.text.length;
-                      });
-                    },
-                    autofocus: true,
-                    style: TextStyle(color: Constants.textFieldHintText),
-                    controller: searchController,
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.teal)),
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none,
-                        prefixIcon: IconButton(
-                            icon: Icon(
-                              Icons.arrow_back,
-                              color: Constants.searchIcon,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                sc = searchController.text;
-                              });
-                              // searchController.clear();
-                              Navigator.pop(context);
-                            }),
-                        suffixIcon: Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child: DropdownButton<int>(
-                            icon: Icon(Icons.gps_fixed,
-                                color: kms == 0 ? Colors.grey : Colors.blue),
-                            focusColor: Colors.white,
-                            // value: kms,
-                            //elevation: 5,
-                            underline: SizedBox(),
-                            style: TextStyle(color: Colors.white),
-                            iconEnabledColor: Colors.black,
-                            items: <int>[
-                              1,
-                              5,
-                              10,
-                              20,
-                              40,
-                              100,
-                              500,
-                            ].map<DropdownMenuItem<int>>((int value) {
-                              return DropdownMenuItem<int>(
-                                value: value,
-                                child: Text(
-                                  '$value KM',
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              );
-                            }).toList(),
-                            // hint: Text(
-                            //   '$kms KM',
-                            //   style: TextStyle(
-                            //       fontWeight: FontWeight.bold, color: Colors.black),
-                            // ),
-                            onTap: () {
-                              getCurrentLocation();
-                            },
-                            onChanged: (int value) {
-                              setState(() {
-                                kms = value;
-                              });
-                            },
+              child: Container(
+                width: queryData.width,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Constants.textFieldBorder),
+                    borderRadius: BorderRadius.circular(15)),
+                child: TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      textFieldTextLength = searchController.text.length;
+                    });
+                  },
+                  autofocus: true,
+                  style: TextStyle(color: Constants.textFieldHintText),
+                  controller: searchController,
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Colors.teal)),
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      prefixIcon: IconButton(
+                          icon: Icon(
+                            Icons.arrow_back,
+                            color: Constants.searchIcon,
                           ),
+                          onPressed: () {
+                            setState(() {
+                              sc = searchController.text;
+                            });
+                            // searchController.clear();
+                            Navigator.pop(context);
+                          }),
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: DropdownButton<int>(
+                          icon: Icon(Icons.gps_fixed,
+                              color: kms == 0 ? Colors.grey : Colors.blue),
+                          focusColor: Colors.white,
+                          // value: kms,
+                          //elevation: 5,
+                          underline: SizedBox(),
+                          style: TextStyle(color: Colors.white),
+                          iconEnabledColor: Colors.black,
+                          items: <int>[
+                            1,
+                            5,
+                            10,
+                            20,
+                            40,
+                            100,
+                            500,
+                          ].map<DropdownMenuItem<int>>((int value) {
+                            return DropdownMenuItem<int>(
+                              value: value,
+                              child: Text(
+                                '$value KM',
+                                style: TextStyle(color: Constants.searchIcon),
+                              ),
+                            );
+                          }).toList(),
+                          // hint: Text(
+                          //   '$kms KM',
+                          //   style: TextStyle(
+                          //       fontWeight: FontWeight.bold, color: Colors.black),
+                          // ),
+                          onTap: () {
+                            getCurrentLocation();
+                          },
+                          onChanged: (int value) {
+                            setState(() {
+                              kms = value;
+                            });
+                          },
                         ),
-                        hintText: "Search...",
-                        hintStyle: TextStyle(
-                          color: Constants.textFieldHintText,
-                        )),
-                  ),
+                      ),
+                      hintText: "Search...",
+                      hintStyle: TextStyle(
+                        color: Constants.textFieldHintText,
+                      )),
                 ),
               ),
             ),

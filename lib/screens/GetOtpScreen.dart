@@ -2,15 +2,20 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:help_others/main.dart';
-import 'package:help_others/services/Database.dart';
+import 'package:help_others/screens/Drawer.dart';
+import 'package:help_others/services/Constants.dart';
+
 import 'package:pinput/pin_put/pin_put.dart';
 
 import 'ProfilePage.dart';
 
 class GetOtpPage extends StatefulWidget {
   String phoneNumber;
-  GetOtpPage(this.phoneNumber);
+  bool acceptAllTermsAndConditions;
+  bool iam18Plus;
+
+  GetOtpPage(
+      this.phoneNumber, this.acceptAllTermsAndConditions, this.iam18Plus);
 
   @override
   _GetOtpPageState createState() => _GetOtpPageState();
@@ -33,7 +38,7 @@ class _GetOtpPageState extends State<GetOtpPage> {
     });
   }
 
-  final GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey<ScaffoldState>();
+  // final GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey<ScaffoldState>();
   String _verificationCode;
   bool resendButton = false;
 
@@ -50,6 +55,7 @@ class _GetOtpPageState extends State<GetOtpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Constants.scaffoldBackground,
       body: Column(
         children: [
           SizedBox(
@@ -59,7 +65,10 @@ class _GetOtpPageState extends State<GetOtpPage> {
             child: Center(
               child: Text(
                 'OTP sent to ${widget.phoneNumber}',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 26,
+                    color: Constants.searchIcon),
               ),
             ),
           ),
@@ -67,7 +76,7 @@ class _GetOtpPageState extends State<GetOtpPage> {
             padding: const EdgeInsets.all(30.0),
             child: PinPut(
               fieldsCount: 6,
-              textStyle: const TextStyle(fontSize: 25.0, color: Colors.white),
+              textStyle: TextStyle(fontSize: 25.0, color: Constants.searchIcon),
               eachFieldWidth: 40.0,
               eachFieldHeight: 55.0,
               focusNode: _pinPutFocusNode,
@@ -86,32 +95,49 @@ class _GetOtpPageState extends State<GetOtpPage> {
                       Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => checkUserExistance()),
+                              builder: (context) => checkUserExistance(
+                                  widget.acceptAllTermsAndConditions,
+                                  widget.iam18Plus)),
                           (route) => false);
                     }
                   });
                 } catch (e) {
                   FocusScope.of(context).unfocus();
-                  _scaffoldkey.currentState
+                  ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(content: Text('invalid OTP')));
+                  // _scaffoldkey.currentState
+                  //     .showSnackBar(SnackBar(content: Text('invalid OTP')));
                 }
               },
             ),
           ),
-          Text("You can resend OTP after ${counter} seconds"),
+          Text(
+            "You can resend OTP after ${counter} seconds",
+            style: TextStyle(color: Constants.searchIcon),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          InkWell(
+            onTap: () => Navigator.pop(context),
+            child: Text(
+              "Wrong number? I want to edit my number.",
+              style: TextStyle(color: Colors.blue),
+            ),
+          ),
           SizedBox(
             height: 50,
           ),
-          RaisedButton(
-            child: Text("Resend OTP"),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(primary: Constants.searchIcon),
+            child: Text("Resend OTP", style: TextStyle(color: Colors.black)),
             onPressed: () {
               setState(() {
+              
                 if (resendButton) {
                   resendButton = false;
                   startTimer();
                   _verifyPhone();
-                } else {
-                  null;
                 }
               });
             },
@@ -124,7 +150,7 @@ class _GetOtpPageState extends State<GetOtpPage> {
   _verifyPhone() async {
     startTimer();
     await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: '+91${widget.phoneNumber}',
+        phoneNumber: widget.phoneNumber,
         verificationCompleted: (PhoneAuthCredential credential) async {
           await FirebaseAuth.instance
               .signInWithCredential(credential)
@@ -134,7 +160,8 @@ class _GetOtpPageState extends State<GetOtpPage> {
               Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => checkUserExistance(),
+                    builder: (context) => checkUserExistance(
+                        widget.acceptAllTermsAndConditions, widget.iam18Plus),
                   ),
                   (route) => false);
             }
@@ -158,8 +185,7 @@ class _GetOtpPageState extends State<GetOtpPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
-    super.initState();
     _verifyPhone();
+    super.initState();
   }
 }

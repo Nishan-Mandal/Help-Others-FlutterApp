@@ -3,8 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:help_others/screens/MyTickets.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:help_others/screens/GetStartedPage.dart';
+
+import 'package:help_others/services/Constants.dart';
 import 'package:help_others/services/Database.dart';
+import 'package:help_others/services/AdMob.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../main.dart';
@@ -30,6 +36,7 @@ class _drawerState extends State<drawer> {
   void initState() {
     super.initState();
     // _signOut();
+    // onDeleteAccount();
     _editingController = TextEditingController(text: initialText);
   }
 
@@ -52,6 +59,9 @@ class _drawerState extends State<drawer> {
                 _isEditingText = false;
               });
             },
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+            decoration: InputDecoration(
+                border: InputBorder.none, focusedBorder: InputBorder.none),
             autofocus: true,
             controller: _editingController,
           ),
@@ -66,9 +76,7 @@ class _drawerState extends State<drawer> {
         child: Text(
           initialText,
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 18.0,
-          ),
+              color: Colors.black, fontSize: 18.0, fontWeight: FontWeight.bold),
         ));
   }
 
@@ -83,7 +91,7 @@ class _drawerState extends State<drawer> {
           ),
           (route) => false);
     } catch (e) {
-      print(e); // TODO: show dialog with error
+      print(e);
     }
   }
 
@@ -104,17 +112,22 @@ class _drawerState extends State<drawer> {
         //     RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
         title: Column(
           children: [
-            Text("Do you want to deactivate your account ?"),
+            Text(
+              "Do you want to deactivate your account ?",
+              style: TextStyle(color: Constants.searchIcon),
+            ),
             Form(
               key: reasonKey,
               child: TextFormField(
                 inputFormatters: [LengthLimitingTextInputFormatter(70)],
+                style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   labelText: "Provide reason",
+                  labelStyle: TextStyle(color: Colors.white),
                 ),
                 validator: (value) {
                   return value.length < 10
-                      ? "Title should be more than 10 characters"
+                      ? "Reason should be more than 10 characters"
                       : null;
                 },
                 controller: reasonControler,
@@ -124,12 +137,23 @@ class _drawerState extends State<drawer> {
         ),
         // backgroundColor: Colors.amber[300],
         actions: [
-          FlatButton(
-            child: Text("No"),
+          ElevatedButton(
+            child: Text(
+              "No",
+              style: TextStyle(color: Colors.black),
+            ),
             onPressed: () => Navigator.pop(context, false),
+            style: ElevatedButton.styleFrom(primary: Constants.searchIcon),
           ),
-          FlatButton(
-            child: Text("Yes"),
+          SizedBox(
+            width: 20,
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(primary: Constants.searchIcon),
+            child: Text(
+              "Yes",
+              style: TextStyle(color: Colors.black),
+            ),
             onPressed: () {
               if (reasonKey.currentState.validate()) {
                 _signOut();
@@ -189,11 +213,11 @@ class _drawerState extends State<drawer> {
                       Container(
                         width: double.infinity,
                         padding: EdgeInsets.all(20),
-                        color: Colors.blueGrey,
+                        color: Constants.searchIcon,
                         child: Column(
                           children: [
                             Container(
-                              margin: EdgeInsets.only(top: 40),
+                              margin: EdgeInsets.only(top: 20),
                               width: 120,
                               height: 120,
                               child: Stack(
@@ -222,9 +246,9 @@ class _drawerState extends State<drawer> {
                                 ],
                               ),
                             ),
-                            SizedBox(
-                              height: 10,
-                            ),
+                            // SizedBox(
+                            //   height: 10,
+                            // ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -235,7 +259,10 @@ class _drawerState extends State<drawer> {
                                 Visibility(
                                   visible: _isEditingText,
                                   child: IconButton(
-                                    icon: Icon(Icons.cancel),
+                                    icon: Icon(
+                                      Icons.cancel,
+                                      color: Colors.black,
+                                    ),
                                     onPressed: () {
                                       setState(() {
                                         _isEditingText = false;
@@ -244,7 +271,10 @@ class _drawerState extends State<drawer> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: Icon(Icons.edit),
+                                  icon: Icon(
+                                    Icons.edit,
+                                    color: Colors.black,
+                                  ),
                                   onPressed: () {
                                     setState(() {
                                       _isEditingText = true;
@@ -253,42 +283,72 @@ class _drawerState extends State<drawer> {
                                 ),
                               ],
                             ),
-                            Text("xxxxxx" +
-                                userMobileNumber.substring(
-                                    userMobileNumber.length - 4,
-                                    userMobileNumber.length))
+                            Text(
+                              "xxxxxx" +
+                                  userMobileNumber.substring(
+                                      userMobileNumber.length - 4,
+                                      userMobileNumber.length),
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold),
+                            )
                           ],
                         ),
                       ),
                       ListTile(
-                        leading: Icon(Icons.feedback),
-                        title: Text(
-                          "Feedback",
-                          style: TextStyle(fontSize: 17),
-                        ),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => GetStartrdPage(),
+                              ));
+                        },
+                        leading:
+                            Icon(Icons.feedback, color: Constants.searchIcon),
+                        title: Text("Feedback",
+                            style: TextStyle(
+                                fontSize: 17, color: Constants.searchIcon)),
                       ),
                       ListTile(
-                        leading: Icon(Icons.logout),
+                        leading:
+                            Icon(Icons.logout, color: Constants.searchIcon),
                         title: Text(
                           "Logout",
-                          style: TextStyle(fontSize: 17),
+                          style: TextStyle(
+                              fontSize: 17, color: Constants.searchIcon),
                         ),
                         onTap: () => _signOut(),
                       ),
+                      // Container(
+                      //   // color: Colors.red,
+                      //   height: 50,
+                      //   width: 300,
+                      //   child: AdWidget(
+                      //     key: UniqueKey(),
+                      //     ad: AdMobService.createBannerAd()..load(),
+                      //   ),
+                      // ),
                       Flexible(
                         child: SizedBox(
                           height: querydata.height,
                         ),
                       ),
-                      ListTile(
-                          leading: Icon(Icons.delete),
-                          title: Text(
-                            "Delete Account",
-                            style: TextStyle(fontSize: 17),
-                          ),
-                          onTap: () {
-                            onDeleteAccount();
-                          }),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            InkWell(
+                              onTap: () => onDeleteAccount(),
+                              child: Text(
+                                "Delete Account",
+                                style: TextStyle(
+                                    fontSize: 12, color: Constants.searchIcon),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
                     ],
                   );
                 })),

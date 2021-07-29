@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:help_others/main.dart';
+import 'package:help_others/services/Constants.dart';
 
 class GetStartrdPage extends StatefulWidget {
   GetStartrdPage({Key key}) : super(key: key);
@@ -19,7 +20,7 @@ class _GetStartrdPageState extends State<GetStartrdPage> {
       height: isCurrentPage ? 10.0 : 6.0,
       width: isCurrentPage ? 10.0 : 6.0,
       decoration: BoxDecoration(
-        color: isCurrentPage ? Colors.grey : Colors.grey[300],
+        color: isCurrentPage ? Constants.searchIcon : Colors.grey[300],
         borderRadius: BorderRadius.circular(12),
       ),
     );
@@ -27,20 +28,19 @@ class _GetStartrdPageState extends State<GetStartrdPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
-    super.initState();
     mySLides = getSlides();
     controller = new PageController();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-          gradient: LinearGradient(
-              colors: [const Color(0xff3C8CE7), const Color(0xff00EAFF)])),
+      // decoration: BoxDecoration(
+      //     gradient: LinearGradient(
+      //         colors: [const Color(0xff3C8CE7), const Color(0xff00EAFF)])),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Constants.scaffoldBackground,
         body: Container(
           height: MediaQuery.of(context).size.height - 100,
           child: PageView(
@@ -52,18 +52,17 @@ class _GetStartrdPageState extends State<GetStartrdPage> {
             },
             children: <Widget>[
               SlideTile(
-                // imagePath: mySLides[0].getImageAssetPath(),
+                imagePath: mySLides[0].getImageAssetPath(),
                 title: mySLides[0].getTitle(),
                 desc: mySLides[0].getDesc(),
               ),
               SlideTile(
-                // imagePath: mySLides[1].getImageAssetPath(),
+                imagePath: mySLides[1].getImageAssetPath(),
                 title: mySLides[1].getTitle(),
                 desc: mySLides[1].getDesc(),
               ),
               SlideTile(
-                // imagePath: mySLides[2].getImageAssetPath(),
-
+                imagePath: mySLides[2].getImageAssetPath(),
                 title: mySLides[2].getTitle(),
                 desc: mySLides[2].getDesc(),
               )
@@ -72,22 +71,27 @@ class _GetStartrdPageState extends State<GetStartrdPage> {
         ),
         bottomSheet: slideIndex != 2
             ? Container(
-                margin: EdgeInsets.symmetric(vertical: 16),
+                height: 60,
+                color: Colors.black,
+                // margin: EdgeInsets.symmetric(vertical: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    FlatButton(
-                      onPressed: () {
-                        controller.animateToPage(2,
-                            duration: Duration(milliseconds: 400),
-                            curve: Curves.linear);
-                      },
-                      splashColor: Colors.blue[50],
-                      child: Text(
-                        "SKIP",
-                        style: TextStyle(
-                            color: Color(0xFF0074E4),
-                            fontWeight: FontWeight.w600),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          controller.animateToPage(2,
+                              duration: Duration(milliseconds: 400),
+                              curve: Curves.linear);
+                        },
+                        style: ElevatedButton.styleFrom(
+                            primary: Constants.searchIcon),
+                        child: Text(
+                          "SKIP",
+                          style: TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.w600),
+                        ),
                       ),
                     ),
                     Container(
@@ -100,18 +104,21 @@ class _GetStartrdPageState extends State<GetStartrdPage> {
                         ],
                       ),
                     ),
-                    FlatButton(
-                      onPressed: () {
-                        controller.animateToPage(slideIndex + 1,
-                            duration: Duration(milliseconds: 500),
-                            curve: Curves.linear);
-                      },
-                      splashColor: Colors.blue[50],
-                      child: Text(
-                        "NEXT",
-                        style: TextStyle(
-                            color: Color(0xFF0074E4),
-                            fontWeight: FontWeight.w600),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          controller.animateToPage(slideIndex + 1,
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.linear);
+                        },
+                        style: ElevatedButton.styleFrom(
+                            primary: Constants.searchIcon),
+                        child: Text(
+                          "NEXT",
+                          style: TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.w600),
+                        ),
                       ),
                     ),
                   ],
@@ -128,12 +135,12 @@ class _GetStartrdPageState extends State<GetStartrdPage> {
                 },
                 child: Container(
                   height: 60,
-                  color: Colors.blue,
+                  color: Constants.searchIcon,
                   alignment: Alignment.center,
                   child: Text(
                     "GET STARTED NOW",
                     style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w600),
+                        color: Colors.black, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -155,7 +162,7 @@ class SlideTile extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          // Image.asset(imagePath),
+          Image.asset(imagePath),
           SizedBox(
             height: 40,
           ),
@@ -177,15 +184,15 @@ class SlideTile extends StatelessWidget {
 }
 
 class SliderModel {
-  // String imageAssetPath;
+  String imageAssetPath;
   String title;
   String desc;
 
-  // SliderModel({this.imageAssetPath, this.title, this.desc});
+  SliderModel({this.imageAssetPath, this.title, this.desc});
 
-  // void setImageAssetPath(String getImageAssetPath) {
-  //   imageAssetPath = getImageAssetPath;
-  // }
+  void setImageAssetPath(String getImageAssetPath) {
+    imageAssetPath = getImageAssetPath;
+  }
 
   void setTitle(String getTitle) {
     title = getTitle;
@@ -195,9 +202,9 @@ class SliderModel {
     desc = getDesc;
   }
 
-  // String getImageAssetPath() {
-  //   return imageAssetPath;
-  // }
+  String getImageAssetPath() {
+    return imageAssetPath;
+  }
 
   String getTitle() {
     return title;
@@ -213,28 +220,25 @@ List<SliderModel> getSlides() {
   SliderModel sliderModel = new SliderModel();
 
   //1
-  sliderModel
-      .setDesc("Discover a Food Courner offering the best fast food near you");
-  sliderModel.setTitle("Search......");
-  // sliderModel.setImageAssetPath("assets/illustration.png");
+  sliderModel.setDesc("Explore the hidden world that you desire.");
+  sliderModel.setTitle("Explore...");
+  sliderModel.setImageAssetPath("getStartedPage1.png");
   slides.add(sliderModel);
 
   sliderModel = new SliderModel();
 
   //2
-  sliderModel.setDesc(
-      "Our food plan is filled with delicious seasonal vegetables, whole grains, fast food , burgger , pizza etc.");
-  sliderModel.setTitle("Order..... ");
-  // sliderModel.setImageAssetPath("assets/illustration2.png");
+  sliderModel.setDesc("A lot of users admires you, find whome you like.");
+  sliderModel.setTitle("Find...");
+  sliderModel.setImageAssetPath("getStartedPage2.png");
   slides.add(sliderModel);
 
   sliderModel = new SliderModel();
 
   //3
-  sliderModel.setDesc(
-      "Food delivery or pickup from local restaurants, Explore restaurants that deliver near you.");
-  sliderModel.setTitle("Deliver........");
-  // sliderModel.setImageAssetPath("assets/illustration3.png");
+  sliderModel.setDesc("Live your life, make it exciting.");
+  sliderModel.setTitle("Enjoy...");
+  sliderModel.setImageAssetPath("getStartedPage3.png");
   slides.add(sliderModel);
 
   sliderModel = new SliderModel();

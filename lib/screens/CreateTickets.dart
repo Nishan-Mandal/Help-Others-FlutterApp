@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,10 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:help_others/main.dart';
-
-import 'package:help_others/screens/Dashboard.dart';
 import 'package:help_others/screens/NavigationBar.dart';
+import 'package:help_others/services/AdMob.dart';
 import 'package:help_others/services/Constants.dart';
 
 import 'package:help_others/services/Database.dart';
@@ -66,7 +65,7 @@ class _categoryPageState extends State<categoryPage> {
           title: Text("This will need your location"),
           // backgroundColor: Colors.amber[300],
           actions: [
-            FlatButton(
+            TextButton(
               child: Text("No, Thanks"),
               onPressed: () => Navigator.pushAndRemoveUntil(
                   context,
@@ -75,7 +74,7 @@ class _categoryPageState extends State<categoryPage> {
                   ),
                   (route) => false),
             ),
-            FlatButton(
+            TextButton(
               child: Text("OK"),
               onPressed: () {
                 Navigator.pop(context, false);
@@ -108,23 +107,10 @@ class _categoryPageState extends State<categoryPage> {
         (route) => false);
   }
 
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   print("kkjjjjjjjjjjjjjjjjjjjjjj");
-  //   print(isLocationServiceEnabled);
-  //   if (!isLocationServiceEnabled) {
-  //     _showDialog();
-  //   } else {
-  //     getCurrentLocation();
-  //   }
-  // }
-
   @override
   void initState() {
-    // TODO: implement initState
-    super.initState();
     checkLocationEnable();
+    super.initState();
   }
 
   @override
@@ -134,9 +120,13 @@ class _categoryPageState extends State<categoryPage> {
       onWillPop: onBackPress,
       child: Material(
         child: Scaffold(
+          backgroundColor: Constants.scaffoldBackground,
           appBar: AppBar(
-            title: Text("Choose Category"),
-            backgroundColor: Colors.blueGrey,
+            title: Text(
+              "Choose Category",
+              style: TextStyle(color: Constants.searchIcon),
+            ),
+            backgroundColor: Constants.appBar,
           ),
           body: Container(
             child: Padding(
@@ -158,7 +148,7 @@ class _categoryPageState extends State<categoryPage> {
                       width: queryData.height,
                       decoration: BoxDecoration(
                           border: Border(
-                              bottom: BorderSide(color: Colors.black12))),
+                              bottom: BorderSide(color: Colors.white24))),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Center(
@@ -189,7 +179,7 @@ class _categoryPageState extends State<categoryPage> {
                       child: Padding(
                         padding: const EdgeInsets.only(left: 8, top: 25),
                         child: Text(
-                          "sex with no string attached (NSA)",
+                          "Sex with no string attached (NSA)",
                           style: TextStyle(fontSize: 20),
                         ),
                       ),
@@ -209,19 +199,28 @@ class _categoryPageState extends State<categoryPage> {
                       width: queryData.height,
                       decoration: BoxDecoration(
                           border: Border(
-                              top: BorderSide(color: Colors.black12),
-                              bottom: BorderSide(color: Colors.black12))),
+                              top: BorderSide(color: Colors.white24),
+                              bottom: BorderSide(color: Colors.white24))),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Center(
                           child: Text(
-                            "erotic services (massages, strippers, etc)",
+                            "Erotic services (massages, strippers, etc)",
                             style: TextStyle(fontSize: 20),
                           ),
                         ),
                       ),
                     ),
                   ),
+                  // Container(
+                  //   color: Colors.red,
+                  //   height: 50,
+                  //   width: queryData.width,
+                  //   child: AdWidget(
+                  //     key: UniqueKey(),
+                  //     ad: AdMobService.createBannerAd()..load(),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -247,9 +246,13 @@ class _category1State extends State<category1> {
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Constants.scaffoldBackground,
       appBar: AppBar(
-        title: Text("Dating, Romance, Long term relationship (LTR)"),
-        backgroundColor: Colors.blueGrey,
+        title: Text(
+          "Dating, Romance, Long term relationship (LTR)",
+          style: TextStyle(color: Constants.searchIcon),
+        ),
+        backgroundColor: Constants.appBar,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -268,9 +271,10 @@ class _category1State extends State<category1> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.white24))
+                  //         ),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -295,9 +299,9 @@ class _category1State extends State<category1> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.white24))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -322,9 +326,9 @@ class _category1State extends State<category1> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.white24))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -349,9 +353,9 @@ class _category1State extends State<category1> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.white24))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -384,9 +388,11 @@ class _category2State extends State<category2> {
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Constants.scaffoldBackground,
       appBar: AppBar(
-        title: Text("Sex with no strings attached (NSA)"),
-        backgroundColor: Colors.blueGrey,
+        title: Text("Sex with no strings attached (NSA)",
+            style: TextStyle(color: Constants.searchIcon)),
+        backgroundColor: Constants.appBar,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -405,9 +411,9 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -434,9 +440,9 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -461,9 +467,9 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -490,9 +496,9 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -519,9 +525,9 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -548,9 +554,9 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -577,9 +583,9 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(
                       left: 8,
@@ -614,9 +620,11 @@ class _category3State extends State<category3> {
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Constants.scaffoldBackground,
       appBar: AppBar(
-        title: Text("Erotic services (massages, strippers, etc.)"),
-        backgroundColor: Colors.blueGrey,
+        title: Text("Erotic services (massages, strippers, etc.)",
+            style: TextStyle(color: Constants.searchIcon)),
+        backgroundColor: Constants.appBar,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -635,9 +643,9 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -662,9 +670,9 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -689,9 +697,9 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -716,9 +724,9 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -743,9 +751,9 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -770,9 +778,9 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -797,9 +805,9 @@ class _category3State extends State<category3> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Colors.black12))),
+                  // decoration: BoxDecoration(
+                  //     border:
+                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -841,17 +849,15 @@ class _crreateTicketsState extends State<crreateTickets> {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        // shape:
-        //     RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-        title: Text("Do you want to discard your post ?"),
-        // backgroundColor: Colors.amber[300],
+        title: Text("Do you want to discard your post ?",
+            style: TextStyle(color: Constants.searchIcon)),
         actions: [
-          FlatButton(
-            child: Text("No"),
+          TextButton(
+            child: Text("No", style: TextStyle(color: Constants.searchIcon)),
             onPressed: () => Navigator.pop(context, false),
           ),
-          FlatButton(
-            child: Text("Yes"),
+          TextButton(
+            child: Text("Yes", style: TextStyle(color: Constants.searchIcon)),
             onPressed: () {
               imageFile = null;
               Navigator.of(context).popUntil((route) => route.isFirst);
@@ -869,9 +875,13 @@ class _crreateTicketsState extends State<crreateTickets> {
     return WillPopScope(
       onWillPop: onBackPress,
       child: Scaffold(
+        backgroundColor: Constants.scaffoldBackground,
         appBar: AppBar(
-          title: Text("Create Ticket"),
-          backgroundColor: Colors.blueGrey,
+          title: Text(
+            "Create Ticket",
+            style: TextStyle(color: Constants.searchIcon),
+          ),
+          backgroundColor: Constants.appBar,
         ),
         body: Container(
             height: screenSize.height,
@@ -893,19 +903,21 @@ class _crreateTicketsState extends State<crreateTickets> {
                                 visible: countTitleChar >= 10 ? true : false,
                                 child: Icon(
                                   Icons.check_box,
-                                  color: Colors.green,
+                                  color: Constants.searchIcon,
                                 )),
                             Container(
                               child: Row(
                                 children: [
                                   Text(
-                                    "${countTitleChar}",
+                                    "$countTitleChar",
                                     style: TextStyle(
                                         color: countTitleChar >= 10
-                                            ? Colors.black
+                                            ? Constants.searchIcon
                                             : Colors.red),
                                   ),
-                                  Text("/10")
+                                  Text("/10",
+                                      style: TextStyle(
+                                          color: Constants.searchIcon))
                                 ],
                               ),
                             )
@@ -926,14 +938,12 @@ class _crreateTicketsState extends State<crreateTickets> {
                               });
                             },
                             decoration: InputDecoration(
-                              labelText: "Provide Title",
-                              // enabledBorder: OutlineInputBorder(
-                              //   borderSide: BorderSide(color: Colors.greenAccent),
-                              // ),
-                              // focusedBorder: OutlineInputBorder(
-                              //   borderSide: BorderSide(color: Colors.red),
-                              // ),
-                            ),
+                                labelText: "Provide Title",
+                                labelStyle:
+                                    TextStyle(color: Constants.searchIcon),
+                                border: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Constants.searchIcon))),
                             validator: (value) {
                               return value.length < 10
                                   ? "Title should be more than 10 characters"
@@ -956,19 +966,21 @@ class _crreateTicketsState extends State<crreateTickets> {
                                     countDescriptionChar >= 20 ? true : false,
                                 child: Icon(
                                   Icons.check_box,
-                                  color: Colors.green,
+                                  color: Constants.searchIcon,
                                 )),
                             Container(
                               child: Row(
                                 children: [
                                   Text(
-                                    "${countDescriptionChar}",
+                                    "$countDescriptionChar",
                                     style: TextStyle(
                                         color: countDescriptionChar >= 20
-                                            ? Colors.black
+                                            ? Constants.searchIcon
                                             : Colors.red),
                                   ),
-                                  Text("/20")
+                                  Text("/20",
+                                      style: TextStyle(
+                                          color: Constants.searchIcon))
                                 ],
                               ),
                             )
@@ -979,33 +991,29 @@ class _crreateTicketsState extends State<crreateTickets> {
                         padding: const EdgeInsets.all(8.0),
                         child: Form(
                           key: discriptionKey,
-                          child: Flexible(
-                            child: TextFormField(
-                              onChanged: (value) {
-                                setState(() {
-                                  countDescriptionChar =
-                                      descriptionControler.text.length;
-                                });
-                              },
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(4000)
-                              ],
-                              decoration: InputDecoration(
+                          child: TextFormField(
+                            onChanged: (value) {
+                              setState(() {
+                                countDescriptionChar =
+                                    descriptionControler.text.length;
+                              });
+                            },
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(4000)
+                            ],
+                            decoration: InputDecoration(
                                 labelText: "Provide Description",
-                                // enabledBorder: OutlineInputBorder(
-                                //   borderSide: BorderSide(color: Colors.greenAccent),
-                                // ),
-                                // focusedBorder: OutlineInputBorder(
-                                //   borderSide: BorderSide(color: Colors.red),
-                                // ),
-                              ),
-                              validator: (value) {
-                                return value.length < 20
-                                    ? "Description should be more than 20 characters"
-                                    : null;
-                              },
-                              controller: descriptionControler,
-                            ),
+                                labelStyle:
+                                    TextStyle(color: Constants.searchIcon),
+                                border: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Constants.searchIcon))),
+                            validator: (value) {
+                              return value.length < 20
+                                  ? "Description should be more than 20 characters"
+                                  : null;
+                            },
+                            controller: descriptionControler,
                           ),
                         ),
                       ),
@@ -1016,11 +1024,14 @@ class _crreateTicketsState extends State<crreateTickets> {
                         padding: const EdgeInsets.all(5.0),
                         child: Container(
                           decoration: BoxDecoration(
-                              border:
-                                  Border.all(color: Colors.black, width: 3)),
-                          child: Text(
-                              "Discribe your offer/search with as much details as possible!\n"
-                              "\nProviding enough relevent information to other user gets your ad fund even faster"),
+                              border: Border.all(
+                                  color: Constants.searchIcon, width: 3)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                                "Discribe your offer/search with as much details as possible!\n"
+                                "\nProviding enough relevent information to other user gets your ad fund even faster"),
+                          ),
                         ),
                       ),
                     ],
@@ -1029,8 +1040,9 @@ class _crreateTicketsState extends State<crreateTickets> {
                 Container(
                   width: screenSize.width,
                   height: 50,
-                  child: RaisedButton(
-                    color: Colors.greenAccent,
+                  child: ElevatedButton(
+                    style:
+                        ElevatedButton.styleFrom(primary: Constants.searchIcon),
                     onPressed: () {
                       setState(() {
                         if (titleKey.currentState.validate() &&
@@ -1046,7 +1058,10 @@ class _crreateTicketsState extends State<crreateTickets> {
                         }
                       });
                     },
-                    child: Text("Next"),
+                    child: Text(
+                      "Next",
+                      style: TextStyle(color: Colors.black),
+                    ),
                   ),
                 ),
               ],
@@ -1090,9 +1105,13 @@ class _secondPageState extends State<secondPage> {
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Constants.scaffoldBackground,
       appBar: AppBar(
-        title: Text("Choose a photo"),
-        backgroundColor: Colors.blueGrey,
+        title: Text(
+          "Choose a photo",
+          style: TextStyle(color: Constants.searchIcon),
+        ),
+        backgroundColor: Constants.appBar,
       ),
       body: Container(
         height: queryData.height,
@@ -1111,14 +1130,13 @@ class _secondPageState extends State<secondPage> {
                 Container(
                   height: 400,
                   width: 300,
-                  // color: Colors.amber,
                   child: imageFile == null
                       ? Icon(
                           Icons.add_photo_alternate,
                           size: 200,
+                          color: Constants.searchIcon,
                         )
                       : Container(
-                          // color: Colors.blue,
                           height: 400,
                           width: 300,
                           child: imageFile != null
@@ -1138,21 +1156,25 @@ class _secondPageState extends State<secondPage> {
                 Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: imageFile != null
-                        ? RaisedButton(
+                        ? ElevatedButton(
                             onPressed: () => showModalBottomSheet(
                               context: context,
                               builder: (context) => bottomSheet(),
                             ),
-                            child: Text("Change Photo"),
-                            color: Colors.lime,
+                            child: Text("Change Photo",
+                                style: TextStyle(color: Colors.black)),
+                            style:
+                                ElevatedButton.styleFrom(primary: Colors.lime),
                           )
-                        : RaisedButton(
+                        : ElevatedButton(
                             onPressed: () => showModalBottomSheet(
                               context: context,
                               builder: (context) => bottomSheet(),
                             ),
-                            child: Text("Upload Photo"),
-                            color: Colors.lime,
+                            child: Text("Upload Photo",
+                                style: TextStyle(color: Colors.black)),
+                            style:
+                                ElevatedButton.styleFrom(primary: Colors.lime),
                           )),
               ],
             ),
@@ -1160,9 +1182,10 @@ class _secondPageState extends State<secondPage> {
               child: Container(
                 height: 50,
                 width: queryData.width,
-                child: RaisedButton(
-                  color: Colors.greenAccent,
-                  child: Text("Preview"),
+                child: ElevatedButton(
+                  style:
+                      ElevatedButton.styleFrom(primary: Constants.searchIcon),
+                  child: Text("Preview", style: TextStyle(color: Colors.black)),
                   onPressed: () {
                     if (imageFile != null) {
                       _tripEditModalBottomSheet(context);
@@ -1192,8 +1215,8 @@ class _secondPageState extends State<secondPage> {
       child: Column(
         children: [
           Text(
-            "choose a profile photo",
-            style: TextStyle(fontSize: 20),
+            "choose a photo",
+            style: TextStyle(fontSize: 20, color: Constants.searchIcon),
           ),
           SizedBox(
             height: 20,
@@ -1202,7 +1225,10 @@ class _secondPageState extends State<secondPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                icon: Icon(Icons.camera),
+                icon: Icon(
+                  Icons.camera,
+                  color: Constants.searchIcon,
+                ),
                 onPressed: () {
                   takePhoto(ImageSource.camera);
                 },
@@ -1211,7 +1237,10 @@ class _secondPageState extends State<secondPage> {
                 width: 50,
               ),
               IconButton(
-                icon: Icon(Icons.image),
+                icon: Icon(
+                  Icons.image,
+                  color: Constants.searchIcon,
+                ),
                 onPressed: () {
                   takePhoto(ImageSource.gallery);
                 },
@@ -1290,24 +1319,12 @@ class _secondPageState extends State<secondPage> {
                         ),
                       ],
                     ),
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.center,
-                    //   children: [
-                    //     SizedBox(
-                    //       width: 10,
-                    //     ),
-                    //     Text(
-                    //       "NOTE: By enabling this your number will be share to public",
-                    //       style: TextStyle(color: Colors.red, fontSize: 8),
-                    //     ),
-                    //   ],
-                    // )
                   ],
                 ),
                 SizedBox(
                   height: 50,
                   width: queryData.width,
-                  child: FlatButton(
+                  child: ElevatedButton(
                     onPressed: () async {
                       if (latitudeData1 == null || longitudeData1 == null) {
                         getCurrentLocation();
@@ -1333,8 +1350,12 @@ class _secondPageState extends State<secondPage> {
                         );
                       }
                     },
-                    child: Text("Preview"),
-                    color: Colors.greenAccent,
+                    child: Text(
+                      "Preview",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    style:
+                        ElevatedButton.styleFrom(primary: Constants.searchIcon),
                   ),
                 )
               ],
@@ -1381,7 +1402,7 @@ class preview extends StatefulWidget {
 
 class _previewState extends State<preview> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
-
+  AdMobService adMobService = new AdMobService();
   uploadImage(bool shareMobileNumber) async {
     String userImageUrl;
 
@@ -1427,9 +1448,15 @@ class _previewState extends State<preview> {
   showOverlay(BuildContext context) async {
     OverlayState overlayState = Overlay.of(context);
     OverlayEntry overlayEntry = OverlayEntry(
-        builder: (context) => Center(
-              child:
-                  Positioned(child: Center(child: CircularProgressIndicator())),
+        builder: (context) => Scaffold(
+              backgroundColor: Colors.white,
+              body: Center(
+                child: Text(
+                  "Posting your ad ...",
+                  style: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+              ),
             ));
 
     overlayState.insert(overlayEntry);
@@ -1437,6 +1464,12 @@ class _previewState extends State<preview> {
     await Future.delayed(Duration(seconds: 3));
 
     overlayEntry.remove();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    adMobService.loadRewardedAd();
   }
 
   @override
@@ -1681,12 +1714,14 @@ class _previewState extends State<preview> {
                 Container(
                   height: 50,
                   width: queryData.width,
-                  child: FlatButton(
+                  child: ElevatedButton(
                     onPressed: () {
                       uploadImage(widget.shareNumber);
                       showOverlay(context);
+
                       Future.delayed(const Duration(seconds: 3), () {
                         imageFile = null;
+                        adMobService.showRewardedAd();
                         Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
@@ -1695,8 +1730,12 @@ class _previewState extends State<preview> {
                             (route) => false);
                       });
                     },
-                    child: Text("Post"),
-                    color: Colors.greenAccent,
+                    child: Text(
+                      "Post",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    style:
+                        ElevatedButton.styleFrom(primary: Constants.searchIcon),
                   ),
                 ),
               ],

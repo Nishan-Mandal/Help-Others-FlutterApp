@@ -1,35 +1,45 @@
 import 'dart:io';
 
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:help_others/screens/CheckInternetConnection.dart';
-import 'package:help_others/screens/CreateTickets.dart';
-import 'package:help_others/screens/Dashboard.dart';
+
 import 'package:help_others/screens/GetOtpScreen.dart';
 import 'package:help_others/screens/GetStartedPage.dart';
-import 'package:help_others/screens/MyTickets.dart';
+
 import 'package:help_others/screens/NavigationBar.dart';
 import 'package:help_others/screens/PrivacyPolicy.dart';
-import 'package:help_others/screens/ProfilePage.dart';
+import 'package:help_others/screens/TermsAndConditions.dart';
+import 'package:help_others/services/Constants.dart';
+
 import 'package:help_others/services/Database.dart';
+import 'package:help_others/services/AdMob.dart';
+import 'package:help_others/services/BannerAds.dart';
+import 'package:provider/provider.dart';
 import 'package:sms_autofill/sms_autofill.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  AdMobService.initialize();
+  final initFuture = MobileAds.instance.initialize();
+  final adState = BannerAds(initFuture);
   ErrorWidget.builder = (FlutterErrorDetails details) => Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),
       );
 
-  runApp(MyApp());
+  runApp(Provider.value(
+    value: adState,
+    builder: (context, child) => MyApp(),
+  ));
 }
 
 final TextEditingController _phoneNumberController = TextEditingController();
-
 final SmsAutoFill _autoFill = SmsAutoFill();
 
 class MyApp extends StatelessWidget {
@@ -49,13 +59,15 @@ class MyApp extends StatelessWidget {
 
         if (snapshot.connectionState == ConnectionState.done) {
           return MaterialApp(
-            title: 'Flutter Demo',
+            title: 'BBold',
             theme: ThemeData(
+                // bottomSheetTheme:
+                //     BottomSheetThemeData(backgroundColor: Colors.red),
                 // primarySwatch: Colors.blue,
                 brightness: Brightness.light),
             darkTheme: ThemeData(brightness: Brightness.dark),
             themeMode: ThemeMode.dark,
-            routes: {'/navigationBar': (context) => navigationBar()},
+            // routes: {'/navigationBar': (context) => navigationBar()},
             home: LandingPage(),
             debugShowCheckedModeBanner: false,
           );
@@ -83,7 +95,7 @@ class _LandingPageState extends State<LandingPage> {
     duration: Duration(seconds: 5),
     backgroundColor: Colors.redAccent,
   );
-  Future<bool> checkInternetConnectivity() async {
+  checkInternetConnectivity() async {
     try {
       final result = await InternetAddress.lookup('example.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {}
@@ -94,7 +106,6 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     checkInternetConnectivity();
   }
@@ -135,21 +146,42 @@ class _MyHomePageState extends State<MyHomePage> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
 
   final formKey = GlobalKey<FormState>();
-  bool acceptAll = true;
-  // uploadUserPhoneNumberAndUid() {
-  //   Map<String, String> userPhoneMap = {
-  //     "mobile_number": _phoneNumberController.text,
-  //     "uid": FirebaseAuth.instance.currentUser.uid
-  //   };
-  //   databaseMethods.uploadUserInfo(userPhoneMap);
+  bool acceptAllTermsAndConditions = true;
+  bool iam18Plus = true;
+  String countryCode;
+  // Future<void> termsAndConditionsInBrowser(String url) async {
+  //   if (await canLaunch(url)) {
+  //     await launch(
+  //       url,
+  //       forceSafariVC: false,
+  //       forceWebView: false,
+  //       headers: <String, String>{'my_header_key': 'my_header_value'},
+  //     );
+  //   } else {
+  //     throw 'Could not launch $url';
+  //   }
   // }
+
+  void autoPickupNumber() async {
+    _phoneNumberController.text = await _autoFill.hint;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    autoPickupNumber();
+  }
 
   @override
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Constants.scaffoldBackground,
       appBar: AppBar(
-        title: Text("Signup page"),
+        backgroundColor: Constants.appBar,
+        title:
+            Text("Signup page", style: TextStyle(color: Constants.searchIcon)),
       ),
       resizeToAvoidBottomInset: false,
       body: Column(
@@ -167,15 +199,45 @@ class _MyHomePageState extends State<MyHomePage> {
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
+                          prefixIcon: CountryCodePicker(
+                              onChanged: (value) {
+                                countryCode = value.dialCode;
+                              },
+                              onInit: (value) {
+                                countryCode = value.dialCode;
+                              },
+                              showFlagMain: false,
+                              initialSelection: 'IN',
+                              barrierColor: Colors.black,
+                              dialogBackgroundColor: Colors.black,
+                              dialogTextStyle: TextStyle(
+                                color: Constants.searchIcon,
+                              ),
+                              showCountryOnly: false,
+                              showOnlyCountryWhenClosed: false,
+                              showDropDownButton: true,
+                              searchStyle: TextStyle(color: Colors.white)),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              Icons.assignment_ind_outlined,
+                              color: Constants.searchIcon,
+                            ),
+                            onPressed: () async {
+                              _phoneNumberController.text =
+                                  await _autoFill.hint;
+                            },
+                          ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.amber),
+                            borderSide: BorderSide(color: Constants.searchIcon),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black),
-                            borderRadius: BorderRadius.circular(30),
+                            borderSide: BorderSide(color: Constants.searchIcon),
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          labelText: "+91"),
+                          // labelText: "+91",
+                          labelStyle: TextStyle(color: Constants.searchIcon)),
+                      style: TextStyle(color: Constants.searchIcon),
                       validator: (value) {
                         return value.isEmpty
                             ? "Please provide valid number"
@@ -190,58 +252,120 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Column(
             children: [
+              SizedBox(
+                height: 30,
+                child: Row(
+                  children: [
+                    Checkbox(
+                      activeColor: Constants.searchIcon,
+                      checkColor: Colors.black,
+                      value: acceptAllTermsAndConditions,
+                      onChanged: (value) {
+                        setState(() {
+                          acceptAllTermsAndConditions = value;
+                        });
+                      },
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              "I have read and accepted the ",
+                              style: TextStyle(
+                                  fontSize: 12, color: Constants.searchIcon),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          termsAndConditions(),
+                                    ));
+                              },
+                              child: Text("Terms & Conditions ",
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.blue)),
+                            ),
+                            Text("and",
+                                style: TextStyle(
+                                    fontSize: 12, color: Constants.searchIcon)),
+                          ],
+                        ),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => privacyPolicy(),
+                                ));
+                          },
+                          child: Text("Privacy policy",
+                              style:
+                                  TextStyle(fontSize: 12, color: Colors.blue)),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
               Row(
                 children: [
                   Checkbox(
-                    activeColor: Colors.black54,
-                    checkColor: Colors.white,
-                    value: acceptAll,
+                    activeColor: Constants.searchIcon,
+                    checkColor: Colors.black,
+                    value: iam18Plus,
                     onChanged: (value) {
                       setState(() {
-                        acceptAll = value;
+                        iam18Plus = value;
                       });
                     },
                   ),
-                  InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => privacyPolicy(),
-                            ));
-                      },
-                      child: Text(
-                        "I have read and accept the Terms & Conditions",
-                        style: TextStyle(color: Colors.blue),
-                      ))
+                  Text(
+                    "I'm over 18 ",
+                    style: TextStyle(color: Constants.searchIcon),
+                  )
                 ],
               ),
               SizedBox(
                 height: 50,
                 width: queryData.width,
-                child: RaisedButton(
-                  color: Colors.blue,
-                  child: Text("Get Otp"),
+                child: ElevatedButton(
+                  style:
+                      ElevatedButton.styleFrom(primary: Constants.searchIcon),
+                  child: Text(
+                    "GET OTP",
+                    style: TextStyle(color: Colors.black),
+                  ),
                   onPressed: () async {
-                    if (acceptAll && _phoneNumberController.text != "") {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                GetOtpPage(_phoneNumberController.text),
-                          ));
+                    if (acceptAllTermsAndConditions &&
+                        iam18Plus &&
+                        _phoneNumberController.text != "") {
+                      if (_phoneNumberController.text.contains("+")) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GetOtpPage(
+                                  _phoneNumberController.text,
+                                  acceptAllTermsAndConditions,
+                                  iam18Plus),
+                            ));
+                      } else {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GetOtpPage(
+                                  countryCode + _phoneNumberController.text,
+                                  acceptAllTermsAndConditions,
+                                  iam18Plus),
+                            ));
+                      }
                     }
                   },
                 ),
               ),
-              // Container(
-              //   color: Colors.blue,
-              //   height: 50,
-              //   width: queryData.width,
-              //   padding: const EdgeInsets.symmetric(vertical: 16.0),
-              //   alignment: Alignment.center,
-              //   child:
-              // ),
             ],
           ),
         ],
