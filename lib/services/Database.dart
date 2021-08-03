@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class DatabaseMethods {
+  DateTime now = DateTime.now();
   uploadUserInfo(String name, String mobileNumber, String photo, String uid,
       bool acceptAllTermsAndConditions, bool iam18Plus) {
     FirebaseFirestore.instance
@@ -45,14 +47,14 @@ class DatabaseMethods {
       'Nov',
       'Dec'
     ];
-    var now = new DateTime.now();
+
     var current_mon = now.month - 1;
     String date = months[current_mon] + " " + now.day.toString();
 
     return ref.set({
       "title": title,
       "description": description,
-      "time": DateTime.now().millisecondsSinceEpoch,
+      "time": now.microsecondsSinceEpoch,
       "share_mobile": shareMobile,
       "ticket_owner": ticketOwnerMobile,
       "latitude": latitude,
@@ -67,7 +69,7 @@ class DatabaseMethods {
     });
   }
 
-  deleteAccount(String reasonForDeletingAc) {
+  deleteAccount(String reasonForDeletingAc) async {
     var ref = FirebaseFirestore.instance
         .collection("user_account")
         .doc(FirebaseAuth.instance.currentUser.phoneNumber);
@@ -79,95 +81,65 @@ class DatabaseMethods {
             isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
         .get()
         .then((value) => {
-              value.docs.forEach((doc) {
-                FirebaseFirestore.instance
+              value.docs.forEach((doc) async {
+                await FirebaseFirestore.instance
                     .collection("global_ticket")
                     .doc(doc.id)
                     .collection("responses")
                     .doc()
                     .delete();
-                FirebaseFirestore.instance
+                await FirebaseStorage.instance
+                    .refFromURL(doc.get("uplodedPhoto"))
+                    .delete();
+                await FirebaseFirestore.instance
                     .collection("global_ticket")
                     .doc(doc.id)
                     .delete();
               })
             });
 
-    FirebaseFirestore.instance
+    var folder = FirebaseAuth.instance.currentUser.phoneNumber;
+    await FirebaseStorage.instance.ref('$folder/user_profile_image').delete();
+    await FirebaseFirestore.instance
         .collection("messages")
         .where("participants",
             arrayContains: FirebaseAuth.instance.currentUser.phoneNumber)
         .get()
         .then((value) => {
-              value.docs.forEach((doc) {
-                FirebaseFirestore.instance
-                    .collection("messages")
-                    .doc(doc.id)
-                    .delete();
-                FirebaseFirestore.instance
+              value.docs.forEach((doc) async {
+                await FirebaseFirestore.instance
                     .collection("messages")
                     .doc(doc.id)
                     .collection("chats")
                     .doc()
+                    .delete();
+                await FirebaseFirestore.instance
+                    .collection("messages")
+                    .doc(doc.id)
                     .delete();
               })
             });
 
     var reason =
         FirebaseFirestore.instance.collection("deactivated_accounts").doc();
-    reason.set({
+    await reason.set({
       "mobileNumber": FirebaseAuth.instance.currentUser.phoneNumber,
       "reason": reasonForDeletingAc,
     });
+    await FirebaseAuth.instance.signOut();
   }
-  // updateTicketInfo(String ticketDocumentId, String title, String description,
-  //     bool is_reviewed, String ticket_owner) {
-  //   DateTime now = new DateTime.now();
-  //   DateTime date = new DateTime(now.year, now.month, now.day);
-  //   var ref = FirebaseFirestore.instance
-  //       .collection("global_ticket")
-  //       .doc("$ticketDocumentId");
 
-  //   FirebaseFirestore.instance
-  //       .collection("global_ticket")
-  //       .doc("$ticketDocumentId")
-  //       .collection("responses")
-  //       .get()
-  //       .then((value) => {
-  //             value.docs.forEach((doc) {
-  //               FirebaseFirestore.instance
-  //                   .collection("global_ticket")
-  //                   .doc("$ticketDocumentId")
-  //                   .collection("responses")
-  //                   .doc(doc.id)
-  //                   .delete();
-  //             })
-  //           });
-
-  //   return ref.update({
-  //     "title": title,
-  //     "description": description,
-  //     "time": DateTime.now().millisecondsSinceEpoch,
-  //     "share_mobile_number": false,
-  //     "ticket_owner": ticket_owner,
-  //     "id": ref.id,
-  //     "date": date,
-  //   }).catchError((e) {
-  //     print(e.toString());
-  //   });
-  // }
-
-  deleteTicket(
-    String ticketDocumentId,
-  ) {
-    var delete = FirebaseFirestore.instance
+  deleteTicket(String ticketDocumentId, String imageURL) {
+    var deleteTickets = FirebaseFirestore.instance
         .collection("global_ticket")
         .doc(ticketDocumentId);
     var deleteMessages =
         FirebaseFirestore.instance.collection("messages").doc(ticketDocumentId);
+    var deleteImages = FirebaseStorage.instance.refFromURL(imageURL);
 
-    delete.delete();
+    deleteTickets.delete();
     deleteMessages.delete();
+    deleteImages.delete();
   }
 
   uploadTicketResponse(
@@ -200,14 +172,14 @@ class DatabaseMethods {
     }).catchError((e) {
       print(e.toString());
     });
-    // Future.delayed(const Duration(milliseconds: 300), () {
+
     messages1.set({
       "responderNumber": FirebaseAuth.instance.currentUser.phoneNumber,
       "ticket_creater_mobile": ticket_creater_mobile,
       "id": messages1.id,
       "ticketId": ticketDocumentId,
       "lastMessage": lastMessage,
-      "timeStamp": DateTime.now().millisecondsSinceEpoch,
+      "timeStamp": now.microsecondsSinceEpoch,
       "participants": FieldValue.arrayUnion(
         [
           "$ticket_creater_mobile",
@@ -220,13 +192,12 @@ class DatabaseMethods {
     }).catchError((e) {
       print(e.toString());
     });
-    // });
-    DateTime now = DateTime.now();
+
     String time = "${now.hour}:${now.minute}";
     messages2.set({
       "message": lastMessage,
       "sender": FirebaseAuth.instance.currentUser.phoneNumber,
-      "timeStamp": DateTime.now().millisecondsSinceEpoch,
+      "timeStamp": now.microsecondsSinceEpoch,
       "messageSentTime": time,
     }).catchError((e) {
       print(e.toString());
@@ -264,7 +235,6 @@ class DatabaseMethods {
     String docIdInMessageCollection,
     String respnderMobileNumber,
   ) {
-    DateTime now = DateTime.now();
     String time = "${now.hour}:${now.minute}";
     var chat = FirebaseFirestore.instance
         .collection("messages")
@@ -278,7 +248,7 @@ class DatabaseMethods {
     chat.set({
       "message": message,
       "sender": FirebaseAuth.instance.currentUser.phoneNumber,
-      "timeStamp": now.millisecondsSinceEpoch,
+      "timeStamp": DateTime.now().microsecondsSinceEpoch,
       "messageSentTime": time,
     }).catchError((e) {
       print(e.toString());
@@ -293,26 +263,26 @@ class DatabaseMethods {
     );
   }
 
-  countUnseenMessages(String field) {
-    int count = 0;
-    var data = FirebaseFirestore.instance
-        .collection("messages")
-        .where("participants",
-            arrayContains: FirebaseAuth.instance.currentUser.phoneNumber)
-        .orderBy("timeStamp", descending: true)
-        .limit(1)
-        .get()
-        .then((value) {
-      value.docs.forEach((element) {
-        print(element.get(field));
-        bool x = element.get(field);
-        if (x == false) {
-          count = count + 1;
-        }
-      });
-    });
-    return count;
-  }
+  // countUnseenMessages(String field) {
+  //   int count = 0;
+  //   var data = FirebaseFirestore.instance
+  //       .collection("messages")
+  //       .where("participants",
+  //           arrayContains: FirebaseAuth.instance.currentUser.phoneNumber)
+  //       .orderBy("timeStamp", descending: true)
+  //       .limit(1)
+  //       .get()
+  //       .then((value) {
+  //     value.docs.forEach((element) {
+  //       print(element.get(field));
+  //       bool x = element.get(field);
+  //       if (x == false) {
+  //         count = count + 1;
+  //       }
+  //     });
+  //   });
+  //   return count;
+  // }
 
   updateOwnerMessageSeenStatus(
     String docIdInMessageCollection,
@@ -342,7 +312,7 @@ class DatabaseMethods {
         .doc(docIdInMessageCollection);
     ticket.update({
       "lastMessage": message,
-      "timeStamp": DateTime.now().microsecondsSinceEpoch
+      "timeStamp": now.microsecondsSinceEpoch
     }).catchError((e) {
       print(e.toString());
     });
@@ -379,4 +349,22 @@ class DatabaseMethods {
         .doc(FirebaseAuth.instance.currentUser.phoneNumber);
     ref.update({"name": name});
   }
+
+  // checkThereIsDefaultTicket() async {
+  //   bool flag = false;
+  //   await FirebaseFirestore.instance
+  //       .collection("global_ticket")
+  //       .get()
+  //       .then((value) {
+  //     value.docs.forEach((element) async {
+  //       print(element.get("ticket_owner"));
+  //       if (await element.get("ticket_owner") ==
+  //           FirebaseAuth.instance.currentUser.phoneNumber) {
+  //         print("yes");
+  //         flag = await true;
+  //       }
+  //     });
+  //   });
+  //   return false;
+  // }
 }

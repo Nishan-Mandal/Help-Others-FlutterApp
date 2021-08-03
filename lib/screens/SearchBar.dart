@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -172,7 +171,7 @@ class _searchBoxState extends State<searchBox> {
                   Navigator.pop(context);
                 },
                 autofocus: false,
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Constants.searchIcon),
                 controller: _searchController,
                 decoration: InputDecoration(
                   border: InputBorder.none,
@@ -257,24 +256,6 @@ class _searchBoxState extends State<searchBox> {
                                                   topLeft: Radius.circular(20),
                                                   topRight: Radius.circular(20),
                                                 ),
-                                                // child: CachedNetworkImage(
-                                                //   fit: BoxFit.cover,
-                                                //   imageUrl: _resultsList[index]
-                                                //       ['uplodedPhoto'],
-                                                //   progressIndicatorBuilder:
-                                                //       (context, url,
-                                                //               downloadProgress) =>
-                                                //           Center(
-                                                //     child:
-                                                //         CircularProgressIndicator(
-                                                //             value:
-                                                //                 downloadProgress
-                                                //                     .progress),
-                                                //   ),
-                                                //   errorWidget:
-                                                //       (context, url, error) =>
-                                                //           Icon(Icons.error),
-                                                // ),
                                                 child: Image(
                                                   fit: BoxFit.cover,
                                                   image: NetworkImage(

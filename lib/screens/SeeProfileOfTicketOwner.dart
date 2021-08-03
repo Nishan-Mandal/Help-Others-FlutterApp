@@ -58,7 +58,7 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
-                        "Ph : ******" +
+                        "Ph : xxxxxx" +
                             widget.ticketOwnweMobileNumber.substring(
                                 widget.ticketOwnweMobileNumber.length - 4,
                                 widget.ticketOwnweMobileNumber.length),
@@ -91,7 +91,9 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return Center(
-                          child: CircularProgressIndicator(),
+                          child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  Constants.searchIcon)),
                         );
                       } else {
                         return StreamBuilder(

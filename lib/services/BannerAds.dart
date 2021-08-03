@@ -4,6 +4,8 @@ class BannerAds {
   Future<InitializationStatus> initialization;
   BannerAds(this.initialization);
   String get bannerAdUnit => 'ca-app-pub-3940256099942544/6300978111';
+  String get bannerAdUnit2 => 'ca-app-pub-3940256099942544/6300978111';
+  String get bannerAdUnit3 => 'ca-app-pub-3940256099942544/6300978111';
 
   BannerAdListener get adListener => _adListener;
   BannerAdListener _adListener = BannerAdListener(

@@ -4,16 +4,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:help_others/main.dart';
 import 'package:help_others/screens/GetStartedPage.dart';
 
 import 'package:help_others/screens/NavigationBar.dart';
 import 'package:help_others/services/Constants.dart';
 import 'package:help_others/services/Database.dart';
+import 'package:help_others/screens/FirstAd.dart';
 
 import 'package:image_picker/image_picker.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path_provider/path_provider.dart';
 
 class checkUserExistance extends StatefulWidget {
   bool acceptAllTermsAndConditions;
@@ -25,6 +26,28 @@ class checkUserExistance extends StatefulWidget {
 }
 
 class _checkUserExistanceState extends State<checkUserExistance> {
+  bool flag = false;
+  void checkDefaultTicket() async {
+    await FirebaseFirestore.instance
+        .collection("global_ticket")
+        .where("ticket_owner",
+            isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
+        .get()
+        .then((value) {
+      value.docs.forEach((element) async {
+        setState(() {
+          flag = true;
+        });
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkDefaultTicket();
+  }
+
   @override
   Widget build(BuildContext context) {
     CollectionReference user =
@@ -39,6 +62,8 @@ class _checkUserExistanceState extends State<checkUserExistance> {
         if (snapshot.hasData && !snapshot.data.exists) {
           return userSignupPage(
               widget.acceptAllTermsAndConditions, widget.iam18Plus);
+        } else if (!flag) {
+          return firstAd(latitudeData1, longitudeData1);
         } else {
           FirebaseFirestore.instance
               .collection("user_account")
@@ -81,16 +106,14 @@ class _userSignupPageState extends State<userSignupPage> {
     }
 
     if (nameformKey.currentState.validate() && !flag) {
-      print("++++++++++++++++++++++++++++");
       try {
+        var folder = FirebaseAuth.instance.currentUser.phoneNumber;
         await FirebaseStorage.instance
-            .ref(
-                'user_profile_image${FirebaseAuth.instance.currentUser.phoneNumber}')
+            .ref('$folder/user_profile_image')
             .putFile(file);
 
         userImageUrl = await FirebaseStorage.instance
-            .ref(
-                'user_profile_image${FirebaseAuth.instance.currentUser.phoneNumber}')
+            .ref('$folder/user_profile_image')
             .getDownloadURL();
       } on FirebaseException catch (e) {
         print("error in uploding user image");
@@ -105,7 +128,6 @@ class _userSignupPageState extends State<userSignupPage> {
         widget.iam18Plus,
       );
     } else {
-      print("----------------------------");
       userImageUrl =
           "https://firebasestorage.googleapis.com/v0/b/bbold-6f546.appspot.com/o/person%20icon.png?alt=media&token=2f605669-8a3e-4fcd-b03a-f1a368e3179b";
       databaseMethods.uploadUserInfo(
@@ -216,7 +238,8 @@ class _userSignupPageState extends State<userSignupPage> {
                     Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => navigationBar(),
+                          builder: (context) =>
+                              firstAd(latitudeData1, longitudeData1),
                         ),
                         (route) => false);
                   }
@@ -273,11 +296,24 @@ class _userSignupPageState extends State<userSignupPage> {
     );
   }
 
+  final imageSizeisTooLarge = SnackBar(
+    content: Text('Image size is too large'),
+    duration: Duration(seconds: 3),
+    backgroundColor: Colors.redAccent,
+  );
   void takePhoto(ImageSource source) async {
-    final pickerFile = await picker.getImage(source: source);
+    final pickerFile = await picker.getImage(source: source, imageQuality: 25);
+    var bytes = new File(pickerFile.path);
+    var enc = await bytes.readAsBytes();
 
-    setState(() {
-      imageFile = pickerFile;
-    });
+    if (enc.length >= 500000) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(imageSizeisTooLarge);
+    } else {
+      setState(() {
+        imageFile = pickerFile;
+        Navigator.pop(context);
+      });
+    }
   }
 }

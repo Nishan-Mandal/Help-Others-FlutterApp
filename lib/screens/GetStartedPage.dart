@@ -36,9 +36,6 @@ class _GetStartrdPageState extends State<GetStartrdPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // decoration: BoxDecoration(
-      //     gradient: LinearGradient(
-      //         colors: [const Color(0xff3C8CE7), const Color(0xff00EAFF)])),
       child: Scaffold(
         backgroundColor: Constants.scaffoldBackground,
         body: Container(
@@ -161,6 +158,7 @@ class SlideTile extends StatelessWidget {
       alignment: Alignment.center,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Image.asset(imagePath),
           SizedBox(
@@ -168,14 +166,14 @@ class SlideTile extends StatelessWidget {
           ),
           Text(
             title,
-            textAlign: TextAlign.center,
+            // textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
           ),
           SizedBox(
             height: 20,
           ),
           Text(desc,
-              textAlign: TextAlign.center,
+              // textAlign: TextAlign.center,
               style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14))
         ],
       ),
@@ -220,7 +218,8 @@ List<SliderModel> getSlides() {
   SliderModel sliderModel = new SliderModel();
 
   //1
-  sliderModel.setDesc("Explore the hidden world that you desire.");
+  sliderModel.setDesc(
+      "Explore the hidden world that you desire.\nMention your interest and get suitable strangers. Post your advertisement to the world and see the magic.");
   sliderModel.setTitle("Explore...");
   sliderModel.setImageAssetPath("getStartedPage1.png");
   slides.add(sliderModel);
@@ -228,7 +227,8 @@ List<SliderModel> getSlides() {
   sliderModel = new SliderModel();
 
   //2
-  sliderModel.setDesc("A lot of users admires you, find whome you like.");
+  sliderModel.setDesc(
+      "A lot of users admires you, find whome you like.\nCheckout the advertisement of the nearby peoples and find your match. You can send message, chat with them, and even you can directly call if they share the number.");
   sliderModel.setTitle("Find...");
   sliderModel.setImageAssetPath("getStartedPage2.png");
   slides.add(sliderModel);
@@ -236,7 +236,8 @@ List<SliderModel> getSlides() {
   sliderModel = new SliderModel();
 
   //3
-  sliderModel.setDesc("Live your life, make it exciting.");
+  sliderModel.setDesc(
+      "Live your life, make it exciting.\nCommunicate with the nearby peoples. Setup meeting, dating and rest you know.");
   sliderModel.setTitle("Enjoy...");
   sliderModel.setImageAssetPath("getStartedPage3.png");
   slides.add(sliderModel);

@@ -1,6 +1,4 @@
 import 'dart:ui';
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +84,9 @@ class _allMessagesState extends State<allMessages> {
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(Constants.searchIcon)),
             );
           } else {
             return ListView.builder(
@@ -262,9 +262,12 @@ class _allMessagesState extends State<allMessages> {
                                                         SizedBox(
                                                           height: 5,
                                                         ),
-                                                        Text(snapshot.data
-                                                                .docs[index]
-                                                            ['lastMessage'],style: TextStyle(color: snapshot.data
+                                                        Text(
+                                                          snapshot.data
+                                                                  .docs[index]
+                                                              ['lastMessage'],
+                                                          style: TextStyle(
+                                                            color: snapshot.data
                                                                             .docs[index][
                                                                         'responderNumber'] ==
                                                                     FirebaseAuth
@@ -285,7 +288,9 @@ class _allMessagesState extends State<allMessages> {
                                                                     ? Colors
                                                                         .white70
                                                                     : Colors
-                                                                        .white),),),
+                                                                        .white),
+                                                          ),
+                                                        ),
                                                       ],
                                                     )
                                                   ],
@@ -323,15 +328,8 @@ class _allMessagesState extends State<allMessages> {
                                   ],
                                 ),
                                 onTap: () {
-                                  // String photo = snapshot.data.docs[index]
-                                  //             ['responderNumber'] ==
-                                  //         FirebaseAuth
-                                  //             .instance.currentUser.phoneNumber
-                                  //     ? (snapshot.data.docs[index]['ownerPic'])
-                                  //     : NetworkImage(snapshot.data.docs[index]
-                                  //         ['responderPic']);
                                   AdMobService.createInterstitialAd();
-                                        AdMobService.showInterstitialAd();
+                                  AdMobService.showInterstitialAd();
                                   showDialog(
                                       context: context,
                                       builder: (context) => chatRoom(
@@ -386,7 +384,9 @@ class _buyingMessagesState extends State<buyingMessages> {
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(Constants.searchIcon)),
             );
           } else {
             return ListView.builder(
@@ -421,7 +421,7 @@ class _buyingMessagesState extends State<buyingMessages> {
                               child: GestureDetector(
                                 onTap: () {
                                   AdMobService.createInterstitialAd();
-                                        AdMobService.showInterstitialAd();
+                                  AdMobService.showInterstitialAd();
                                   showDialog(
                                       context: context,
                                       builder: (context) => chatRoom(
@@ -561,9 +561,12 @@ class _buyingMessagesState extends State<buyingMessages> {
                                                         SizedBox(
                                                           height: 5,
                                                         ),
-                                                        Text(snapshot.data
-                                                                .docs[index]
-                                                            ['lastMessage'],style: TextStyle(color: snapshot.data
+                                                        Text(
+                                                          snapshot.data
+                                                                  .docs[index]
+                                                              ['lastMessage'],
+                                                          style: TextStyle(
+                                                            color: snapshot.data
                                                                             .docs[index][
                                                                         'responderNumber'] ==
                                                                     FirebaseAuth
@@ -584,7 +587,9 @@ class _buyingMessagesState extends State<buyingMessages> {
                                                                     ? Colors
                                                                         .white70
                                                                     : Colors
-                                                                        .white),),),
+                                                                        .white),
+                                                          ),
+                                                        ),
                                                       ],
                                                     )
                                                   ],
@@ -660,7 +665,9 @@ class _sellingMessagesState extends State<sellingMessages> {
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(Constants.searchIcon)),
             );
           } else {
             return ListView.builder(
@@ -695,7 +702,7 @@ class _sellingMessagesState extends State<sellingMessages> {
                               child: GestureDetector(
                                 onTap: () {
                                   AdMobService.createInterstitialAd();
-                                        AdMobService.showInterstitialAd();
+                                  AdMobService.showInterstitialAd();
                                   showDialog(
                                       context: context,
                                       builder: (context) => chatRoom(
@@ -835,9 +842,12 @@ class _sellingMessagesState extends State<sellingMessages> {
                                                         SizedBox(
                                                           height: 5,
                                                         ),
-                                                        Text(snapshot.data
-                                                                .docs[index]
-                                                            ['lastMessage'],style: TextStyle(color: snapshot.data
+                                                        Text(
+                                                          snapshot.data
+                                                                  .docs[index]
+                                                              ['lastMessage'],
+                                                          style: TextStyle(
+                                                            color: snapshot.data
                                                                             .docs[index][
                                                                         'responderNumber'] ==
                                                                     FirebaseAuth
@@ -858,7 +868,9 @@ class _sellingMessagesState extends State<sellingMessages> {
                                                                     ? Colors
                                                                         .white70
                                                                     : Colors
-                                                                        .white),),),
+                                                                        .white),
+                                                          ),
+                                                        ),
                                                       ],
                                                     )
                                                   ],

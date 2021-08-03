@@ -11,10 +11,12 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:help_others/main.dart';
 import 'package:help_others/screens/NavigationBar.dart';
 import 'package:help_others/services/AdMob.dart';
+import 'package:help_others/services/BannerAds.dart';
 import 'package:help_others/services/Constants.dart';
 
 import 'package:help_others/services/Database.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // import '../main.dart';
@@ -113,6 +115,23 @@ class _categoryPageState extends State<categoryPage> {
     super.initState();
   }
 
+  BannerAd banner3;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final adState = Provider.of<BannerAds>(context);
+    adState.initialization.then((value) {
+      setState(() {
+        banner3 = BannerAd(
+            size: AdSize.banner,
+            adUnitId: adState.bannerAdUnit3,
+            listener: adState.adListener,
+            request: AdRequest())
+          ..load();
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
@@ -128,6 +147,16 @@ class _categoryPageState extends State<categoryPage> {
             ),
             backgroundColor: Constants.appBar,
           ),
+          bottomSheet: banner3 != null
+              ? Container(
+                  color: Constants.scaffoldBackground,
+                  height: 50,
+                  width: queryData.width,
+                  child: AdWidget(
+                    ad: banner3,
+                  ),
+                )
+              : SizedBox(),
           body: Container(
             child: Padding(
               padding: const EdgeInsets.all(2.0),
@@ -212,15 +241,6 @@ class _categoryPageState extends State<categoryPage> {
                       ),
                     ),
                   ),
-                  // Container(
-                  //   color: Colors.red,
-                  //   height: 50,
-                  //   width: queryData.width,
-                  //   child: AdWidget(
-                  //     key: UniqueKey(),
-                  //     ad: AdMobService.createBannerAd()..load(),
-                  //   ),
-                  // ),
                 ],
               ),
             ),
@@ -271,10 +291,6 @@ class _category1State extends State<category1> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  // decoration: BoxDecoration(
-                  //     border:
-                  //         Border(bottom: BorderSide(color: Colors.white24))
-                  //         ),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -299,9 +315,6 @@ class _category1State extends State<category1> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  // decoration: BoxDecoration(
-                  //     border:
-                  //         Border(bottom: BorderSide(color: Colors.white24))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -326,9 +339,6 @@ class _category1State extends State<category1> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  // decoration: BoxDecoration(
-                  //     border:
-                  //         Border(bottom: BorderSide(color: Colors.white24))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -353,9 +363,6 @@ class _category1State extends State<category1> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  // decoration: BoxDecoration(
-                  //     border:
-                  //         Border(bottom: BorderSide(color: Colors.white24))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -411,9 +418,6 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  // decoration: BoxDecoration(
-                  //     border:
-                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -440,9 +444,6 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  // decoration: BoxDecoration(
-                  //     border:
-                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -467,9 +468,6 @@ class _category2State extends State<category2> {
                 child: Container(
                   height: queryData.height / 15,
                   width: queryData.width,
-                  // decoration: BoxDecoration(
-                  //     border:
-                  //         Border(bottom: BorderSide(color: Colors.black12))),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8, top: 10),
                     child: Text(
@@ -878,7 +876,7 @@ class _crreateTicketsState extends State<crreateTickets> {
         backgroundColor: Constants.scaffoldBackground,
         appBar: AppBar(
           title: Text(
-            "Create Ticket",
+            "Create an advertisement",
             style: TextStyle(color: Constants.searchIcon),
           ),
           backgroundColor: Constants.appBar,
@@ -895,7 +893,7 @@ class _crreateTicketsState extends State<crreateTickets> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.only(top: 5, left: 8),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -905,20 +903,23 @@ class _crreateTicketsState extends State<crreateTickets> {
                                   Icons.check_box,
                                   color: Constants.searchIcon,
                                 )),
-                            Container(
-                              child: Row(
-                                children: [
-                                  Text(
-                                    "$countTitleChar",
-                                    style: TextStyle(
-                                        color: countTitleChar >= 10
-                                            ? Constants.searchIcon
-                                            : Colors.red),
-                                  ),
-                                  Text("/10",
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: Container(
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      "$countTitleChar",
                                       style: TextStyle(
-                                          color: Constants.searchIcon))
-                                ],
+                                          color: countTitleChar >= 10
+                                              ? Constants.searchIcon
+                                              : Colors.red),
+                                    ),
+                                    Text("/10",
+                                        style: TextStyle(
+                                            color: Constants.searchIcon))
+                                  ],
+                                ),
                               ),
                             )
                           ],
@@ -957,7 +958,7 @@ class _crreateTicketsState extends State<crreateTickets> {
                         height: 10,
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.only(top: 8, left: 8),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -968,20 +969,23 @@ class _crreateTicketsState extends State<crreateTickets> {
                                   Icons.check_box,
                                   color: Constants.searchIcon,
                                 )),
-                            Container(
-                              child: Row(
-                                children: [
-                                  Text(
-                                    "$countDescriptionChar",
-                                    style: TextStyle(
-                                        color: countDescriptionChar >= 20
-                                            ? Constants.searchIcon
-                                            : Colors.red),
-                                  ),
-                                  Text("/20",
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: Container(
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      "$countDescriptionChar",
                                       style: TextStyle(
-                                          color: Constants.searchIcon))
-                                ],
+                                          color: countDescriptionChar >= 20
+                                              ? Constants.searchIcon
+                                              : Colors.red),
+                                    ),
+                                    Text("/20",
+                                        style: TextStyle(
+                                            color: Constants.searchIcon))
+                                  ],
+                                ),
                               ),
                             )
                           ],
@@ -1018,7 +1022,7 @@ class _crreateTicketsState extends State<crreateTickets> {
                         ),
                       ),
                       SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
                       Padding(
                         padding: const EdgeInsets.all(5.0),
@@ -1030,7 +1034,7 @@ class _crreateTicketsState extends State<crreateTickets> {
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
                                 "Discribe your offer/search with as much details as possible!\n"
-                                "\nProviding enough relevent information to other user gets your ad fund even faster"),
+                                "\nProviding enough relevent information to other user gets your ad found even faster"),
                           ),
                         ),
                       ),
@@ -1121,11 +1125,25 @@ class _secondPageState extends State<secondPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Constants.searchIcon)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        "Upload an attractive photo so that people find it more interesting!",
+                        style: TextStyle(color: Constants.searchIcon),
+                      ),
+                    ),
+                  ),
+                ),
                 SizedBox(
-                  height: 100,
+                  height: 50,
                 ),
                 Container(
                   height: 400,
@@ -1185,7 +1203,8 @@ class _secondPageState extends State<secondPage> {
                 child: ElevatedButton(
                   style:
                       ElevatedButton.styleFrom(primary: Constants.searchIcon),
-                  child: Text("Preview", style: TextStyle(color: Colors.black)),
+                  child: Text("Preview Advertisement",
+                      style: TextStyle(color: Colors.black)),
                   onPressed: () {
                     if (imageFile != null) {
                       _tripEditModalBottomSheet(context);
@@ -1351,7 +1370,7 @@ class _secondPageState extends State<secondPage> {
                       }
                     },
                     child: Text(
-                      "Preview",
+                      "Preview Advertisement",
                       style: TextStyle(color: Colors.black),
                     ),
                     style:
@@ -1517,10 +1536,6 @@ class _previewState extends State<preview> {
                     ),
                   ]),
                   alignment: Alignment.bottomLeft,
-                  // child: IconButton(
-                  //   icon: Icon(Icons.arrow_back),
-                  //   onPressed: () => Navigator.of(context).pop(dashboard("")),
-                  // ),
                 ),
                 Expanded(
                   child: SingleChildScrollView(
@@ -1539,6 +1554,9 @@ class _previewState extends State<preview> {
                             image: FileImage(File(imageFile.path)),
                           ),
                         ),
+                        Divider(
+                          thickness: 1,
+                        ),
                         Padding(
                           padding: const EdgeInsets.all(9.0),
                           child: Text(
@@ -1548,6 +1566,9 @@ class _previewState extends State<preview> {
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold),
                           ),
+                        ),
+                        Divider(
+                          thickness: 1,
                         ),
                         SizedBox(
                           height: 10,
@@ -1575,6 +1596,9 @@ class _previewState extends State<preview> {
                                       fontWeight: FontWeight.w400)),
                             ),
                           ),
+                        ),
+                        Divider(
+                          thickness: 1,
                         ),
                         Padding(
                           padding: const EdgeInsets.only(
@@ -1646,6 +1670,9 @@ class _previewState extends State<preview> {
                                   ),
                                 )),
                           ],
+                        ),
+                        Divider(
+                          thickness: 2,
                         ),
                         Container(
                           width: queryData.width,

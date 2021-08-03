@@ -93,7 +93,9 @@ class _chatRoomState extends State<chatRoom> {
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              Constants.searchIcon)),
                     );
                   } else {
                     return StreamBuilder(

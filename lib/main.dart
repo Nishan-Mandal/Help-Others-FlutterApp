@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:help_others/screens/GetStartedPage.dart';
 import 'package:help_others/screens/NavigationBar.dart';
 import 'package:help_others/screens/PrivacyPolicy.dart';
 import 'package:help_others/screens/TermsAndConditions.dart';
+import 'package:help_others/screens/FirstAd.dart';
 import 'package:help_others/services/Constants.dart';
 
 import 'package:help_others/services/Database.dart';
@@ -21,15 +23,48 @@ import 'package:provider/provider.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
-void main() {
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'high_importance_channel', // id
+  'High Importance Notifications', // title
+  'This channel is used for important notifications.', // description
+  importance: Importance.high,
+  playSound: true,
+);
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print('Handling a background message ${message.messageId}');
+}
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   AdMobService.initialize();
+  await Firebase.initializeApp();
   final initFuture = MobileAds.instance.initialize();
   final adState = BannerAds(initFuture);
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
   ErrorWidget.builder = (FlutterErrorDetails details) => Scaffold(
         body: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Constants.searchIcon)),
         ),
       );
 
@@ -73,7 +108,10 @@ class MyApp extends StatelessWidget {
           );
         }
 
-        return Center(child: CircularProgressIndicator());
+        return Center(
+            child: CircularProgressIndicator(
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(Constants.searchIcon)));
       },
     );
   }
@@ -90,6 +128,7 @@ double latitudeData1;
 double longitudeData1;
 
 class _LandingPageState extends State<LandingPage> {
+  DatabaseMethods databaseMethods = new DatabaseMethods();
   final connectivity = SnackBar(
     content: Text('No internet connection'),
     duration: Duration(seconds: 5),
@@ -107,7 +146,53 @@ class _LandingPageState extends State<LandingPage> {
   @override
   void initState() {
     super.initState();
+    checkDefaultTicket();
     checkInternetConnectivity();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification notification = message.notification;
+      AndroidNotification android = message.notification?.android;
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channel.description,
+                color: Colors.blue,
+                playSound: true,
+                icon: '@mipmap/ic_launcher',
+              ),
+            ));
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('A new onMessageOpenedApp event was published!');
+      RemoteNotification notification = message.notification;
+      AndroidNotification android = message.notification?.android;
+      if (notification != null && android != null) {
+        // todo----
+      }
+    });
+  }
+
+  bool flag = false;
+  checkDefaultTicket() async {
+    await FirebaseFirestore.instance
+        .collection("global_ticket")
+        .where("ticket_owner",
+            isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
+        .get()
+        .then((value) {
+      value.docs.forEach((element) async {
+        setState(() {
+          flag = true;
+        });
+      });
+    });
   }
 
   @override
@@ -119,13 +204,17 @@ class _LandingPageState extends State<LandingPage> {
           User user = snapshot.data;
           if (user == null) {
             return GetStartrdPage();
+          } else if (!flag) {
+            return firstAd(latitudeData1, longitudeData1);
           } else {
             return navigationBar();
           }
         } else {
           return Scaffold(
             body: Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(Constants.searchIcon)),
             ),
           );
         }
@@ -180,8 +269,9 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: Constants.scaffoldBackground,
       appBar: AppBar(
         backgroundColor: Constants.appBar,
-        title:
-            Text("Signup page", style: TextStyle(color: Constants.searchIcon)),
+        title: Center(
+            child: Text("Enter your phone number",
+                style: TextStyle(color: Constants.searchIcon))),
       ),
       resizeToAvoidBottomInset: false,
       body: Column(
@@ -190,60 +280,85 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Row(
+            child: Column(
               children: [
-                Form(
-                  key: formKey,
-                  child: Flexible(
-                    child: TextFormField(
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                          prefixIcon: CountryCodePicker(
-                              onChanged: (value) {
-                                countryCode = value.dialCode;
-                              },
-                              onInit: (value) {
-                                countryCode = value.dialCode;
-                              },
-                              showFlagMain: false,
-                              initialSelection: 'IN',
-                              barrierColor: Colors.black,
-                              dialogBackgroundColor: Colors.black,
-                              dialogTextStyle: TextStyle(
-                                color: Constants.searchIcon,
+                Row(
+                  children: [
+                    Form(
+                      key: formKey,
+                      child: Flexible(
+                        child: TextFormField(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                              prefixIcon: CountryCodePicker(
+                                  onChanged: (value) {
+                                    countryCode = value.dialCode;
+                                  },
+                                  onInit: (value) {
+                                    countryCode = value.dialCode;
+                                  },
+                                  showFlagMain: false,
+                                  initialSelection: 'IN',
+                                  barrierColor: Colors.black,
+                                  dialogBackgroundColor: Colors.black,
+                                  dialogTextStyle: TextStyle(
+                                    color: Constants.searchIcon,
+                                  ),
+                                  showCountryOnly: false,
+                                  showOnlyCountryWhenClosed: false,
+                                  showDropDownButton: true,
+                                  searchStyle: TextStyle(color: Colors.white)),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  Icons.assignment_ind_outlined,
+                                  color: Constants.searchIcon,
+                                ),
+                                onPressed: () async {
+                                  _phoneNumberController.text =
+                                      await _autoFill.hint;
+                                },
                               ),
-                              showCountryOnly: false,
-                              showOnlyCountryWhenClosed: false,
-                              showDropDownButton: true,
-                              searchStyle: TextStyle(color: Colors.white)),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              Icons.assignment_ind_outlined,
-                              color: Constants.searchIcon,
-                            ),
-                            onPressed: () async {
-                              _phoneNumberController.text =
-                                  await _autoFill.hint;
-                            },
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Constants.searchIcon),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Constants.searchIcon),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          // labelText: "+91",
-                          labelStyle: TextStyle(color: Constants.searchIcon)),
-                      style: TextStyle(color: Constants.searchIcon),
-                      validator: (value) {
-                        return value.isEmpty
-                            ? "Please provide valid number"
-                            : null;
-                      },
-                      controller: _phoneNumberController,
+                              enabledBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Constants.searchIcon),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Constants.searchIcon),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              // labelText: "+91",
+                              labelStyle:
+                                  TextStyle(color: Constants.searchIcon)),
+                          style: TextStyle(color: Constants.searchIcon),
+                          validator: (value) {
+                            return value.isEmpty
+                                ? "Please provide valid number"
+                                : null;
+                          },
+                          controller: _phoneNumberController,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                // SizedBox(
+                //   height: 5,
+                // ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 5, right: 5, left: 5),
+                  child: Container(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        "NOTE: We will not share your number without your consent.",
+                        style: TextStyle(
+                            fontSize: 11, color: Constants.searchIcon),
+                      ),
                     ),
                   ),
                 ),

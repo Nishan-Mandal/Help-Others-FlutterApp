@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +19,6 @@ class myTickets extends StatefulWidget {
 }
 
 class _myTicketsState extends State<myTickets> {
-  DatabaseMethods databaseMethods = new DatabaseMethods();
   Future<bool> onBackPress() {
     Navigator.pushAndRemoveUntil(
         context,
@@ -57,7 +55,7 @@ class _myTicketsState extends State<myTickets> {
           ),
           body: TabBarView(
             children: [
-              ads(),
+              myAds(),
               favourites(),
             ],
           ),
@@ -67,26 +65,53 @@ class _myTicketsState extends State<myTickets> {
   }
 }
 
-class ads extends StatefulWidget {
+class myAds extends StatefulWidget {
   @override
-  _adsState createState() => _adsState();
+  _myAdsState createState() => _myAdsState();
 }
 
-class _adsState extends State<ads> {
-  get databaseMethods => null;
+class _myAdsState extends State<myAds> {
+  DatabaseMethods databaseMethods = new DatabaseMethods();
+  Future<bool> onDeleteButtonPress(String ticketId, String adPhoto) {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        // shape:
+        //     RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+        title: Text(
+          "Do you want to delete your post ?",
+          style: TextStyle(color: Constants.searchIcon),
+        ),
+        // backgroundColor: Colors.amber[300],
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(primary: Constants.searchIcon),
+            child: Text(
+              "No",
+              style: TextStyle(color: Colors.black),
+            ),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(primary: Constants.searchIcon),
+            child: Text(
+              "Yes",
+              style: TextStyle(color: Colors.black),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+              databaseMethods.deleteTicket(ticketId, adPhoto);
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Scaffold(
-      bottomSheet: SizedBox(
-        height: 50,
-        width: queryData.width,
-        child: AdWidget(
-          key: UniqueKey(),
-          ad: AdMobService.createBannerAd3()..load(),
-        ),
-      ),
       backgroundColor: Constants.scaffoldBackground,
       body: Container(
         child: StreamBuilder(
@@ -98,7 +123,9 @@ class _adsState extends State<ads> {
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Constants.searchIcon)),
               );
             } else {
               return Padding(
@@ -112,17 +139,7 @@ class _adsState extends State<ads> {
                       String title = snapshot.data.docs[index]["title"];
                       String description =
                           snapshot.data.docs[index]["description"];
-                      // bool myFavFlag = false;
 
-                      // try {
-                      //   List l = snapshot.data.docs[index]["favourites"];
-                      //   if (l.contains(
-                      //       FirebaseAuth.instance.currentUser.phoneNumber)) {
-                      //     myFavFlag = true;
-                      //   }
-                      // } catch (e) {
-                      //   myFavFlag = false;
-                      // }
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -165,15 +182,6 @@ class _adsState extends State<ads> {
                                                 topLeft: Radius.circular(20),
                                                 topRight: Radius.circular(20),
                                               ),
-                                              // child: CachedNetworkImage(
-                                              //   fit: BoxFit.cover,
-                                              //   imageUrl:
-                                              //       snapshot.data.docs[index]
-                                              //           ["uplodedPhoto"],
-                                              //   errorWidget:
-                                              //       (context, url, error) =>
-                                              //           Icon(Icons.error),
-                                              // ),
                                               child: Image(
                                                 fit: BoxFit.cover,
                                                 image: NetworkImage(
@@ -232,6 +240,56 @@ class _adsState extends State<ads> {
                                     ],
                                   ),
                                 )),
+                            Visibility(
+                              visible:
+                                  snapshot.data.docs.length > 1 ? false : true,
+                              child: Positioned(
+                                  top: 0,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Constants.searchIcon,
+                                        borderRadius: BorderRadius.only(
+                                          // topRight: Radius.circular(10),
+                                          bottomRight: Radius.circular(10),
+                                          // bottomLeft: Radius.circular(10),
+                                          topLeft: Radius.circular(10),
+                                        )),
+                                    height: 20,
+                                    width: queryData.width / 4,
+                                    child: Center(
+                                      child: Text(
+                                        "DEFAULT",
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  )),
+                            ),
+                            Visibility(
+                              visible:
+                                  snapshot.data.docs.length > 1 ? true : false,
+                              child: Align(
+                                  alignment: Alignment.topRight,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Constants.myFavIconBackground,
+                                        borderRadius:
+                                            BorderRadius.circular(90)),
+                                    child: IconButton(
+                                      icon: Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () {
+                                        onDeleteButtonPress(
+                                            snapshot.data.docs[index]["id"],
+                                            snapshot.data.docs[index]
+                                                ["uplodedPhoto"]);
+                                      },
+                                    ),
+                                  )),
+                            ),
                             Align(
                               alignment: Alignment.bottomRight,
                               child: Padding(
@@ -334,7 +392,10 @@ class _favouritesState extends State<favourites> {
               .snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
-              return Center(child: CircularProgressIndicator());
+              return Center(
+                  child: CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Constants.searchIcon)));
             } else {
               return Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -400,15 +461,6 @@ class _favouritesState extends State<favourites> {
                                                 topLeft: Radius.circular(20),
                                                 topRight: Radius.circular(20),
                                               ),
-                                              // child: CachedNetworkImage(
-                                              //   fit: BoxFit.cover,
-                                              //   imageUrl:
-                                              //       snapshot.data.docs[index]
-                                              //           ["uplodedPhoto"],
-                                              //   errorWidget:
-                                              //       (context, url, error) =>
-                                              //           Icon(Icons.error),
-                                              // ),
                                               child: Image(
                                                 fit: BoxFit.cover,
                                                 image: NetworkImage(

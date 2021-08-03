@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:help_others/services/Constants.dart';
 
 import '../main.dart';
 import 'Dashboard.dart';
@@ -55,29 +56,56 @@ class _navigationBarState extends State<navigationBar> {
           // // print(userTicketDocument["responderMessageSeen"]);
           // print(snapshot2.data.docs[0]["ownerMessageSeen"]);
           if (!snapshot2.hasData || snapshot2.hasError) {
-            return Center(child: CircularProgressIndicator());
+            return Center(
+                child: CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Constants.searchIcon)));
           } else {
             if (snapshot2.data.docs.length != 0) {
-              String thisUser = snapshot2.data.docs[0]["ticket_creater_mobile"];
-              if (thisUser == FirebaseAuth.instance.currentUser.phoneNumber &&
-                  snapshot2.data.docs[0]["ownerMessageSeen"] == false) {
-                // if (this.mounted) {
-                // setState(() {
-                messageCheker = true;
-                // });
-                // }
-              } else if (thisUser !=
-                      FirebaseAuth.instance.currentUser.phoneNumber &&
-                  snapshot2.data.docs[0]["responderMessageSeen"] == false) {
-                // if (this.mounted) {
-                // setState(() {
-                messageCheker = true;
-                // });
-                // }
+              if (snapshot2.data.docs[0]['responderNumber'] ==
+                  FirebaseAuth.instance.currentUser.phoneNumber) {
+                if (snapshot2.data.docs[0]['responderMessageSeen']) {
+                  messageCheker = false;
+                } else {
+                  messageCheker = true;
+                }
               } else {
-                messageCheker = false;
+                if (snapshot2.data.docs[0]['ownerMessageSeen']) {
+                  messageCheker = false;
+                } else {
+                  messageCheker = true;
+                }
               }
+              // snapshot2.data.docs[0]['responderNumber'] ==
+              //         FirebaseAuth.instance.currentUser.phoneNumber
+              //     ? (snapshot2.data.docs[0]['responderMessageSeen']
+              //         ? messageCheker = false
+              //         : messageCheker = true)
+              //     : (snapshot2.data.docs[0]['ownerMessageSeen']
+              //         ? messageCheker = false
+              //         : messageCheker = true);
             }
+            // if (snapshot2.data.docs.length != 0) {
+            //   String thisUser = snapshot2.data.docs[0]["ticket_creater_mobile"];
+            //   if (thisUser == FirebaseAuth.instance.currentUser.phoneNumber &&
+            //       snapshot2.data.docs[0]["ownerMessageSeen"] == false) {
+            //     // if (this.mounted) {
+            //     // setState(() {
+            //     messageCheker = true;
+            //     // });
+            //     // }
+            //   } else if (thisUser !=
+            //           FirebaseAuth.instance.currentUser.phoneNumber &&
+            //       snapshot2.data.docs[0]["responderMessageSeen"] == false) {
+            //     // if (this.mounted) {
+            //     // setState(() {
+            //     messageCheker = true;
+            //     // });
+            //     // }
+            //   } else {
+            //     messageCheker = false;
+            //   }
+            // }
             return Scaffold(
               body: tabs[navBarIndex],
               bottomNavigationBar: BottomNavigationBar(

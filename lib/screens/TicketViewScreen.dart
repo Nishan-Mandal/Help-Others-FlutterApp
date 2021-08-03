@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +85,16 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
   Future<void> sendMessageFromGivenKeywords(
     String text,
   ) async {
-    var name;
+    String name;
+    await FirebaseFirestore.instance
+        .collection("user_account")
+        .doc(FirebaseAuth.instance.currentUser.phoneNumber)
+        .get()
+        .then((value) {
+      setState(() {
+        name = value.get("name");
+      });
+    });
     databaseMethods.uploadTicketResponse("comment", widget.id, false,
         widget.ticketOwnweMobileNumber, true, widget.title, text);
 
@@ -103,6 +111,9 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
             widget.ticketOwnweMobileNumber,
           ),
         ));
+    // Future.delayed(const Duration(seconds: 2), () {
+
+    // });
   }
 
   void _tripEditModalBottomSheet(context) {
@@ -116,7 +127,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                 .snapshots(),
             builder: (context, snapshot) {
               return Container(
-                height: MediaQuery.of(context).size.height * .40,
+                height: MediaQuery.of(context).size.height * 0.40,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
@@ -131,6 +142,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                 child: Text(
                                   "Chat",
                                   style: TextStyle(
+                                      color: Constants.searchIcon,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 20),
                                 ),
@@ -151,8 +163,12 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                           Row(
                             children: [
                               ElevatedButton(
-                                child: Text("Hello"),
+                                child: Text(
+                                  "Hello",
+                                  style: TextStyle(color: Colors.black),
+                                ),
                                 style: ElevatedButton.styleFrom(
+                                  primary: Colors.orange,
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(6)),
                                 ),
@@ -164,22 +180,30 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                 width: 10,
                               ),
                               ElevatedButton(
-                                child: Text("Are you available"),
+                                child: Text(
+                                  "Are you available?",
+                                  style: TextStyle(color: Colors.black),
+                                ),
                                 style: ElevatedButton.styleFrom(
+                                  primary: Colors.orange,
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(6)),
                                 ),
                                 onPressed: () {
                                   sendMessageFromGivenKeywords(
-                                      "Are you available");
+                                      "Are you available?");
                                 },
                               ),
                               SizedBox(
                                 width: 10,
                               ),
                               ElevatedButton(
-                                child: Text("Let's talk"),
+                                child: Text(
+                                  "Let's talk",
+                                  style: TextStyle(color: Colors.black),
+                                ),
                                 style: ElevatedButton.styleFrom(
+                                  primary: Colors.orange,
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(6)),
                                 ),
@@ -189,20 +213,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                               )
                             ],
                           ),
-                          Row(
-                            children: [
-                              ElevatedButton(
-                                child: Text("Let's meet"),
-                                style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(6)),
-                                ),
-                                onPressed: () {
-                                  sendMessageFromGivenKeywords("Let's meet");
-                                },
-                              )
-                            ],
-                          )
                         ],
                       ),
                       Flexible(
@@ -213,12 +223,16 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                 controller: messageControler,
                                 decoration: InputDecoration(
                                   hintText: "Type a message...",
+                                  hintStyle:
+                                      TextStyle(color: Constants.searchIcon),
                                   enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.black),
+                                    borderSide:
+                                        BorderSide(color: Constants.searchIcon),
                                     borderRadius: BorderRadius.circular(30),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.black),
+                                    borderSide:
+                                        BorderSide(color: Constants.searchIcon),
                                     borderRadius: BorderRadius.circular(30),
                                   ),
                                 ),
@@ -239,10 +253,10 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                               },
                               child: Icon(
                                 Icons.send,
-                                color: Colors.white,
+                                color: Colors.black,
                                 size: 18,
                               ),
-                              backgroundColor: Colors.blue,
+                              backgroundColor: Constants.searchIcon,
                               elevation: 0,
                             ),
                           ],
@@ -258,16 +272,28 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
   }
 
   BannerAd banner;
+  BannerAd banner2;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final adState = Provider.of<BannerAds>(context);
+    final adState2 = Provider.of<BannerAds>(context);
     adState.initialization.then((value) {
       setState(() {
         banner = BannerAd(
-            size: AdSize.banner,
+            size: AdSize.mediumRectangle,
             adUnitId: adState.bannerAdUnit,
             listener: adState.adListener,
+            request: AdRequest())
+          ..load();
+      });
+    });
+    adState2.initialization.then((value) {
+      setState(() {
+        banner2 = BannerAd(
+            size: AdSize.mediumRectangle,
+            adUnitId: adState2.bannerAdUnit2,
+            listener: adState2.adListener,
             request: AdRequest())
           ..load();
       });
@@ -299,15 +325,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                   responded = false;
                 }
                 return Scaffold(
-                  // bottomSheet: Container(
-                  //   color: Colors.red,
-                  //   height: 50,
-                  //   width: 300,
-                  //   child: AdWidget(
-                  //     key: UniqueKey(),
-                  //     ad: AdMobService.createBannerAd()..load(),
-                  //   ),
-                  // ),
                   backgroundColor: Constants.tscaffoldBackground,
                   floatingActionButton: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -376,7 +393,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                         ),
                                       ),
                                     )
-                                  : Text("              "))
+                                  : Text("             "))
                         ],
                       ),
                       Padding(
@@ -394,7 +411,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                         : false,
                                     child: !responded
                                         ? SizedBox(
-                                            width: queryData.width * 0.35,
+                                            width: queryData.width * 0.36,
                                             height: 50,
                                             child: ElevatedButton(
                                               style: ElevatedButton.styleFrom(
@@ -414,7 +431,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                         .tChatbuttonText,
                                                   ),
                                                   Text(
-                                                    "  Chat",
+                                                    "Chat Request",
                                                     style: TextStyle(
                                                         color: Constants
                                                             .tChatbuttonText),
@@ -422,17 +439,17 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                 ],
                                               ),
                                               onPressed: () {
-                                                // adMobService.loadRewardedAd();
-                                                // adMobService.showRewardedAd();
                                                 setState(() {
                                                   _tripEditModalBottomSheet(
                                                       context);
                                                 });
+                                                adMobService.loadRewardedAd();
+                                                adMobService.showRewardedAd();
                                               },
                                             ),
                                           )
                                         : SizedBox(
-                                            width: queryData.width * 0.35,
+                                            width: queryData.width * 0.36,
                                             height: 50,
                                             child: ElevatedButton(
                                               style: ElevatedButton.styleFrom(
@@ -442,12 +459,21 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                         BorderRadius.circular(
                                                             15)),
                                               ),
-                                              child: Text(
-                                                "Chat History",
-                                                style: TextStyle(
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.history,
                                                     color: Constants
                                                         .tChatbuttonText,
-                                                    fontSize: 13),
+                                                  ),
+                                                  Text(
+                                                    "Chat History",
+                                                    style: TextStyle(
+                                                        color: Constants
+                                                            .tChatbuttonText,
+                                                        fontSize: 13),
+                                                  ),
+                                                ],
                                               ),
                                               onPressed: () {
                                                 setState(() {
@@ -467,12 +493,16 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                               .ticketOwnweMobileNumber,
                                                         ),
                                                       ));
+                                                  AdMobService
+                                                      .createInterstitialAd2();
+                                                  AdMobService
+                                                      .showInterstitialAd2();
                                                 });
                                               },
                                             ),
                                           )),
                                 SizedBox(
-                                  width: queryData.width * 0.15,
+                                  width: queryData.width * 0.12,
                                 ),
                                 Visibility(
                                   visible: widget.ticketOwnweMobileNumber !=
@@ -486,7 +516,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: SizedBox(
-                                          width: queryData.width * 0.35,
+                                          width: queryData.width * 0.36,
                                           height: 50,
                                           child: ElevatedButton(
                                             style: ElevatedButton.styleFrom(
@@ -501,8 +531,9 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                             ),
                                             onPressed: () {
                                               if (widget.shareMobileNumber) {
-                                                adMobService.loadRewardedAd();
-                                                adMobService.showRewardedAd();
+                                                adMobService.loadRewardedAd2();
+                                                adMobService.showRewardedAd2();
+
                                                 callTicketOwner();
                                                 databaseMethods
                                                     .uploadTicketResponseByCall(
@@ -550,31 +581,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                     ],
                   ),
                   body: Container(
-                    child:
-                        // StreamBuilder(
-                        //     stream: FirebaseFirestore.instance
-                        //         .collection("user_account")
-                        //         .doc(widget.ticketOwnweMobileNumber)
-                        //         .snapshots(),
-                        //     builder: (context, snapshot) {
-                        //       var userAccount = snapshot.data;
-
-                        //       return
-                        // StreamBuilder(
-                        //     stream: FirebaseFirestore.instance
-                        //         .collection("global_ticket")
-                        //         .doc(widget.id)
-                        //         .collection("responses")
-                        //         .doc(FirebaseAuth.instance.currentUser.phoneNumber)
-                        //         .snapshots(),
-                        //     builder: (context, snapshot2) {
-                        //       var userTicketDocument = snapshot2.data;
-                        //       try {
-                        //         responded = userTicketDocument["responded"];
-                        //       } catch (e) {
-                        //         responded = false;
-                        //       }
-                        Column(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
@@ -612,13 +619,9 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                           colors: Constants.adPhotoContainer)),
                                   height: 250,
                                   width: queryData.width,
-                                  // child: CachedNetworkImage(
-                                  //   imageUrl: widget.photo,
-                                  //   placeholder: (context, url) => Center(
-                                  //       child: CircularProgressIndicator()),
-                                  //   errorWidget: (context, url, error) =>
-                                  //       Icon(Icons.error),
-                                  // ),
+                                ),
+                                Divider(
+                                  thickness: 1,
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(9.0),
@@ -642,6 +645,9 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                       width: 15,
                                     )
                                   ],
+                                ),
+                                Divider(
+                                  thickness: 1,
                                 ),
                                 SizedBox(
                                   height: 10,
@@ -682,25 +688,9 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                 //     //         "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d${widget.latitude}!4d${widget.longitude}");
                                 //     //   },
                                 //     // ),
-                                // SizedBox(
-                                //   height: 50,
-                                //   width: queryData.width,
-                                //   child: AdWidget(
-                                //     // key: UniqueKey(),
-                                //     ad: AdMobService.createBannerAd3()..load(),
-                                //   ),
-                                // ),
-                                banner != null
-                                    ? SizedBox(
-                                        height: 60,
-                                        width: queryData.width,
-                                        child: AdWidget(
-                                          // key: UniqueKey(),
-                                          ad: banner,
-                                        ),
-                                      )
-                                    : SizedBox(),
-
+                                Divider(
+                                  thickness: 1,
+                                ),
                                 Padding(
                                   padding: const EdgeInsets.only(
                                       right: 12.0, left: 12.0, top: 12.0),
@@ -782,7 +772,18 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                     ],
                                   ),
                                 ),
-
+                                Divider(
+                                  thickness: 2,
+                                ),
+                                banner != null
+                                    ? SizedBox(
+                                        height: 250,
+                                        width: queryData.width,
+                                        child: AdWidget(
+                                          ad: banner,
+                                        ),
+                                      )
+                                    : SizedBox(),
                                 //     // Visibility(
                                 //     //   visible: userAccount["mobile_number"] !=
                                 //     //           FirebaseAuth
@@ -793,86 +794,85 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                 //     // Padding(
                                 //     //   padding: const EdgeInsets.all(12.0),
                                 //     // child:
-                                Container(
-                                  width: queryData.width,
-                                  height: queryData.height * 0.07,
-                                  color: Constants.tSeeProfileContainer,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: 6, bottom: 6),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Constants.tSeeProfileSticker,
-                                        // borderRadius: BorderRadius.circular(15)
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(3.0),
-                                            child: CircleAvatar(
-                                              minRadius: 40,
-                                              backgroundImage: NetworkImage(
-                                                userAccount["photo"],
+                                Divider(
+                                  thickness: 2,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 12,
+                                  ),
+                                  child: Container(
+                                    width: queryData.width,
+                                    height: queryData.height * 0.07,
+                                    color: Constants.tSeeProfileContainer,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 6, bottom: 6),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Constants.tSeeProfileSticker,
+                                          // borderRadius: BorderRadius.circular(15)
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(3.0),
+                                              child: CircleAvatar(
+                                                minRadius: 40,
+                                                backgroundImage: NetworkImage(
+                                                  userAccount["photo"],
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 5),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(userAccount["name"],
-                                                    style: TextStyle(
-                                                        color: Constants
-                                                            .tNameInSeeProfile,
-                                                        fontSize: 15,
-                                                        fontWeight:
-                                                            FontWeight.bold)),
-                                                SizedBox(
-                                                  height: 2,
-                                                ),
-                                                InkWell(
-                                                  onTap: () {
-                                                    Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              seeProfileOfTicketOwner(
-                                                                  userAccount[
-                                                                      "photo"],
-                                                                  userAccount[
-                                                                      "name"],
-                                                                  widget
-                                                                      .ticketOwnweMobileNumber),
-                                                        ));
-                                                  },
-                                                  child: Text("SEE PROFILE",
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.only(top: 5),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(userAccount["name"],
                                                       style: TextStyle(
-                                                        color: Constants
-                                                            .tSeeProfileText,
-                                                        fontSize: 15,
-                                                      )),
-                                                ),
-                                              ],
+                                                          color: Constants
+                                                              .tNameInSeeProfile,
+                                                          fontSize: 15,
+                                                          fontWeight:
+                                                              FontWeight.bold)),
+                                                  SizedBox(
+                                                    height: 2,
+                                                  ),
+                                                  InkWell(
+                                                    onTap: () {
+                                                      Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                seeProfileOfTicketOwner(
+                                                                    userAccount[
+                                                                        "photo"],
+                                                                    userAccount[
+                                                                        "name"],
+                                                                    widget
+                                                                        .ticketOwnweMobileNumber),
+                                                          ));
+                                                    },
+                                                    child: Text("SEE PROFILE",
+                                                        style: TextStyle(
+                                                          color: Constants
+                                                              .tSeeProfileText,
+                                                          fontSize: 15,
+                                                        )),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                                // banner != null
-                                //     ? SizedBox(
-                                //         height: 60,
-                                //         width: queryData.width,
-                                //         child: AdWidget(
-                                //           // key: UniqueKey(),
-                                //           ad: banner,
-                                //         ),
-                                //       )
-                                //     : SizedBox(),
 
                                 Padding(
                                   padding: const EdgeInsets.only(
@@ -903,11 +903,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                           .collection('global_ticket')
                                           .where("category",
                                               isEqualTo: widget.category)
-                                          // .where(
-                                          //   "id",
-                                          //   isNotEqualTo: (widget.id),
-                                          // )
-                                          // .orderBy("time", descending: true)
                                           .snapshots(),
                                       builder: (context, snapshot3) {
                                         if (snapshot3.hasData) {
@@ -1118,8 +1113,21 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                         }
                                       }),
                                 ),
+                                Divider(
+                                  thickness: 2,
+                                ),
+                                banner2 != null
+                                    ? SizedBox(
+                                        height: 250,
+                                        width: queryData.width,
+                                        child: AdWidget(
+                                          // key: UniqueKey(),
+                                          ad: banner2,
+                                        ),
+                                      )
+                                    : SizedBox(),
                                 SizedBox(
-                                  height: 70,
+                                  height: 10,
                                 )
                               ],
                             ),

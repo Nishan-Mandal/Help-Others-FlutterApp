@@ -37,6 +37,7 @@ class _drawerState extends State<drawer> {
     super.initState();
     // _signOut();
     // onDeleteAccount();
+
     _editingController = TextEditingController(text: initialText);
   }
 
@@ -154,17 +155,38 @@ class _drawerState extends State<drawer> {
               "Yes",
               style: TextStyle(color: Colors.black),
             ),
-            onPressed: () {
+            onPressed: () async {
               if (reasonKey.currentState.validate()) {
-                _signOut();
-                databaseMethods.deleteAccount(reasonControler.text);
                 Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
                       builder: (context) => MyHomePage(),
                     ),
                     (route) => false);
+                await databaseMethods.deleteAccount(reasonControler.text);
               }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<bool> onLogoutPress() {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Do you want to Logout ?",
+            style: TextStyle(color: Constants.searchIcon)),
+        actions: [
+          TextButton(
+            child: Text("No", style: TextStyle(color: Constants.searchIcon)),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          TextButton(
+            child: Text("Yes", style: TextStyle(color: Constants.searchIcon)),
+            onPressed: () {
+              _signOut();
             },
           ),
         ],
@@ -177,14 +199,13 @@ class _drawerState extends State<drawer> {
     File file = File(imageFile.path);
 
     try {
+      var folder = FirebaseAuth.instance.currentUser.phoneNumber;
       await FirebaseStorage.instance
-          .ref(
-              'user_profile_image${FirebaseAuth.instance.currentUser.phoneNumber}')
+          .ref('$folder/user_profile_image')
           .putFile(file);
 
       userImageUrl = await FirebaseStorage.instance
-          .ref(
-              'user_profile_image${FirebaseAuth.instance.currentUser.phoneNumber}')
+          .ref('$folder/user_profile_image')
           .getDownloadURL();
     } on FirebaseException catch (e) {
       print("error in uploding user image");
@@ -284,7 +305,9 @@ class _drawerState extends State<drawer> {
                               ],
                             ),
                             Text(
-                              "xxxxxx" +
+                              FirebaseAuth.instance.currentUser.phoneNumber
+                                      .substring(0, 3) +
+                                  "xxxxxx" +
                                   userMobileNumber.substring(
                                       userMobileNumber.length - 4,
                                       userMobileNumber.length),
@@ -317,17 +340,8 @@ class _drawerState extends State<drawer> {
                           style: TextStyle(
                               fontSize: 17, color: Constants.searchIcon),
                         ),
-                        onTap: () => _signOut(),
+                        onTap: () => onLogoutPress(),
                       ),
-                      // Container(
-                      //   // color: Colors.red,
-                      //   height: 50,
-                      //   width: 300,
-                      //   child: AdWidget(
-                      //     key: UniqueKey(),
-                      //     ad: AdMobService.createBannerAd()..load(),
-                      //   ),
-                      // ),
                       Flexible(
                         child: SizedBox(
                           height: querydata.height,
@@ -400,13 +414,26 @@ class _drawerState extends State<drawer> {
     );
   }
 
-  void takePhoto(ImageSource source) async {
-    final pickerFile = await picker.getImage(source: source);
+  final imageSizeisTooLarge = SnackBar(
+    content: Text('Image size is too large'),
+    duration: Duration(seconds: 3),
+    backgroundColor: Colors.redAccent,
+  );
 
-    setState(() {
-      imageFile = pickerFile;
-      updateUserProfilePhoto();
+  void takePhoto(ImageSource source) async {
+    final pickerFile = await picker.getImage(source: source, imageQuality: 25);
+    var bytes = new File(pickerFile.path);
+    var enc = await bytes.readAsBytes();
+
+    if (enc.length >= 500000) {
       Navigator.pop(context);
-    });
+      ScaffoldMessenger.of(context).showSnackBar(imageSizeisTooLarge);
+    } else {
+      setState(() {
+        imageFile = pickerFile;
+        updateUserProfilePhoto();
+        Navigator.pop(context);
+      });
+    }
   }
 }

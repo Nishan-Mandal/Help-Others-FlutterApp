@@ -37,22 +37,22 @@ class _dashboardState extends State<dashboard> {
   int notificationCounter = 0;
   int messageCounter = 0;
 
-  BannerAd banner;
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final adState = Provider.of<BannerAds>(context);
-    adState.initialization.then((value) {
-      setState(() {
-        banner = BannerAd(
-            size: AdSize.banner,
-            adUnitId: adState.bannerAdUnit,
-            listener: adState.adListener,
-            request: AdRequest())
-          ..load();
-      });
-    });
-  }
+  // BannerAd banner;
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   final adState = Provider.of<BannerAds>(context);
+  //   adState.initialization.then((value) {
+  //     setState(() {
+  //       banner = BannerAd(
+  //           size: AdSize.banner,
+  //           adUnitId: adState.bannerAdUnit,
+  //           listener: adState.adListener,
+  //           request: AdRequest())
+  //         ..load();
+  //     });
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -98,28 +98,12 @@ class _dashboardState extends State<dashboard> {
               ),
             ),
           ),
-          bottomSheet: banner != null
-              ? SizedBox(
-                  height: 50,
-                  width: queryData.width,
-                  child: AdWidget(
-                    // key: UniqueKey(),
-                    ad: banner,
-                  ),
-                )
-              : SizedBox(),
           body: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection('global_ticket')
                   .orderBy("time", descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
-                // if (snapshot.connectionState == ConnectionState.waiting) {
-                //   return Center(
-                //     child: CircularProgressIndicator(),
-                //   );
-                // }
-                // else
                 if (snapshot.hasData) {
                   return Padding(
                     padding: const EdgeInsets.only(left: 8, right: 8),
@@ -143,21 +127,22 @@ class _dashboardState extends State<dashboard> {
                           } catch (e) {
                             myFavFlag = false;
                           }
-                          if (index % 4 == 0) {
+                          if (index % 5 == 0) {
                             return Container(
                               color: Constants.scaffoldBackground,
                               child: Column(
                                 children: [
                                   Container(
                                     decoration: BoxDecoration(
+                                        color: Constants.scaffoldBackground,
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(20))),
-                                    height: 280,
+                                    height: 300,
                                     width: queryData.width / 2,
                                     child: GestureDetector(
                                       onTap: () {
-                                        AdMobService.createInterstitialAd();
-                                        AdMobService.showInterstitialAd();
+                                        // AdMobService.createInterstitialAd();
+                                        // AdMobService.showInterstitialAd();
                                         // adMobService.loadRewardedAd();
                                         Navigator.push(
                                             context,
@@ -227,15 +212,6 @@ class _dashboardState extends State<dashboard> {
                                                                       .circular(
                                                                           20),
                                                                 ),
-                                                                // child: CachedNetworkImage(
-                                                                //   fit: BoxFit.cover,
-                                                                //   imageUrl: snapshot.data
-                                                                //           .docs[index]
-                                                                //       ["uplodedPhoto"],
-                                                                //   errorWidget: (context,
-                                                                //           url, error) =>
-                                                                //       Icon(Icons.error),
-                                                                // ),
                                                                 child: Image(
                                                                   fit: BoxFit
                                                                       .cover,
@@ -288,7 +264,7 @@ class _dashboardState extends State<dashboard> {
                                                       color: Constants.divider,
                                                     ),
                                                     Container(
-                                                      height: 70,
+                                                      height: 80,
                                                       width: queryData.width,
                                                       child: Column(
                                                         crossAxisAlignment:
@@ -474,17 +450,17 @@ class _dashboardState extends State<dashboard> {
                                             end: Alignment.bottomRight,
                                             colors:
                                                 Constants.gradientColorOnAd),
-                                        // color: Colors.grey[800],
-
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(20))),
-                                    // color: Colors.blue,
-                                    height: 280,
+                                    height: 305,
                                     width: queryData.width / 2,
-                                    child: AdWidget(
-                                      // key: UniqueKey(),
-                                      ad: AdMobService.createBannerAd2()
-                                        ..load(),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 8, right: 8),
+                                      child: AdWidget(
+                                        ad: AdMobService.createBannerAd3()
+                                          ..load(),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -494,7 +470,7 @@ class _dashboardState extends State<dashboard> {
 
                           return GestureDetector(
                             onTap: () {
-                              AdMobService.createInterstitialAd();
+                              // AdMobService.createInterstitialAd();
                               // AdMobService.showInterstitialAd();
 
                               Navigator.push(
@@ -758,10 +734,10 @@ class _dashboardState extends State<dashboard> {
                             new StaggeredTile.count(
                                 2,
                                 index.isEven
-                                    ? index % 4 == 0
+                                    ? index % 5 == 0
                                         ? 7.1
                                         : 3.2
-                                    : index % 4 == 0
+                                    : index % 5 == 0
                                         ? 7.5
                                         : 3.8),
                         mainAxisSpacing: 4.0,
@@ -770,7 +746,10 @@ class _dashboardState extends State<dashboard> {
                     ),
                   );
                 }
-                return Center(child: CircularProgressIndicator());
+                return Center(
+                    child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            Constants.searchIcon)));
               })),
     );
   }
@@ -879,9 +858,7 @@ class _searchBarState extends State<searchBar> {
                           style: TextStyle(color: Colors.white),
                           iconEnabledColor: Colors.black,
                           items: <int>[
-                            1,
                             5,
-                            10,
                             20,
                             40,
                             100,
@@ -1074,6 +1051,7 @@ class _searchBarState extends State<searchBar> {
                 ),
                 onPressed: () {
                   if (textFieldTextLength != 0 || kms != 0) {
+                    AdMobService.createInterstitialAd();
                     setState(() {
                       ticketsWithinDistance = kms * 1000;
                       sc = searchController.text;
