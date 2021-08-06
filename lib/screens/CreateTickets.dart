@@ -1025,18 +1025,33 @@ class _crreateTicketsState extends State<crreateTickets> {
                         height: 10,
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(5.0),
+                        padding: const EdgeInsets.all(10.0),
                         child: Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: Constants.searchIcon, width: 3)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                                "Discribe your offer/search with as much details as possible!\n"
-                                "\nProviding enough relevent information to other user gets your ad found even faster"),
-                          ),
-                        ),
+                            decoration: BoxDecoration(
+                                color: Colors.grey[900],
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                    color: Constants.searchIcon, width: 1)),
+                            child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 5, right: 5, top: 10, bottom: 10),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.lightbulb,
+                                      color: Colors.yellow,
+                                      size: 30,
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      "Discribe your offer/search with as much\ndetails as possible! Providing enough relevent\ninformation to other user gets your ad\nfound even faster.",
+                                      style: TextStyle(
+                                          color: Constants.searchIcon),
+                                    )
+                                  ],
+                                ))),
                       ),
                     ],
                   ),
@@ -1095,7 +1110,7 @@ class _secondPageState extends State<secondPage> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
 
   final snackBar = SnackBar(
-    content: Text('Choose photo'),
+    content: Text('Please choose a photo'),
     duration: Duration(seconds: 1),
     backgroundColor: Colors.redAccent,
   );
@@ -1129,17 +1144,47 @@ class _secondPageState extends State<secondPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(10.0),
                   child: Container(
                     decoration: BoxDecoration(
+                        color: Colors.grey[900],
+                        borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Constants.searchIcon)),
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        "Upload an attractive photo so that people find it more interesting!",
-                        style: TextStyle(color: Constants.searchIcon),
-                      ),
-                    ),
+                        padding: const EdgeInsets.only(
+                            left: 5, right: 5, top: 10, bottom: 10),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.lightbulb,
+                              color: Colors.yellow,
+                              size: 30,
+                            ),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            Text(
+                              "Upload an attractive photo so that people \nfind it more interesting!",
+                              style: TextStyle(color: Constants.searchIcon),
+                            )
+                          ],
+                        )
+                        // RichText(
+                        //     text: TextSpan(children: [
+                        //   WidgetSpan(
+                        //     child: Icon(
+                        //       Icons.lightbulb_outline_rounded,
+                        //       color: Colors.yellow,
+                        //       size: 20,
+                        //     ),
+                        //   ),
+                        //   TextSpan(
+                        //     text:
+                        //         "Upload an attractive photo so that people find it\nmore interesting!",
+                        //     style: TextStyle(color: Constants.searchIcon),
+                        //   ),
+                        // ])),
+                        ),
                   ),
                 ),
                 SizedBox(
@@ -1203,8 +1248,7 @@ class _secondPageState extends State<secondPage> {
                 child: ElevatedButton(
                   style:
                       ElevatedButton.styleFrom(primary: Constants.searchIcon),
-                  child: Text("Preview Advertisement",
-                      style: TextStyle(color: Colors.black)),
+                  child: Text("NEXT", style: TextStyle(color: Colors.black)),
                   onPressed: () {
                     if (imageFile != null) {
                       _tripEditModalBottomSheet(context);
@@ -1238,31 +1282,44 @@ class _secondPageState extends State<secondPage> {
             style: TextStyle(fontSize: 20, color: Constants.searchIcon),
           ),
           SizedBox(
-            height: 20,
+            height: 10,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(
-                icon: Icon(
-                  Icons.camera,
-                  color: Constants.searchIcon,
-                ),
-                onPressed: () {
-                  takePhoto(ImageSource.camera);
-                },
+              Column(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.camera,
+                      color: Constants.searchIcon,
+                    ),
+                    onPressed: () {
+                      takePhoto(ImageSource.camera);
+                    },
+                  ),
+                  Text(
+                    "Camera",
+                    style: TextStyle(color: Constants.searchIcon),
+                  )
+                ],
               ),
               SizedBox(
                 width: 50,
               ),
-              IconButton(
-                icon: Icon(
-                  Icons.image,
-                  color: Constants.searchIcon,
-                ),
-                onPressed: () {
-                  takePhoto(ImageSource.gallery);
-                },
+              Column(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.image,
+                      color: Constants.searchIcon,
+                    ),
+                    onPressed: () {
+                      takePhoto(ImageSource.gallery);
+                    },
+                  ),
+                  Text("Gallery", style: TextStyle(color: Constants.searchIcon))
+                ],
               )
             ],
           )
@@ -1521,252 +1578,273 @@ class _previewState extends State<preview> {
           builder: (context, snapshot) {
             var userAccount = snapshot.data;
             return Container(
-                child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 60,
-                  width: queryData.width,
-                  decoration: BoxDecoration(boxShadow: [
-                    BoxShadow(
-                      color: Constants.tscaffoldBackground,
-                      // spreadRadius: 10,
-                      // blurRadius: 25.0,
-                      offset: Offset(0, 0),
-                    ),
-                  ]),
-                  alignment: Alignment.bottomLeft,
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: Constants.adPhotoContainer)),
-                          height: 250,
-                          width: queryData.width,
-                          child: Image(
-                            image: FileImage(File(imageFile.path)),
+              child: Stack(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 60,
+                        width: queryData.width,
+                        decoration: BoxDecoration(boxShadow: [
+                          BoxShadow(
+                            color: Constants.tscaffoldBackground,
+                            // spreadRadius: 10,
+                            // blurRadius: 25.0,
+                            offset: Offset(0, 0),
                           ),
-                        ),
-                        Divider(
-                          thickness: 1,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(9.0),
-                          child: Text(
-                            widget.title,
-                            style: TextStyle(
-                                color: Constants.tTitleText,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Divider(
-                          thickness: 1,
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(9.0),
-                          child: Text("Description",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Constants.tDescriptionBoxString)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 12, right: 12),
-                          child: Container(
-                            constraints:
-                                BoxConstraints(minHeight: queryData.height / 4),
-                            width: queryData.width,
-                            color: Constants.tDescriptionBox,
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Text(widget.description,
-                                  style: TextStyle(
-                                      color: Constants.tDescriptionText,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w400)),
-                            ),
-                          ),
-                        ),
-                        Divider(
-                          thickness: 1,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              right: 12.0, left: 12.0, top: 12.0),
-                          child: Text(
-                            "Ad posted at",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Constants.tAdpostAt),
-                          ),
-                        ),
-                        Stack(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Container(
-                                height: 70,
-                                width: queryData.width,
+                        ]),
+                        alignment: Alignment.bottomLeft,
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  image: DecorationImage(
-                                      image: AssetImage("map.jpg"),
-                                      fit: BoxFit.fill),
+                                    gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: Constants.adPhotoContainer)),
+                                height: 250,
+                                width: queryData.width,
+                                child: Image(
+                                  image: FileImage(File(imageFile.path)),
                                 ),
                               ),
-                            ),
-                            Positioned(
-                                left: 40,
-                                bottom: 25,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    left: 12,
-                                  ),
-                                  child: Container(
-                                    width: queryData.width * 0.70,
-                                    height: 40,
-                                    color: Constants.tlocationSticker,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Icon(
-                                          Icons.location_on,
-                                          color: Constants.tlocationIcon,
-                                          size: 25,
-                                        ),
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "  Location",
-                                              style: TextStyle(
-                                                  fontSize: 15,
-                                                  color: Constants
-                                                      .tlocationTextString),
-                                            ),
-                                            Text(
-                                              widget.address,
-                                              style: TextStyle(
-                                                  fontSize: 15,
-                                                  color:
-                                                      Constants.tlocationText),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )),
-                          ],
-                        ),
-                        Divider(
-                          thickness: 2,
-                        ),
-                        Container(
-                          width: queryData.width,
-                          height: queryData.height * 0.07,
-                          color: Constants.tSeeProfileContainer,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 6, bottom: 6),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Constants.tSeeProfileSticker,
-                                // borderRadius: BorderRadius.circular(15)
+                              Divider(
+                                thickness: 1,
                               ),
-                              child: Row(
+                              Padding(
+                                padding: const EdgeInsets.all(9.0),
+                                child: Text(
+                                  widget.title,
+                                  style: TextStyle(
+                                      color: Constants.tTitleText,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Divider(
+                                thickness: 1,
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(9.0),
+                                child: Text("Description",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            Constants.tDescriptionBoxString)),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 12, right: 12),
+                                child: Container(
+                                  constraints: BoxConstraints(
+                                      minHeight: queryData.height / 4),
+                                  width: queryData.width,
+                                  color: Constants.tDescriptionBox,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Text(widget.description,
+                                        style: TextStyle(
+                                            color: Constants.tDescriptionText,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w400)),
+                                  ),
+                                ),
+                              ),
+                              Divider(
+                                thickness: 1,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    right: 12.0, left: 12.0, top: 12.0),
+                                child: Text(
+                                  "Ad posted at",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Constants.tAdpostAt),
+                                ),
+                              ),
+                              Stack(
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.all(3.0),
-                                    child: CircleAvatar(
-                                      minRadius: 40,
-                                      backgroundImage: NetworkImage(
-                                        userAccount["photo"],
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Container(
+                                      height: 70,
+                                      width: queryData.width,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5),
+                                        image: DecorationImage(
+                                            image: AssetImage("map.jpg"),
+                                            fit: BoxFit.fill),
                                       ),
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 5),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(userAccount["name"],
-                                            style: TextStyle(
-                                                color:
-                                                    Constants.tNameInSeeProfile,
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold)),
-                                        SizedBox(
-                                          height: 2,
+                                  Positioned(
+                                      left: 40,
+                                      bottom: 25,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                          left: 12,
                                         ),
-                                        Text("SEE PROFILE",
-                                            style: TextStyle(
-                                              color: Constants.tSeeProfileText,
-                                              fontSize: 15,
-                                            )),
+                                        child: Container(
+                                          width: queryData.width * 0.70,
+                                          height: 40,
+                                          color: Constants.tlocationSticker,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Icon(
+                                                Icons.location_on,
+                                                color: Constants.tlocationIcon,
+                                                size: 25,
+                                              ),
+                                              Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    "  Location",
+                                                    style: TextStyle(
+                                                        fontSize: 15,
+                                                        color: Constants
+                                                            .tlocationTextString),
+                                                  ),
+                                                  Text(
+                                                    widget.address,
+                                                    style: TextStyle(
+                                                        fontSize: 15,
+                                                        color: Constants
+                                                            .tlocationText),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )),
+                                ],
+                              ),
+                              Divider(
+                                thickness: 2,
+                              ),
+                              Container(
+                                width: queryData.width,
+                                height: queryData.height * 0.07,
+                                color: Constants.tSeeProfileContainer,
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.only(top: 6, bottom: 6),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Constants.tSeeProfileSticker,
+                                      // borderRadius: BorderRadius.circular(15)
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(3.0),
+                                          child: CircleAvatar(
+                                            minRadius: 40,
+                                            backgroundImage: NetworkImage(
+                                              userAccount["photo"],
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 5),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(userAccount["name"],
+                                                  style: TextStyle(
+                                                      color: Constants
+                                                          .tNameInSeeProfile,
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                              SizedBox(
+                                                height: 2,
+                                              ),
+                                              Text("SEE PROFILE",
+                                                  style: TextStyle(
+                                                    color: Constants
+                                                        .tSeeProfileText,
+                                                    fontSize: 15,
+                                                  )),
+                                            ],
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
+                              Container(
+                                  height: 50,
+                                  width: queryData.width,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image: widget.shareNumber
+                                            ? AssetImage("callTrue.jpg")
+                                            : AssetImage("callFalse.jpg"),
+                                        fit: BoxFit.cover),
+                                  ))
+                            ],
                           ),
                         ),
-                        Container(
-                            height: 50,
-                            width: queryData.width,
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                  image: widget.shareNumber
-                                      ? AssetImage("callTrue.jpg")
-                                      : AssetImage("callFalse.jpg"),
-                                  fit: BoxFit.cover),
-                            ))
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  height: 50,
-                  width: queryData.width,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      uploadImage(widget.shareNumber);
-                      showOverlay(context);
+                      ),
+                      Container(
+                        height: 50,
+                        width: queryData.width,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            uploadImage(widget.shareNumber);
+                            showOverlay(context);
 
-                      Future.delayed(const Duration(seconds: 3), () {
-                        imageFile = null;
-                        adMobService.showRewardedAd();
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => navigationBar(),
-                            ),
-                            (route) => false);
-                      });
-                    },
-                    child: Text(
-                      "Post",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                    style:
-                        ElevatedButton.styleFrom(primary: Constants.searchIcon),
+                            Future.delayed(const Duration(seconds: 3), () {
+                              imageFile = null;
+
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => navigationBar(),
+                                  ),
+                                  (route) => false);
+                              adMobService.showRewardedAd();
+                            });
+                          },
+                          child: Text(
+                            "Post",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                              primary: Constants.searchIcon),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ));
+                  Center(
+                    child: RotationTransition(
+                      turns: AlwaysStoppedAnimation(320 / 360),
+                      child: Text(
+                        "DRAFT",
+                        style: TextStyle(fontSize: 100, color: Colors.white12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
           }),
     );
   }

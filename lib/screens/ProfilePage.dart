@@ -269,25 +269,35 @@ class _userSignupPageState extends State<userSignupPage> {
             style: TextStyle(fontSize: 20, color: Constants.searchIcon),
           ),
           SizedBox(
-            height: 20,
+            height: 10,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(
-                icon: Icon(Icons.camera, color: Constants.searchIcon),
-                onPressed: () {
-                  takePhoto(ImageSource.camera);
-                },
+              Column(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.camera, color: Constants.searchIcon),
+                    onPressed: () {
+                      takePhoto(ImageSource.camera);
+                    },
+                  ),
+                  Text("Camera", style: TextStyle(color: Constants.searchIcon))
+                ],
               ),
               SizedBox(
                 width: 50,
               ),
-              IconButton(
-                icon: Icon(Icons.image, color: Constants.searchIcon),
-                onPressed: () {
-                  takePhoto(ImageSource.gallery);
-                },
+              Column(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.image, color: Constants.searchIcon),
+                    onPressed: () {
+                      takePhoto(ImageSource.gallery);
+                    },
+                  ),
+                  Text("Gallery", style: TextStyle(color: Constants.searchIcon))
+                ],
               )
             ],
           )

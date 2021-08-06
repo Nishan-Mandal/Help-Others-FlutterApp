@@ -139,17 +139,31 @@ class _firstAdState extends State<firstAd> {
                   height: 30,
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(10.0),
                   child: Container(
                     decoration: BoxDecoration(
+                        color: Colors.grey[900],
+                        borderRadius: BorderRadius.circular(15),
                         border: Border.all(color: Constants.searchIcon)),
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        "We use the information to serve you better. We will create an advertisement so that people around you can reach out.\nYou can anytime update your interest as per your mood. Please feel free and go ahead.",
-                        style: TextStyle(color: Constants.searchIcon),
-                      ),
-                    ),
+                        padding: const EdgeInsets.only(
+                            left: 5, right: 5, bottom: 10, top: 10),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.lightbulb,
+                              color: Colors.yellow,
+                              size: 30,
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              "We use the information to serve you better.\nWe will create an advertisement so that\npeople around you can reach out. You can\nanytime update your interest as per your\nmood. Please feel free and go ahead.",
+                              style: TextStyle(color: Constants.searchIcon),
+                            )
+                          ],
+                        )),
                   ),
                 )
               ],

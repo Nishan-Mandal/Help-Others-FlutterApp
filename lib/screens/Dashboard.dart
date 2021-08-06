@@ -37,23 +37,6 @@ class _dashboardState extends State<dashboard> {
   int notificationCounter = 0;
   int messageCounter = 0;
 
-  // BannerAd banner;
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   final adState = Provider.of<BannerAds>(context);
-  //   adState.initialization.then((value) {
-  //     setState(() {
-  //       banner = BannerAd(
-  //           size: AdSize.banner,
-  //           adUnitId: adState.bannerAdUnit,
-  //           listener: adState.adListener,
-  //           request: AdRequest())
-  //         ..load();
-  //     });
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
@@ -129,7 +112,7 @@ class _dashboardState extends State<dashboard> {
                           }
                           if (index % 5 == 0) {
                             return Container(
-                              color: Constants.scaffoldBackground,
+                              color: Colors.transparent,
                               child: Column(
                                 children: [
                                   Container(

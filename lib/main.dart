@@ -146,7 +146,7 @@ class _LandingPageState extends State<LandingPage> {
   @override
   void initState() {
     super.initState();
-    checkDefaultTicket();
+    // checkDefaultTicket();
     checkInternetConnectivity();
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       RemoteNotification notification = message.notification;
@@ -179,21 +179,21 @@ class _LandingPageState extends State<LandingPage> {
     });
   }
 
-  bool flag = false;
-  checkDefaultTicket() async {
-    await FirebaseFirestore.instance
-        .collection("global_ticket")
-        .where("ticket_owner",
-            isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
-        .get()
-        .then((value) {
-      value.docs.forEach((element) async {
-        setState(() {
-          flag = true;
-        });
-      });
-    });
-  }
+  // bool flag = false;
+  // checkDefaultTicket() async {
+  //   await FirebaseFirestore.instance
+  //       .collection("global_ticket")
+  //       .where("ticket_owner",
+  //           isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
+  //       .get()
+  //       .then((value) {
+  //     value.docs.forEach((element) async {
+  //       setState(() {
+  //         flag = true;
+  //       });
+  //     });
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -204,9 +204,11 @@ class _LandingPageState extends State<LandingPage> {
           User user = snapshot.data;
           if (user == null) {
             return GetStartrdPage();
-          } else if (!flag) {
-            return firstAd(latitudeData1, longitudeData1);
-          } else {
+          }
+          // else if (!flag) {
+          //   return firstAd(latitudeData1, longitudeData1);
+          // }
+          else {
             return navigationBar();
           }
         } else {
@@ -238,18 +240,6 @@ class _MyHomePageState extends State<MyHomePage> {
   bool acceptAllTermsAndConditions = true;
   bool iam18Plus = true;
   String countryCode;
-  // Future<void> termsAndConditionsInBrowser(String url) async {
-  //   if (await canLaunch(url)) {
-  //     await launch(
-  //       url,
-  //       forceSafariVC: false,
-  //       forceWebView: false,
-  //       headers: <String, String>{'my_header_key': 'my_header_value'},
-  //     );
-  //   } else {
-  //     throw 'Could not launch $url';
-  //   }
-  // }
 
   void autoPickupNumber() async {
     _phoneNumberController.text = await _autoFill.hint;

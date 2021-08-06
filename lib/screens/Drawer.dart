@@ -14,6 +14,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../main.dart';
+import 'FirstAd.dart';
 import 'NavigationBar.dart';
 
 class drawer extends StatefulWidget {
@@ -35,7 +36,7 @@ class _drawerState extends State<drawer> {
   @override
   void initState() {
     super.initState();
-    // _signOut();
+
     // onDeleteAccount();
 
     _editingController = TextEditingController(text: initialText);
@@ -323,7 +324,7 @@ class _drawerState extends State<drawer> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => GetStartrdPage(),
+                                builder: (context) => firstAd(1, 1),
                               ));
                         },
                         leading:
@@ -384,28 +385,41 @@ class _drawerState extends State<drawer> {
         children: [
           Text(
             "choose a profile photo",
-            style: TextStyle(fontSize: 20),
+            style: TextStyle(fontSize: 20, color: Constants.searchIcon),
           ),
           SizedBox(
-            height: 20,
+            height: 10,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(
-                icon: Icon(Icons.camera),
-                onPressed: () {
-                  takePhoto(ImageSource.camera);
-                },
+              Column(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.camera, color: Constants.searchIcon),
+                    onPressed: () {
+                      takePhoto(ImageSource.camera);
+                    },
+                  ),
+                  Text("Camera", style: TextStyle(color: Constants.searchIcon))
+                ],
               ),
               SizedBox(
                 width: 50,
               ),
-              IconButton(
-                icon: Icon(Icons.image),
-                onPressed: () {
-                  takePhoto(ImageSource.gallery);
-                },
+              Column(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.image,
+                      color: Constants.searchIcon,
+                    ),
+                    onPressed: () {
+                      takePhoto(ImageSource.gallery);
+                    },
+                  ),
+                  Text("Gallery", style: TextStyle(color: Constants.searchIcon))
+                ],
               )
             ],
           )

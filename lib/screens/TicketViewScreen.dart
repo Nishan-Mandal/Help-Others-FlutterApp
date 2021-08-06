@@ -52,11 +52,31 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
   AdMobService adMobService = new AdMobService();
   final TextEditingController messageControler = TextEditingController();
   bool responded = false;
+  int callAdCounter = 0;
+  String idInMessageCollection;
 
   @override
   void initState() {
     super.initState();
     adMobService.loadRewardedAd();
+    adMobService.loadRewardedAd2();
+    databaseMethods.totalViewsInAd(widget.id, widget.ticketOwnweMobileNumber);
+  }
+
+  getMessageCollectionId() async {
+    await FirebaseFirestore.instance
+        .collection("messages")
+        .where("participants",
+            arrayContains: FirebaseAuth.instance.currentUser.phoneNumber)
+        .where("ticketId", isEqualTo: widget.id)
+        .get()
+        .then((value) {
+      value.docs.forEach((element) {
+        setState(() {
+          idInMessageCollection = element.get("id");
+        });
+      });
+    });
   }
 
   callTicketOwner() async {
@@ -85,6 +105,8 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
   Future<void> sendMessageFromGivenKeywords(
     String text,
   ) async {
+    Navigator.pop(context);
+    showOverlay(context);
     String name;
     await FirebaseFirestore.instance
         .collection("user_account")
@@ -95,25 +117,31 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
         name = value.get("name");
       });
     });
-    databaseMethods.uploadTicketResponse("comment", widget.id, false,
-        widget.ticketOwnweMobileNumber, true, widget.title, text);
+    databaseMethods.uploadTicketResponse(
+        widget.id,
+        widget.ticketOwnweMobileNumber,
+        widget.title,
+        text,
+        name,
+        widget.photo,
+        widget.ticketOwnweMobileNumber,
+        context);
+  }
 
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => chatRoom(
-            widget.id,
-            widget.ticketOwnweMobileNumber,
-            widget.title,
-            widget.id,
-            name,
-            widget.photo,
-            widget.ticketOwnweMobileNumber,
-          ),
-        ));
-    // Future.delayed(const Duration(seconds: 2), () {
+  showOverlay(BuildContext context) async {
+    OverlayState overlayState = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(
+        builder: (context) => Center(
+              child: CircularProgressIndicator(
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(Constants.searchIcon)),
+            ));
 
-    // });
+    overlayState.insert(overlayEntry);
+
+    await Future.delayed(Duration(seconds: 3));
+
+    overlayEntry.remove();
   }
 
   void _tripEditModalBottomSheet(context) {
@@ -276,6 +304,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    getMessageCollectionId();
     final adState = Provider.of<BannerAds>(context);
     final adState2 = Provider.of<BannerAds>(context);
     adState.initialization.then((value) {
@@ -320,7 +349,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
               builder: (context, snapshot2) {
                 var userTicketDocument = snapshot2.data;
                 try {
-                  responded = userTicketDocument["responded"];
+                  responded = userTicketDocument["responseViaChat"];
                 } catch (e) {
                   responded = false;
                 }
@@ -411,7 +440,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                         : false,
                                     child: !responded
                                         ? SizedBox(
-                                            width: queryData.width * 0.36,
+                                            width: queryData.width * 0.40,
                                             height: 50,
                                             child: ElevatedButton(
                                               style: ElevatedButton.styleFrom(
@@ -423,12 +452,15 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                               ),
                                               child: Row(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment.center,
+                                                    MainAxisAlignment.start,
                                                 children: [
                                                   Icon(
                                                     Icons.chat,
                                                     color: Constants
                                                         .tChatbuttonText,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 3,
                                                   ),
                                                   Text(
                                                     "Chat Request",
@@ -439,17 +471,16 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                 ],
                                               ),
                                               onPressed: () {
-                                                setState(() {
-                                                  _tripEditModalBottomSheet(
-                                                      context);
-                                                });
+                                                _tripEditModalBottomSheet(
+                                                    context);
+
                                                 adMobService.loadRewardedAd();
                                                 adMobService.showRewardedAd();
                                               },
                                             ),
                                           )
                                         : SizedBox(
-                                            width: queryData.width * 0.36,
+                                            width: queryData.width * 0.40,
                                             height: 50,
                                             child: ElevatedButton(
                                               style: ElevatedButton.styleFrom(
@@ -465,6 +496,9 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                     Icons.history,
                                                     color: Constants
                                                         .tChatbuttonText,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 4,
                                                   ),
                                                   Text(
                                                     "Chat History",
@@ -486,7 +520,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                           widget
                                                               .ticketOwnweMobileNumber,
                                                           widget.title,
-                                                          widget.id,
+                                                          idInMessageCollection,
                                                           userAccount["name"],
                                                           widget.photo,
                                                           widget
@@ -502,7 +536,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                             ),
                                           )),
                                 SizedBox(
-                                  width: queryData.width * 0.12,
+                                  width: queryData.width * 0.05,
                                 ),
                                 Visibility(
                                   visible: widget.ticketOwnweMobileNumber !=
@@ -516,7 +550,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: SizedBox(
-                                          width: queryData.width * 0.36,
+                                          width: queryData.width * 0.40,
                                           height: 50,
                                           child: ElevatedButton(
                                             style: ElevatedButton.styleFrom(
@@ -531,18 +565,21 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                             ),
                                             onPressed: () {
                                               if (widget.shareMobileNumber) {
-                                                adMobService.loadRewardedAd2();
-                                                adMobService.showRewardedAd2();
-
-                                                callTicketOwner();
-                                                databaseMethods
-                                                    .uploadTicketResponseByCall(
-                                                        "",
-                                                        widget.id,
-                                                        false,
-                                                        widget
-                                                            .ticketOwnweMobileNumber,
-                                                        false);
+                                                if (callAdCounter == 0) {
+                                                  callAdCounter =
+                                                      callAdCounter + 1;
+                                                  adMobService
+                                                      .showRewardedAd2();
+                                                  adMobService
+                                                      .loadRewardedAd2();
+                                                } else if (callAdCounter >= 1) {
+                                                  callTicketOwner();
+                                                  databaseMethods
+                                                      .uploadTicketResponseByCall(
+                                                    widget.id,
+                                                    responded,
+                                                  );
+                                                }
                                               }
                                             },
                                             child: Row(
@@ -580,563 +617,569 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                       )
                     ],
                   ),
-                  body: Container(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          height: 60,
-                          width: queryData.width,
-                          decoration: BoxDecoration(boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey[900],
-                              // spreadRadius: 10,
-                              // blurRadius: 25.0,
-                              offset: Offset(0, 0),
-                            ),
-                          ]),
-                          alignment: Alignment.bottomLeft,
-                          // child: IconButton(
-                          //   icon: Icon(Icons.arrow_back),
-                          //   onPressed: () => Navigator.of(context).pop(dashboard("")),
-                          // ),
-                        ),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  height: 20,
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                          image: NetworkImage(widget.photo)),
-                                      gradient: LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: Constants.adPhotoContainer)),
-                                  height: 250,
-                                  width: queryData.width,
-                                ),
-                                Divider(
-                                  thickness: 1,
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(9.0),
-                                  child: Text(
-                                    widget.title,
-                                    style: TextStyle(
-                                        color: Constants.tTitleText,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold),
+                  body: Padding(
+                    padding: const EdgeInsets.only(left: 10, right: 15),
+                    child: Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 60,
+                            width: queryData.width,
+                            decoration: BoxDecoration(boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey[900],
+                                // spreadRadius: 10,
+                                // blurRadius: 25.0,
+                                offset: Offset(0, 0),
+                              ),
+                            ]),
+                            alignment: Alignment.bottomLeft,
+                            // child: IconButton(
+                            //   icon: Icon(Icons.arrow_back),
+                            //   onPressed: () => Navigator.of(context).pop(dashboard("")),
+                            // ),
+                          ),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    height: 20,
                                   ),
-                                ),
-
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      widget.date,
-                                      style: TextStyle(fontSize: 15),
-                                    ),
-                                    SizedBox(
-                                      width: 15,
-                                    )
-                                  ],
-                                ),
-                                Divider(
-                                  thickness: 1,
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(9.0),
-                                  child: Text("Description",
-                                      style: TextStyle(
-                                          color:
-                                              Constants.tDescriptionBoxString,
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 12, right: 12),
-                                  child: Container(
-                                    constraints: BoxConstraints(
-                                        minHeight: queryData.height / 4),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                            image: NetworkImage(widget.photo)),
+                                        gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors:
+                                                Constants.adPhotoContainer)),
+                                    height: 250,
                                     width: queryData.width,
-                                    color: Constants.tDescriptionBox,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Text(widget.description,
-                                          style: TextStyle(
-                                              color: Constants.tDescriptionText,
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w400)),
-                                    ),
                                   ),
-                                ),
-                                //     // https://www.google.com/maps/place/Newtown,+Kolkata,+West+Bengal/@22.5861408,88.4227606,12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d22.5753931!4d88.4797903
-                                //     // RaisedButton(
-                                //     //   child: Text("map"),
-                                //     //   onPressed: () {
-                                //     //     mapInBrowser(
-                                //     //         // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}");
-                                //     //         // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}/@${widget.latitude},${widget.longitude},12z");
-                                //     //         "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d${widget.latitude}!4d${widget.longitude}");
-                                //     //   },
-                                //     // ),
-                                Divider(
-                                  thickness: 1,
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      right: 12.0, left: 12.0, top: 12.0),
-                                  child: Text(
-                                    "Ad posted at",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Constants.tAdpostAt),
+                                  Divider(
+                                    thickness: 1,
                                   ),
-                                ),
-                                GestureDetector(
-                                  onTap: () => mapInBrowser(
-                                      "https://www.google.com/maps/preview/@${widget.latitude},${widget.longitude},17z"
-                                      // "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},${widget.latitude}${widget.longitude}"
-                                      // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}"
-                                      // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}"
-                                      ),
-                                  child: Stack(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(12.0),
-                                        child: Container(
-                                          height: 70,
-                                          width: queryData.width,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(5),
-                                            image: DecorationImage(
-                                                image: AssetImage("map.jpg"),
-                                                fit: BoxFit.fill),
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                          left: 40,
-                                          bottom: 25,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                              left: 12,
-                                            ),
-                                            child: Container(
-                                              width: queryData.width * 0.70,
-                                              height: 40,
-                                              color: Constants.tlocationSticker,
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                children: [
-                                                  Icon(
-                                                    Icons.location_on,
-                                                    color:
-                                                        Constants.tlocationIcon,
-                                                    size: 25,
-                                                  ),
-                                                  Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      Text(
-                                                        "  Location",
-                                                        style: TextStyle(
-                                                            fontSize: 15,
-                                                            color: Constants
-                                                                .tlocationTextString),
-                                                      ),
-                                                      Text(
-                                                        widget.address,
-                                                        style: TextStyle(
-                                                            fontSize: 15,
-                                                            color: Constants
-                                                                .tlocationText),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          )),
-                                    ],
-                                  ),
-                                ),
-                                Divider(
-                                  thickness: 2,
-                                ),
-                                banner != null
-                                    ? SizedBox(
-                                        height: 250,
-                                        width: queryData.width,
-                                        child: AdWidget(
-                                          ad: banner,
-                                        ),
-                                      )
-                                    : SizedBox(),
-                                //     // Visibility(
-                                //     //   visible: userAccount["mobile_number"] !=
-                                //     //           FirebaseAuth
-                                //     //               .instance.currentUser.phoneNumber
-                                //     //       ? true
-                                //     //       : false,
-                                //     // child:
-                                //     // Padding(
-                                //     //   padding: const EdgeInsets.all(12.0),
-                                //     // child:
-                                Divider(
-                                  thickness: 2,
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 12,
-                                  ),
-                                  child: Container(
-                                    width: queryData.width,
-                                    height: queryData.height * 0.07,
-                                    color: Constants.tSeeProfileContainer,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          top: 6, bottom: 6),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Constants.tSeeProfileSticker,
-                                          // borderRadius: BorderRadius.circular(15)
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(3.0),
-                                              child: CircleAvatar(
-                                                minRadius: 40,
-                                                backgroundImage: NetworkImage(
-                                                  userAccount["photo"],
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.only(top: 5),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(userAccount["name"],
-                                                      style: TextStyle(
-                                                          color: Constants
-                                                              .tNameInSeeProfile,
-                                                          fontSize: 15,
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                                  SizedBox(
-                                                    height: 2,
-                                                  ),
-                                                  InkWell(
-                                                    onTap: () {
-                                                      Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                seeProfileOfTicketOwner(
-                                                                    userAccount[
-                                                                        "photo"],
-                                                                    userAccount[
-                                                                        "name"],
-                                                                    widget
-                                                                        .ticketOwnweMobileNumber),
-                                                          ));
-                                                    },
-                                                    child: Text("SEE PROFILE",
-                                                        style: TextStyle(
-                                                          color: Constants
-                                                              .tSeeProfileText,
-                                                          fontSize: 15,
-                                                        )),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 10, right: 10, top: 10),
-                                  child: Divider(
-                                    thickness: 3,
-                                    color: Constants.tdivider,
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 50,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(top: 10),
+                                  Padding(
+                                    padding: const EdgeInsets.all(9.0),
                                     child: Text(
-                                      "   Related Advertisement:",
+                                      widget.title,
                                       style: TextStyle(
-                                          color: Constants.tRelatedAds,
+                                          color: Constants.tTitleText,
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold),
                                     ),
                                   ),
-                                ),
-                                Container(
-                                  height: 300,
-                                  width: queryData.width,
-                                  child: StreamBuilder(
-                                      stream: FirebaseFirestore.instance
-                                          .collection('global_ticket')
-                                          .where("category",
-                                              isEqualTo: widget.category)
-                                          .snapshots(),
-                                      builder: (context, snapshot3) {
-                                        if (snapshot3.hasData) {
-                                          return ListView.builder(
-                                            shrinkWrap: true,
-                                            scrollDirection: Axis.horizontal,
-                                            itemCount:
-                                                snapshot3.data.docs.length,
-                                            itemBuilder: (context, index) {
-                                              String title = snapshot3
-                                                  .data.docs[index]["title"];
-                                              String description = snapshot3
-                                                  .data
-                                                  .docs[index]["description"];
 
-                                              return snapshot3.data.docs[index]
-                                                          ["id"] !=
-                                                      widget.id
-                                                  ? Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          Navigator.push(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                builder: (context) => ticketViewScreen(
-                                                                    snapshot3.data.docs[index][
-                                                                        "ticket_owner"],
-                                                                    snapshot3
-                                                                            .data
-                                                                            .docs[index][
-                                                                        "title"],
-                                                                    snapshot3
-                                                                            .data
-                                                                            .docs[index][
-                                                                        "description"],
-                                                                    snapshot3
-                                                                            .data
-                                                                            .docs[index]
-                                                                        ["id"],
-                                                                    snapshot3
-                                                                            .data
-                                                                            .docs[index][
-                                                                        "uplodedPhoto"],
-                                                                    snapshot3
-                                                                        .data
-                                                                        .docs[index]["latitude"],
-                                                                    snapshot3.data.docs[index]["longitude"],
-                                                                    snapshot3.data.docs[index]["date"],
-                                                                    snapshot3.data.docs[index]["share_mobile"],
-                                                                    false,
-                                                                    snapshot3.data.docs[index]["address"],
-                                                                    snapshot3.data.docs[index]["category"]),
-                                                              ));
-                                                        },
-                                                        child: Container(
-                                                            height: 50,
-                                                            width: 180,
-                                                            decoration: BoxDecoration(
-                                                                gradient: LinearGradient(
-                                                                    begin: Alignment
-                                                                        .topLeft,
-                                                                    end: Alignment
-                                                                        .bottomRight,
-                                                                    colors: Constants
-                                                                        .gradientColorOnAd),
-                                                                border: Border
-                                                                    .all(),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            20)),
-                                                            child: Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .start,
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Padding(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                              .all(
-                                                                          8.0),
-                                                                  child:
-                                                                      Container(
-                                                                    height: 180,
-                                                                    width: 160,
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        widget.date,
+                                        style: TextStyle(fontSize: 15),
+                                      ),
+                                      SizedBox(
+                                        width: 15,
+                                      )
+                                    ],
+                                  ),
+                                  Divider(
+                                    thickness: 1,
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(9.0),
+                                    child: Text("Description",
+                                        style: TextStyle(
+                                            color:
+                                                Constants.tDescriptionBoxString,
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 12, right: 12),
+                                    child: Container(
+                                      constraints: BoxConstraints(
+                                          minHeight: queryData.height / 4),
+                                      width: queryData.width,
+                                      color: Constants.tDescriptionBox,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: Text(widget.description,
+                                            style: TextStyle(
+                                                color:
+                                                    Constants.tDescriptionText,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w400)),
+                                      ),
+                                    ),
+                                  ),
+                                  //     // https://www.google.com/maps/place/Newtown,+Kolkata,+West+Bengal/@22.5861408,88.4227606,12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d22.5753931!4d88.4797903
+                                  //     // RaisedButton(
+                                  //     //   child: Text("map"),
+                                  //     //   onPressed: () {
+                                  //     //     mapInBrowser(
+                                  //     //         // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}");
+                                  //     //         // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}/@${widget.latitude},${widget.longitude},12z");
+                                  //     //         "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d${widget.latitude}!4d${widget.longitude}");
+                                  //     //   },
+                                  //     // ),
+                                  Divider(
+                                    thickness: 1,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        right: 12.0, left: 12.0, top: 12.0),
+                                    child: Text(
+                                      "Ad posted at",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Constants.tAdpostAt),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () => mapInBrowser(
+                                        "https://www.google.com/maps/preview/@${widget.latitude},${widget.longitude},17z"
+                                        // "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},${widget.latitude}${widget.longitude}"
+                                        // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}"
+                                        // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}"
+                                        ),
+                                    child: Stack(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(12.0),
+                                          child: Container(
+                                            height: 70,
+                                            width: queryData.width,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              image: DecorationImage(
+                                                  image: AssetImage("map.jpg"),
+                                                  fit: BoxFit.fill),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                            left: 40,
+                                            bottom: 25,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 12,
+                                              ),
+                                              child: Container(
+                                                width: queryData.width * 0.70,
+                                                height: 40,
+                                                color:
+                                                    Constants.tlocationSticker,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.location_on,
+                                                      color: Constants
+                                                          .tlocationIcon,
+                                                      size: 25,
+                                                    ),
+                                                    Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          "  Location",
+                                                          style: TextStyle(
+                                                              fontSize: 15,
+                                                              color: Constants
+                                                                  .tlocationTextString),
+                                                        ),
+                                                        Text(
+                                                          widget.address,
+                                                          style: TextStyle(
+                                                              fontSize: 15,
+                                                              color: Constants
+                                                                  .tlocationText),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            )),
+                                      ],
+                                    ),
+                                  ),
+                                  Divider(
+                                    thickness: 2,
+                                  ),
+                                  banner != null
+                                      ? SizedBox(
+                                          height: 250,
+                                          width: queryData.width,
+                                          child: AdWidget(
+                                            ad: banner,
+                                          ),
+                                        )
+                                      : SizedBox(),
+                                  //     // Visibility(
+                                  //     //   visible: userAccount["mobile_number"] !=
+                                  //     //           FirebaseAuth
+                                  //     //               .instance.currentUser.phoneNumber
+                                  //     //       ? true
+                                  //     //       : false,
+                                  //     // child:
+                                  //     // Padding(
+                                  //     //   padding: const EdgeInsets.all(12.0),
+                                  //     // child:
+                                  Divider(
+                                    thickness: 2,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 12,
+                                    ),
+                                    child: Container(
+                                      width: queryData.width,
+                                      height: queryData.height * 0.07,
+                                      color: Constants.tSeeProfileContainer,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                            top: 6, bottom: 6),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Constants.tSeeProfileSticker,
+                                            // borderRadius: BorderRadius.circular(15)
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(3.0),
+                                                child: CircleAvatar(
+                                                  minRadius: 40,
+                                                  backgroundImage: NetworkImage(
+                                                    userAccount["photo"],
+                                                  ),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 5),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(userAccount["name"],
+                                                        style: TextStyle(
+                                                            color: Constants
+                                                                .tNameInSeeProfile,
+                                                            fontSize: 15,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold)),
+                                                    SizedBox(
+                                                      height: 2,
+                                                    ),
+                                                    InkWell(
+                                                      onTap: () {
+                                                        Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder: (context) =>
+                                                                  seeProfileOfTicketOwner(
+                                                                      userAccount[
+                                                                          "photo"],
+                                                                      userAccount[
+                                                                          "name"],
+                                                                      widget
+                                                                          .ticketOwnweMobileNumber),
+                                                            ));
+                                                      },
+                                                      child: Text("SEE PROFILE",
+                                                          style: TextStyle(
+                                                            color: Constants
+                                                                .tSeeProfileText,
+                                                            fontSize: 15,
+                                                          )),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 10, right: 10, top: 10),
+                                    child: Divider(
+                                      thickness: 3,
+                                      color: Constants.tdivider,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 50,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 10),
+                                      child: Text(
+                                        "   Related Advertisement:",
+                                        style: TextStyle(
+                                            color: Constants.tRelatedAds,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 300,
+                                    width: queryData.width,
+                                    child: StreamBuilder(
+                                        stream: FirebaseFirestore.instance
+                                            .collection('global_ticket')
+                                            .where("category",
+                                                isEqualTo: widget.category)
+                                            .snapshots(),
+                                        // ignore: missing_return
+                                        builder: (context, snapshot3) {
+                                          if (snapshot3.hasData) {
+                                            return ListView.builder(
+                                              shrinkWrap: true,
+                                              scrollDirection: Axis.horizontal,
+                                              itemCount:
+                                                  snapshot3.data.docs.length,
+                                              itemBuilder: (context, index) {
+                                                String title = snapshot3
+                                                    .data.docs[index]["title"];
+                                                String description = snapshot3
+                                                    .data
+                                                    .docs[index]["description"];
+                                                return snapshot3.data
+                                                                .docs[index]
+                                                            ["id"] !=
+                                                        widget.id
+                                                    ? Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                  builder: (context) => ticketViewScreen(
+                                                                      snapshot3
+                                                                              .data
+                                                                              .docs[index][
+                                                                          "ticket_owner"],
+                                                                      snapshot3
+                                                                              .data
+                                                                              .docs[index][
+                                                                          "title"],
+                                                                      snapshot3
+                                                                              .data
+                                                                              .docs[index][
+                                                                          "description"],
+                                                                      snapshot3
+                                                                              .data
+                                                                              .docs[index]
+                                                                          [
+                                                                          "id"],
+                                                                      snapshot3
+                                                                          .data
+                                                                          .docs[index]["uplodedPhoto"],
+                                                                      snapshot3.data.docs[index]["latitude"],
+                                                                      snapshot3.data.docs[index]["longitude"],
+                                                                      snapshot3.data.docs[index]["date"],
+                                                                      snapshot3.data.docs[index]["share_mobile"],
+                                                                      false,
+                                                                      snapshot3.data.docs[index]["address"],
+                                                                      snapshot3.data.docs[index]["category"]),
+                                                                ));
+                                                          },
+                                                          child: Container(
+                                                              height: 50,
+                                                              width: 180,
+                                                              decoration: BoxDecoration(
+                                                                  gradient: LinearGradient(
+                                                                      begin: Alignment
+                                                                          .topLeft,
+                                                                      end: Alignment
+                                                                          .bottomRight,
+                                                                      colors: Constants
+                                                                          .gradientColorOnAd),
+                                                                  border: Border
+                                                                      .all(),
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              20)),
+                                                              child: Column(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .start,
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Padding(
+                                                                    padding:
+                                                                        const EdgeInsets.all(
+                                                                            8.0),
                                                                     child:
-                                                                        ClipRRect(
-                                                                      borderRadius:
-                                                                          BorderRadius
-                                                                              .only(
-                                                                        topLeft:
-                                                                            Radius.circular(20),
-                                                                        topRight:
-                                                                            Radius.circular(20),
-                                                                      ),
+                                                                        Container(
+                                                                      height:
+                                                                          180,
+                                                                      width:
+                                                                          160,
                                                                       child:
-                                                                          Image(
-                                                                        fit: BoxFit
-                                                                            .cover,
-                                                                        image: NetworkImage(snapshot3
-                                                                            .data
-                                                                            .docs[index]["uplodedPhoto"]),
+                                                                          ClipRRect(
+                                                                        borderRadius:
+                                                                            BorderRadius.only(
+                                                                          topLeft:
+                                                                              Radius.circular(20),
+                                                                          topRight:
+                                                                              Radius.circular(20),
+                                                                        ),
+                                                                        child:
+                                                                            Image(
+                                                                          fit: BoxFit
+                                                                              .cover,
+                                                                          image: NetworkImage(snapshot3
+                                                                              .data
+                                                                              .docs[index]["uplodedPhoto"]),
+                                                                        ),
                                                                       ),
                                                                     ),
                                                                   ),
-                                                                ),
-                                                                Padding(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                              .all(
-                                                                          8.0),
-                                                                  child: Text(
-                                                                    title.length >
-                                                                            20
-                                                                        ? title.substring(0,
-                                                                                20) +
-                                                                            "..."
-                                                                        : title,
-                                                                    style: TextStyle(
-                                                                        color: Constants
-                                                                            .titleText,
-                                                                        fontWeight:
-                                                                            FontWeight.bold),
-                                                                  ),
-                                                                ),
-                                                                Padding(
-                                                                  padding: const EdgeInsets
-                                                                          .only(
-                                                                      left: 8),
-                                                                  child: Text(
-                                                                      description.length >
+                                                                  Padding(
+                                                                    padding:
+                                                                        const EdgeInsets.all(
+                                                                            8.0),
+                                                                    child: Text(
+                                                                      title.length >
                                                                               20
-                                                                          ? description.substring(0, 20) +
+                                                                          ? title.substring(0, 20) +
                                                                               "..."
-                                                                          : description,
-                                                                      style:
-                                                                          TextStyle(
-                                                                        color: Constants
-                                                                            .descriptionText,
-                                                                      )),
-                                                                ),
-                                                                Padding(
-                                                                  padding: const EdgeInsets
-                                                                          .only(
-                                                                      left: 8,
-                                                                      top: 12),
-                                                                  child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .spaceBetween,
-                                                                    children: [
-                                                                      Row(
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.start,
-                                                                        children: [
-                                                                          Icon(
-                                                                            Icons.location_on_outlined,
-                                                                            color:
-                                                                                Constants.addressText,
-                                                                            size:
-                                                                                15,
-                                                                          ),
-                                                                          Text(
-                                                                            snapshot3.data.docs[index]["address"],
-                                                                            style:
-                                                                                TextStyle(color: Constants.locationMarker, fontSize: 12),
-                                                                          )
-                                                                        ],
-                                                                      ),
-                                                                      Padding(
-                                                                        padding:
-                                                                            const EdgeInsets.only(right: 20),
-                                                                        child:
-                                                                            Row(
+                                                                          : title,
+                                                                      style: TextStyle(
+                                                                          color: Constants
+                                                                              .titleText,
+                                                                          fontWeight:
+                                                                              FontWeight.bold),
+                                                                    ),
+                                                                  ),
+                                                                  Padding(
+                                                                    padding: const EdgeInsets
+                                                                            .only(
+                                                                        left:
+                                                                            8),
+                                                                    child: Text(
+                                                                        description.length >
+                                                                                20
+                                                                            ? description.substring(0, 20) +
+                                                                                "..."
+                                                                            : description,
+                                                                        style:
+                                                                            TextStyle(
+                                                                          color:
+                                                                              Constants.descriptionText,
+                                                                        )),
+                                                                  ),
+                                                                  Padding(
+                                                                    padding: const EdgeInsets
+                                                                            .only(
+                                                                        left: 8,
+                                                                        top:
+                                                                            12),
+                                                                    child: Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .spaceBetween,
+                                                                      children: [
+                                                                        Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.start,
                                                                           children: [
                                                                             Icon(
-                                                                              Icons.add_ic_call,
-                                                                              size: 22,
-                                                                              color: Constants.callIcon,
+                                                                              Icons.location_on_outlined,
+                                                                              color: Constants.addressText,
+                                                                              size: 15,
                                                                             ),
-                                                                            SizedBox(
-                                                                              width: 5,
-                                                                            ),
-                                                                            Icon(
-                                                                              FontAwesome.comments_o,
-                                                                              color: Constants.chatIcon,
-                                                                              size: 22,
-                                                                            ),
+                                                                            Text(
+                                                                              snapshot3.data.docs[index]["address"],
+                                                                              style: TextStyle(color: Constants.locationMarker, fontSize: 12),
+                                                                            )
                                                                           ],
                                                                         ),
-                                                                      )
-                                                                    ],
+                                                                        Padding(
+                                                                          padding:
+                                                                              const EdgeInsets.only(right: 20),
+                                                                          child:
+                                                                              Row(
+                                                                            children: [
+                                                                              Icon(
+                                                                                Icons.add_ic_call,
+                                                                                size: 22,
+                                                                                color: Constants.callIcon,
+                                                                              ),
+                                                                              SizedBox(
+                                                                                width: 5,
+                                                                              ),
+                                                                              Icon(
+                                                                                FontAwesome.comments_o,
+                                                                                color: Constants.chatIcon,
+                                                                                size: 22,
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        )
+                                                                      ],
+                                                                    ),
                                                                   ),
-                                                                ),
-                                                              ],
-                                                            )),
-                                                      ),
-                                                    )
-                                                  : Text("");
-                                            },
-                                          );
-                                        }
-                                      }),
-                                ),
-                                Divider(
-                                  thickness: 2,
-                                ),
-                                banner2 != null
-                                    ? SizedBox(
-                                        height: 250,
-                                        width: queryData.width,
-                                        child: AdWidget(
-                                          // key: UniqueKey(),
-                                          ad: banner2,
-                                        ),
-                                      )
-                                    : SizedBox(),
-                                SizedBox(
-                                  height: 10,
-                                )
-                              ],
+                                                                ],
+                                                              )),
+                                                        ),
+                                                      )
+                                                    : Text("");
+                                              },
+                                            );
+                                          }
+                                        }),
+                                  ),
+                                  Divider(
+                                    thickness: 2,
+                                  ),
+                                  banner2 != null
+                                      ? SizedBox(
+                                          height: 250,
+                                          width: queryData.width,
+                                          child: AdWidget(
+                                            // key: UniqueKey(),
+                                            ad: banner2,
+                                          ),
+                                        )
+                                      : SizedBox(),
+                                  SizedBox(
+                                    height: 10,
+                                  )
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
 
-                    // }),
+                      // }),
+                    ),
                   ),
                 );
               });

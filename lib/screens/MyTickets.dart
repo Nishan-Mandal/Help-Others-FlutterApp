@@ -139,7 +139,8 @@ class _myAdsState extends State<myAds> {
                       String title = snapshot.data.docs[index]["title"];
                       String description =
                           snapshot.data.docs[index]["description"];
-
+                      int arrayLength =
+                          snapshot.data.docs[index]["totalViews"].length - 1;
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -340,6 +341,34 @@ class _myAdsState extends State<myAds> {
                                 ),
                               ),
                             ),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: Container(
+                                height: 50,
+                                constraints: BoxConstraints(minWidth: 30),
+                                decoration: BoxDecoration(
+                                    color: Constants.searchIcon,
+                                    borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(10),
+                                      // bottomRight: Radius.circular(10),
+                                      bottomLeft: Radius.circular(10),
+                                      // topLeft: Radius.circular(10),
+                                    )),
+                                child: Column(
+                                  children: [
+                                    Icon(Icons.remove_red_eye,
+                                        color: Colors.black),
+                                    Text(
+                                      arrayLength >= 1000
+                                          ? "1k+"
+                                          : "$arrayLength",
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
                           ],
                         ),
                       );

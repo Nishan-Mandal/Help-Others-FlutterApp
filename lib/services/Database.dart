@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:help_others/screens/ChatRoom.dart';
+import 'package:intl/intl.dart';
 
 class DatabaseMethods {
   DateTime now = DateTime.now();
@@ -64,6 +67,9 @@ class DatabaseMethods {
       "category": category,
       "date": date,
       "address": address,
+      "totalViews": FieldValue.arrayUnion(
+        ["${FirebaseAuth.instance.currentUser.phoneNumber}"],
+      ),
     }).catchError((e) {
       print(e.toString());
     });
@@ -143,37 +149,30 @@ class DatabaseMethods {
   }
 
   uploadTicketResponse(
-    String comment,
     String ticketDocumentId,
-    bool share_mobile,
     String ticket_creater_mobile,
-    bool responded,
     String ticketTitle,
     String lastMessage,
+    String appBarname,
+    String photo,
+    String notCurrentUserNumber,
+    BuildContext context,
   ) async {
+    String dateTime = DateFormat.yMEd().add_jms().format(DateTime.now());
     var ref = FirebaseFirestore.instance
         .collection("global_ticket")
         .doc("$ticketDocumentId")
         .collection("responses")
         .doc(FirebaseAuth.instance.currentUser.phoneNumber);
 
-    var messages1 =
-        FirebaseFirestore.instance.collection("messages").doc(ticketDocumentId);
-    var messages2 = messages1.collection('chats').doc();
+    var messages1 = FirebaseFirestore.instance.collection("messages").doc();
 
-    ref.set({
-      "comment": comment,
-      "ticket_unique_id": ticketDocumentId,
-      "share_mobile": share_mobile,
-      "ticket_owner_mobile": ticket_creater_mobile,
-      "utr_mobile": FirebaseAuth.instance.currentUser.phoneNumber,
-      "id": ref.id,
-      "responded": responded,
-    }).catchError((e) {
+    await ref
+        .set({"dateTime": dateTime, "responseViaChat": true}).catchError((e) {
       print(e.toString());
     });
 
-    messages1.set({
+    await messages1.set({
       "responderNumber": FirebaseAuth.instance.currentUser.phoneNumber,
       "ticket_creater_mobile": ticket_creater_mobile,
       "id": messages1.id,
@@ -187,14 +186,20 @@ class DatabaseMethods {
         ],
       ),
       "ownerMessageSeen": false,
-      "responderMessageSeen": false,
+      "responderMessageSeen": true,
       "ticketTitle": ticketTitle,
     }).catchError((e) {
       print(e.toString());
     });
 
+    var messages2 = FirebaseFirestore.instance
+        .collection("messages")
+        .doc(messages1.id)
+        .collection('chats')
+        .doc();
+
     String time = "${now.hour}:${now.minute}";
-    messages2.set({
+    await messages2.set({
       "message": lastMessage,
       "sender": FirebaseAuth.instance.currentUser.phoneNumber,
       "timeStamp": now.microsecondsSinceEpoch,
@@ -202,15 +207,35 @@ class DatabaseMethods {
     }).catchError((e) {
       print(e.toString());
     });
+
+    // return chatRoom(
+    //     ticketDocumentId,
+    //     FirebaseAuth.instance.currentUser.phoneNumber,
+    //     ticketTitle,
+    //     messages1.id,
+    //     appBarname,
+    //     photo,
+    //     notCurrentUserNumber);
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => chatRoom(
+              ticketDocumentId,
+              FirebaseAuth.instance.currentUser.phoneNumber,
+              ticketTitle,
+              messages1.id,
+              appBarname,
+              photo,
+              notCurrentUserNumber),
+        ));
   }
 
   uploadTicketResponseByCall(
-    String comment,
     String ticketDocumentId,
-    bool share_mobile,
-    String ticket_creater_mobile,
-    bool responded,
+    bool responseViaChat,
   ) {
+    String dateTime = DateFormat.yMEd().add_jms().format(DateTime.now());
     var ref = FirebaseFirestore.instance
         .collection("global_ticket")
         .doc("$ticketDocumentId")
@@ -218,13 +243,9 @@ class DatabaseMethods {
         .doc(FirebaseAuth.instance.currentUser.phoneNumber);
 
     ref.set({
-      "comment": comment,
-      "ticket_unique_id": ticketDocumentId,
-      "share_mobile": share_mobile,
-      "ticket_owner_mobile": ticket_creater_mobile,
-      "utr_mobile": FirebaseAuth.instance.currentUser.phoneNumber,
-      "id": ref.id,
-      "responded": responded,
+      "dateTime": dateTime,
+      "responseViaCall": true,
+      "responseViaChat": responseViaChat,
     }).catchError((e) {
       print(e.toString());
     });
@@ -234,7 +255,7 @@ class DatabaseMethods {
     String message,
     String docIdInMessageCollection,
     String respnderMobileNumber,
-  ) {
+  ) async {
     String time = "${now.hour}:${now.minute}";
     var chat = FirebaseFirestore.instance
         .collection("messages")
@@ -245,7 +266,7 @@ class DatabaseMethods {
         .collection("messages")
         .doc(docIdInMessageCollection);
 
-    chat.set({
+    await chat.set({
       "message": message,
       "sender": FirebaseAuth.instance.currentUser.phoneNumber,
       "timeStamp": DateTime.now().microsecondsSinceEpoch,
@@ -254,7 +275,7 @@ class DatabaseMethods {
       print(e.toString());
     });
 
-    data.update(
+    await data.update(
       respnderMobileNumber == FirebaseAuth.instance.currentUser.phoneNumber
           ? ({
               "ownerMessageSeen": false,
@@ -263,34 +284,13 @@ class DatabaseMethods {
     );
   }
 
-  // countUnseenMessages(String field) {
-  //   int count = 0;
-  //   var data = FirebaseFirestore.instance
-  //       .collection("messages")
-  //       .where("participants",
-  //           arrayContains: FirebaseAuth.instance.currentUser.phoneNumber)
-  //       .orderBy("timeStamp", descending: true)
-  //       .limit(1)
-  //       .get()
-  //       .then((value) {
-  //     value.docs.forEach((element) {
-  //       print(element.get(field));
-  //       bool x = element.get(field);
-  //       if (x == false) {
-  //         count = count + 1;
-  //       }
-  //     });
-  //   });
-  //   return count;
-  // }
-
   updateOwnerMessageSeenStatus(
     String docIdInMessageCollection,
-  ) {
+  ) async {
     var message = FirebaseFirestore.instance
         .collection("messages")
         .doc(docIdInMessageCollection);
-    message.update({"ownerMessageSeen": true}).catchError((e) {
+    await message.update({"ownerMessageSeen": true}).catchError((e) {
       print(e.toString());
     });
   }
@@ -328,6 +328,19 @@ class DatabaseMethods {
     });
   }
 
+  totalViewsInAd(String ticketId, String ticketOwnweMobileNumber) {
+    if (ticketOwnweMobileNumber !=
+        FirebaseAuth.instance.currentUser.phoneNumber) {
+      var ref =
+          FirebaseFirestore.instance.collection("global_ticket").doc(ticketId);
+      ref.update({
+        "totalViews": FieldValue.arrayUnion(
+          ["${FirebaseAuth.instance.currentUser.phoneNumber}"],
+        ),
+      });
+    }
+  }
+
   undomyFavourite(String ticketId) {
     var val = [];
     val.add('${FirebaseAuth.instance.currentUser.phoneNumber}');
@@ -349,22 +362,4 @@ class DatabaseMethods {
         .doc(FirebaseAuth.instance.currentUser.phoneNumber);
     ref.update({"name": name});
   }
-
-  // checkThereIsDefaultTicket() async {
-  //   bool flag = false;
-  //   await FirebaseFirestore.instance
-  //       .collection("global_ticket")
-  //       .get()
-  //       .then((value) {
-  //     value.docs.forEach((element) async {
-  //       print(element.get("ticket_owner"));
-  //       if (await element.get("ticket_owner") ==
-  //           FirebaseAuth.instance.currentUser.phoneNumber) {
-  //         print("yes");
-  //         flag = await true;
-  //       }
-  //     });
-  //   });
-  //   return false;
-  // }
 }
