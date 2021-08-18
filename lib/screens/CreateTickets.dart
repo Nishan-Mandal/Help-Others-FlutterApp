@@ -13,6 +13,7 @@ import 'package:help_others/screens/NavigationBar.dart';
 import 'package:help_others/services/AdMob.dart';
 import 'package:help_others/services/BannerAds.dart';
 import 'package:help_others/services/Constants.dart';
+import 'package:help_others/services/CustomPageRoute.dart';
 
 import 'package:help_others/services/Database.dart';
 import 'package:image_picker/image_picker.dart';
@@ -165,12 +166,16 @@ class _categoryPageState extends State<categoryPage> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => category1(
-                                widget.latitudeData, widget.longitudeData),
-                          ));
+                      Navigator.of(context).push(CustomPageRouteAnimation(
+                        child: category3(
+                            widget.latitudeData, widget.longitudeData),
+                      ));
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //       builder: (context) => category1(
+                      //           widget.latitudeData, widget.longitudeData),
+                      //     ));
                     },
                     child: Container(
                       height: queryData.height * 0.1,
@@ -191,12 +196,16 @@ class _categoryPageState extends State<categoryPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => category2(
-                                widget.latitudeData, widget.longitudeData),
-                          ));
+                      Navigator.of(context).push(CustomPageRouteAnimation(
+                        child: category3(
+                            widget.latitudeData, widget.longitudeData),
+                      ));
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //       builder: (context) => category2(
+                      //           widget.latitudeData, widget.longitudeData),
+                      //     ));
                     },
                     child: Container(
                       height: queryData.height * 0.1,
@@ -216,12 +225,16 @@ class _categoryPageState extends State<categoryPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => category3(
-                                widget.latitudeData, widget.longitudeData),
-                          ));
+                      Navigator.of(context).push(CustomPageRouteAnimation(
+                        child: category3(
+                            widget.latitudeData, widget.longitudeData),
+                      ));
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //       builder: (context) => category3(
+                      //           widget.latitudeData, widget.longitudeData),
+                      //     ));
                     },
                     child: Container(
                       height: queryData.height * 0.1,
@@ -1443,7 +1456,12 @@ class _secondPageState extends State<secondPage> {
   }
 
   void takePhoto(ImageSource source) async {
-    final pickerFile = await picker.getImage(source: source, imageQuality: 25);
+    final pickerFile = await picker.getImage(
+      source: source,
+      imageQuality: 25,
+      maxHeight: 440,
+      maxWidth: 370,
+    );
     var bytes = new File(pickerFile.path);
     var enc = await bytes.readAsBytes();
 
@@ -1813,6 +1831,11 @@ class _previewState extends State<preview> {
 
                             Future.delayed(const Duration(seconds: 3), () {
                               imageFile = null;
+                              try {
+                                adMobService.showRewardedAd();
+                              } catch (e) {
+                                print(e.toString());
+                              }
 
                               Navigator.pushAndRemoveUntil(
                                   context,
@@ -1820,7 +1843,6 @@ class _previewState extends State<preview> {
                                     builder: (context) => navigationBar(),
                                   ),
                                   (route) => false);
-                              adMobService.showRewardedAd();
                             });
                           },
                           child: Text(

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:help_others/screens/SeeProfileOfTicketOwner.dart';
+import 'package:help_others/services/AdMob.dart';
 import 'package:help_others/services/Constants.dart';
 import 'package:help_others/services/Database.dart';
 
@@ -35,6 +36,8 @@ class _chatRoomState extends State<chatRoom> {
 
   @override
   void initState() {
+    AdMobService.createInterstitialAd();
+    AdMobService.showInterstitialAd();
     Future.delayed(const Duration(milliseconds: 300), () {
       setState(() {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);

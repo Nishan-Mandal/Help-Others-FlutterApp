@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -252,17 +253,30 @@ class _searchBoxState extends State<searchBox> {
                                             padding: const EdgeInsets.all(8.0),
                                             child: Container(
                                               child: ClipRRect(
-                                                borderRadius: BorderRadius.only(
-                                                  topLeft: Radius.circular(20),
-                                                  topRight: Radius.circular(20),
-                                                ),
-                                                child: Image(
-                                                  fit: BoxFit.cover,
-                                                  image: NetworkImage(
-                                                      _resultsList[index]
-                                                          ["uplodedPhoto"]),
-                                                ),
-                                              ),
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(20),
+                                                    topRight:
+                                                        Radius.circular(20),
+                                                  ),
+                                                  child: Image.network(
+                                                    _resultsList[index]
+                                                        ["uplodedPhoto"],
+                                                    fit: BoxFit.cover,
+                                                    cacheHeight: 300,
+                                                    cacheWidth: 200,
+                                                  )
+
+                                                  // CachedNetworkImage(
+                                                  //   imageUrl:
+                                                  //       _resultsList[index]
+                                                  //           ["uplodedPhoto"],
+                                                  //   fit: BoxFit.cover,
+                                                  //   height: 300,
+                                                  //   width: 200,
+                                                  // )
+                                                  ),
                                               decoration: BoxDecoration(
                                                   borderRadius:
                                                       BorderRadius.only(
@@ -421,116 +435,7 @@ class _searchBoxState extends State<searchBox> {
                     );
                   }),
             ),
-          )
-          // Container(
-          //   color: Colors.white,
-          //   child: Stack(
-          //     children: [
-          //       Column(
-          //         children: [
-          //           Flexible(
-          //               child: ListView.builder(
-          //             itemExtent: 140,
-          //             scrollDirection: Axis.vertical,
-          //             controller: controller,
-          //             physics: BouncingScrollPhysics(),
-          //             itemCount: _resultsList.length,
-          //             itemBuilder: (BuildContext context, index) {
-          //               double scale = 1.0;
-          //               if (topContainer > 1) {
-          //                 scale = index + 1 - topContainer;
-          //                 if (scale < 0) {
-          //                   scale = 0;
-          //                 } else if (scale > 1) {
-          //                   scale = 1;
-          //                 }
-          //               }
-
-          //               return Opacity(
-          //                 opacity: scale,
-          //                 child: Transform(
-          //                   transform: Matrix4.identity()..scale(scale, scale),
-          //                   alignment: Alignment.bottomCenter,
-
-          //                   // color: Colors.yellowAccent,
-          //                   child: Center(
-          //                     child: Padding(
-          //                       padding: const EdgeInsets.all(8.0),
-          //                       child: GestureDetector(
-          //                         onTap: () {
-          //                           Navigator.push(
-          //                               context,
-          //                               MaterialPageRoute(
-          //                                 builder: (context) =>
-          //                                     ticketViewScreen(
-          //                                   _resultsList[index]['ticket_owner'],
-          //                                   _resultsList[index]['title'],
-          //                                   _resultsList[index]['description'],
-          //                                   _resultsList[index]['id'],
-          //                                   _resultsList[index]['uplodedPhoto'],
-          //                                   _resultsList[index]['latitude'],
-          //                                   _resultsList[index]['longitude'],
-          //                                   _resultsList[index]['date'],
-          //                                   _resultsList[index]['share_mobile'],
-          //                                 ),
-          //                               ));
-          //                         },
-          //                         child: Stack(
-          //                           overflow: Overflow.visible,
-          //                           children: [
-          //                             Positioned(
-          //                               left: 35,
-          //                               child: Container(
-          //                                 decoration: BoxDecoration(
-          //                                   boxShadow: [
-          //                                     BoxShadow(
-          //                                       color: Colors.black,
-          //                                       // spreadRadius: 5,
-          //                                       blurRadius: 5.0,
-          //                                       offset: Offset(5, 8),
-          //                                     ),
-          //                                   ],
-          //                                   color: Colors.grey[200],
-          //                                   borderRadius:
-          //                                       BorderRadius.circular(10.0),
-          //                                 ),
-          //                                 constraints: BoxConstraints(
-          //                                     maxWidth: 300, maxHeight: 110),
-          //                               ),
-          //                             ),
-          //                             Positioned(
-          //                                 left: 0,
-          //                                 top: 15,
-          //                                 child: CircleAvatar(
-          //                                     minRadius: 40,
-          //                                     backgroundImage: NetworkImage(
-          //                                         _resultsList[index]
-          //                                             ['uplodedPhoto']))),
-          //                             Positioned(
-          //                                 top: 25,
-          //                                 left: 100,
-          //                                 child: Text(
-          //                                     _resultsList[index]['title'])),
-          //                             Positioned(
-          //                                 top: 55,
-          //                                 left: 100,
-          //                                 child: Text(_resultsList[index]
-          //                                     ['description']))
-          //                           ],
-          //                         ),
-          //                       ),
-          //                     ),
-          //                   ),
-          //                 ),
-          //               );
-          //             },
-          //           )),
-          //         ],
-          //       ),
-          //     ],
-          //   ),
-          // )
-          ),
+          )),
     );
   }
 }

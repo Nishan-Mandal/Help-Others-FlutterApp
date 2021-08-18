@@ -247,7 +247,14 @@ class _drawerState extends State<drawer> {
                                   CircleAvatar(
                                       radius: 80.0,
                                       backgroundImage: imageFile == null
-                                          ? NetworkImage(userDocument['photo'])
+                                          ? NetworkImage(
+                                              userDocument['photo'],
+                                            )
+                                          //  Image.network(
+                                          //     userDocument['photo'],
+                                          //     cacheHeight: 120,
+                                          //     cacheWidth: 120,
+                                          //   )
                                           : FileImage(File(imageFile.path))),
                                   Positioned(
                                       bottom: 15.0,

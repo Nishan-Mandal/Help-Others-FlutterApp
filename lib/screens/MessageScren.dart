@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:help_others/screens/ChatRoom.dart';
 import 'package:help_others/services/AdMob.dart';
 import 'package:help_others/services/Constants.dart';
@@ -71,7 +72,7 @@ class _allMessagesState extends State<allMessages> {
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Container(
-      color: Constants.scaffoldBackground,
+      // color: Constants.scaffoldBackground,
       child: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection("messages")
@@ -93,6 +94,7 @@ class _allMessagesState extends State<allMessages> {
               itemCount: snapshot.data.docs.length,
               itemBuilder: (context, index) {
                 String title = snapshot.data.docs[index]['ticketTitle'];
+                String lastMessage = snapshot.data.docs[index]['lastMessage'];
                 String mobile;
                 if (snapshot.data.docs[index]['ticket_creater_mobile'] ==
                     FirebaseAuth.instance.currentUser.phoneNumber) {
@@ -101,7 +103,6 @@ class _allMessagesState extends State<allMessages> {
                     FirebaseAuth.instance.currentUser.phoneNumber) {
                   mobile = snapshot.data.docs[index]['ticket_creater_mobile'];
                 }
-                print(mobile);
 
                 return StreamBuilder(
                     stream: FirebaseFirestore.instance
@@ -117,234 +118,214 @@ class _allMessagesState extends State<allMessages> {
                               .snapshots(),
                           builder: (context, snapshot3) {
                             var userDocument2 = snapshot3.data;
-                            return Align(
-                              heightFactor: 0.92,
-                              child: GestureDetector(
-                                child: Stack(
-                                  children: [
-                                    Card(
-                                      color: Constants.scaffoldBackground,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Flexible(
-                                            child: SizedBox(
-                                              height: 80,
-                                              child: Center(
-                                                child: Container(
-                                                    child: Row(
-                                                  children: [
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-
-                                                      // borderRadius:
-                                                      //     BorderRadius
-                                                      //         .all(Radius
-                                                      //             .circular(
-                                                      //                 10)),
-                                                      child: ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(50),
-                                                        child: SizedBox(
-                                                          height: 60,
-                                                          width: 60,
-                                                          // child:
-                                                          //     CachedNetworkImage(
-                                                          //   fit: BoxFit.cover,
-                                                          //   imageUrl: userDocument2[
-                                                          //       "uplodedPhoto"],
-                                                          //   errorWidget:
-                                                          //       (context, url,
-                                                          //               error) =>
-                                                          //           Icon(Icons
-                                                          //               .error),
-                                                          // ),
-                                                          child: Image(
-                                                            fit: BoxFit.cover,
-                                                            image: NetworkImage(
-                                                              userDocument2[
-                                                                  "uplodedPhoto"],
-                                                            ),
-                                                          ),
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 5, right: 5),
+                              child: Align(
+                                heightFactor: 0.915,
+                                child: GestureDetector(
+                                  child: Stack(
+                                    children: [
+                                      Card(
+                                        // color: Constants.scaffoldBackground,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Flexible(
+                                              child: SizedBox(
+                                                height: 80,
+                                                child: Center(
+                                                  child: Container(
+                                                      child: Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(50),
+                                                          child: SizedBox(
+                                                              height: 60,
+                                                              width: 60,
+                                                              child:
+                                                                  Image.network(
+                                                                userDocument2[
+                                                                    "uplodedPhoto"],
+                                                                cacheHeight:
+                                                                    100,
+                                                                cacheWidth: 100,
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                              )),
                                                         ),
                                                       ),
-
-                                                      //  snapshot.data
-                                                      //                 .docs[index][
-                                                      //             'responderNumber'] ==
-                                                      //         FirebaseAuth
-                                                      //             .instance
-                                                      //             .currentUser
-                                                      //             .phoneNumber
-                                                      //     ? (NetworkImage(snapshot
-                                                      //             .data.docs[index]
-                                                      //         ['ownerPic']))
-                                                      //     : NetworkImage((snapshot
-                                                      //             .data.docs[index]
-                                                      //         ['responderPic'])),
-                                                    ),
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        Text(
-                                                          userDocument["name"],
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 17,
-                                                            color: snapshot.data
-                                                                            .docs[index][
-                                                                        'responderNumber'] ==
-                                                                    FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .phoneNumber
-                                                                ? (snapshot.data
-                                                                            .docs[index]
-                                                                        [
-                                                                        'responderMessageSeen']
-                                                                    ? Colors
-                                                                        .white54
-                                                                    : Colors
-                                                                        .white)
-                                                                : (snapshot.data
-                                                                            .docs[index][
-                                                                        'ownerMessageSeen']
-                                                                    ? Colors
-                                                                        .white54
-                                                                    : Colors
-                                                                        .white),
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          SizedBox(
+                                                            height: 10,
                                                           ),
-                                                        ),
-                                                        Text(
-                                                          title.length > 30
-                                                              ? title.substring(
-                                                                      0, 30) +
-                                                                  "..."
-                                                              : title,
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 17,
-                                                            color: snapshot.data
-                                                                            .docs[index][
-                                                                        'responderNumber'] ==
-                                                                    FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .phoneNumber
-                                                                ? (snapshot.data
-                                                                            .docs[index]
-                                                                        [
-                                                                        'responderMessageSeen']
-                                                                    ? Colors
-                                                                        .white54
-                                                                    : Colors
-                                                                        .white)
-                                                                : (snapshot.data
-                                                                            .docs[index][
-                                                                        'ownerMessageSeen']
-                                                                    ? Colors
-                                                                        .white54
-                                                                    : Colors
-                                                                        .white),
+                                                          Text(
+                                                            userDocument[
+                                                                "name"],
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 15,
+                                                              color: snapshot.data.docs[index][
+                                                                          'responderNumber'] ==
+                                                                      FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser
+                                                                          .phoneNumber
+                                                                  ? (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'responderMessageSeen']
+                                                                      ? Colors
+                                                                          .white54
+                                                                      : Colors
+                                                                          .white)
+                                                                  : (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'ownerMessageSeen']
+                                                                      ? Colors
+                                                                          .white54
+                                                                      : Colors
+                                                                          .white),
+                                                            ),
                                                           ),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 5,
-                                                        ),
-                                                        Text(
-                                                          snapshot.data
-                                                                  .docs[index]
-                                                              ['lastMessage'],
-                                                          style: TextStyle(
-                                                            color: snapshot.data
-                                                                            .docs[index][
-                                                                        'responderNumber'] ==
-                                                                    FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .phoneNumber
-                                                                ? (snapshot.data
-                                                                            .docs[index]
-                                                                        [
-                                                                        'responderMessageSeen']
-                                                                    ? Colors
-                                                                        .white70
-                                                                    : Colors
-                                                                        .white)
-                                                                : (snapshot.data
-                                                                            .docs[index][
-                                                                        'ownerMessageSeen']
-                                                                    ? Colors
-                                                                        .white70
-                                                                    : Colors
-                                                                        .white),
+                                                          Text(
+                                                            title.length > 30
+                                                                ? title.substring(
+                                                                        0, 30) +
+                                                                    "..."
+                                                                : title,
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 15,
+                                                              color: snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'responderNumber'] ==
+                                                                      FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser
+                                                                          .phoneNumber
+                                                                  ? (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'responderMessageSeen']
+                                                                      ? Colors.amber[
+                                                                          100]
+                                                                      : Constants
+                                                                          .searchIcon)
+                                                                  : (snapshot
+                                                                          .data
+                                                                          .docs[index]['ownerMessageSeen']
+                                                                      ? Colors.amber[100]
+                                                                      : Constants.searchIcon),
+                                                            ),
                                                           ),
-                                                        ),
-                                                      ],
-                                                    )
-                                                  ],
-                                                )),
+                                                          SizedBox(
+                                                            height: 4,
+                                                          ),
+                                                          Text(
+                                                            lastMessage.length >
+                                                                    25
+                                                                ? lastMessage
+                                                                        .substring(
+                                                                            0,
+                                                                            25) +
+                                                                    "..."
+                                                                : lastMessage,
+                                                            style: TextStyle(
+                                                              fontSize: 13,
+                                                              color: snapshot.data.docs[index][
+                                                                          'responderNumber'] ==
+                                                                      FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser
+                                                                          .phoneNumber
+                                                                  ? (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'responderMessageSeen']
+                                                                      ? Colors
+                                                                          .white70
+                                                                      : Colors
+                                                                          .white)
+                                                                  : (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'ownerMessageSeen']
+                                                                      ? Colors
+                                                                          .white70
+                                                                      : Colors
+                                                                          .white),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    ],
+                                                  )),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    Visibility(
-                                      visible: snapshot.data.docs[index]
-                                                  ['responderNumber'] ==
-                                              FirebaseAuth.instance.currentUser
-                                                  .phoneNumber
-                                          ? (snapshot.data.docs[index]
-                                                  ['responderMessageSeen']
-                                              ? false
-                                              : true)
-                                          : (snapshot.data.docs[index]
-                                                  ['ownerMessageSeen']
-                                              ? false
-                                              : true),
-                                      child: Positioned(
-                                          left: queryData.width * 0.89,
-                                          top: 35,
-                                          child: Center(
-                                            child: Icon(
-                                              Icons.brightness_1,
-                                              size: 12.0,
-                                              color: Colors.red,
-                                            ),
-                                          )),
-                                    ),
-                                  ],
+                                      Visibility(
+                                        visible: snapshot.data.docs[index]
+                                                    ['responderNumber'] ==
+                                                FirebaseAuth.instance
+                                                    .currentUser.phoneNumber
+                                            ? (snapshot.data.docs[index]
+                                                    ['responderMessageSeen']
+                                                ? false
+                                                : true)
+                                            : (snapshot.data.docs[index]
+                                                    ['ownerMessageSeen']
+                                                ? false
+                                                : true),
+                                        child: Positioned(
+                                            left: queryData.width * 0.89,
+                                            top: 35,
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.brightness_1,
+                                                size: 12.0,
+                                                color: Colors.red,
+                                              ),
+                                            )),
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) => chatRoom(
+                                              snapshot.data.docs[index]
+                                                  ['ticketId'],
+                                              snapshot.data.docs[index]
+                                                  ['responderNumber'],
+                                              snapshot.data.docs[index]
+                                                  ['ticketTitle'],
+                                              snapshot.data.docs[index]['id'],
+                                              userDocument["name"],
+                                              userDocument2["uplodedPhoto"],
+                                              mobile,
+                                            ));
+                                  },
                                 ),
-                                onTap: () {
-                                  AdMobService.createInterstitialAd();
-                                  AdMobService.showInterstitialAd();
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) => chatRoom(
-                                            snapshot.data.docs[index]
-                                                ['ticketId'],
-                                            snapshot.data.docs[index]
-                                                ['responderNumber'],
-                                            snapshot.data.docs[index]
-                                                ['ticketTitle'],
-                                            snapshot.data.docs[index]['id'],
-                                            userDocument["name"],
-                                            userDocument2["uplodedPhoto"],
-                                            mobile,
-                                          ));
-                                },
                               ),
                             );
                           });
@@ -393,6 +374,7 @@ class _buyingMessagesState extends State<buyingMessages> {
               itemCount: snapshot.data.docs.length,
               itemBuilder: (context, index) {
                 String title = snapshot.data.docs[index]['ticketTitle'];
+                String lastMessage = snapshot.data.docs[index]['lastMessage'];
                 String mobile;
                 if (snapshot.data.docs[index]['ticket_creater_mobile'] ==
                     FirebaseAuth.instance.currentUser.phoneNumber) {
@@ -401,7 +383,7 @@ class _buyingMessagesState extends State<buyingMessages> {
                     FirebaseAuth.instance.currentUser.phoneNumber) {
                   mobile = snapshot.data.docs[index]['ticket_creater_mobile'];
                 }
-                print(mobile);
+
                 return StreamBuilder(
                     stream: FirebaseFirestore.instance
                         .collection("user_account")
@@ -416,215 +398,213 @@ class _buyingMessagesState extends State<buyingMessages> {
                               .snapshots(),
                           builder: (context, snapshot3) {
                             var userDocument2 = snapshot3.data;
-                            return Align(
-                              heightFactor: 0.92,
-                              child: GestureDetector(
-                                onTap: () {
-                                  AdMobService.createInterstitialAd();
-                                  AdMobService.showInterstitialAd();
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) => chatRoom(
-                                            snapshot.data.docs[index]
-                                                ['ticketId'],
-                                            snapshot.data.docs[index]
-                                                ['responderNumber'],
-                                            snapshot.data.docs[index]
-                                                ['ticketTitle'],
-                                            snapshot.data.docs[index]['id'],
-                                            userDocument["name"],
-                                            userDocument2["uplodedPhoto"],
-                                            mobile,
-                                          ));
-                                },
-                                child: Stack(
-                                  children: [
-                                    Card(
-                                      color: Constants.scaffoldBackground,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Flexible(
-                                            child: SizedBox(
-                                              height: 80,
-                                              child: Center(
-                                                child: Container(
-                                                    child: Row(
-                                                  children: [
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: SizedBox(
-                                                        width: 60,
-                                                        height: 60,
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 5, right: 5),
+                              child: Align(
+                                heightFactor: 0.915,
+                                child: GestureDetector(
+                                  child: Stack(
+                                    children: [
+                                      Card(
+                                        // color: Constants.scaffoldBackground,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Flexible(
+                                              child: SizedBox(
+                                                height: 80,
+                                                child: Center(
+                                                  child: Container(
+                                                      child: Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
                                                         child: ClipRRect(
                                                           borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          30)),
-                                                          // child:
-                                                          //     CachedNetworkImage(
-                                                          //   fit: BoxFit.cover,
-                                                          //   imageUrl: userDocument2[
-                                                          //       "uplodedPhoto"],
-                                                          //   errorWidget:
-                                                          //       (context, url,
-                                                          //               error) =>
-                                                          //           Icon(Icons
-                                                          //               .error),
-                                                          // ),
-                                                          child: Image(
-                                                            fit: BoxFit.cover,
-                                                            image: NetworkImage(
-                                                              userDocument2[
-                                                                  "uplodedPhoto"],
-                                                            ),
-                                                          ),
+                                                              BorderRadius
+                                                                  .circular(50),
+                                                          child: SizedBox(
+                                                              height: 60,
+                                                              width: 60,
+                                                              child:
+                                                                  Image.network(
+                                                                userDocument2[
+                                                                    "uplodedPhoto"],
+                                                                cacheHeight:
+                                                                    100,
+                                                                cacheWidth: 100,
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                              )),
                                                         ),
                                                       ),
-                                                    ),
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        Text(
-                                                          userDocument["name"],
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 17,
-                                                            color: snapshot.data
-                                                                            .docs[index][
-                                                                        'responderNumber'] ==
-                                                                    FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .phoneNumber
-                                                                ? (snapshot.data
-                                                                            .docs[index]
-                                                                        [
-                                                                        'responderMessageSeen']
-                                                                    ? Colors
-                                                                        .white54
-                                                                    : Colors
-                                                                        .white)
-                                                                : (snapshot.data
-                                                                            .docs[index][
-                                                                        'ownerMessageSeen']
-                                                                    ? Colors
-                                                                        .white54
-                                                                    : Colors
-                                                                        .white),
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          SizedBox(
+                                                            height: 10,
                                                           ),
-                                                        ),
-                                                        Text(
-                                                          title.length > 30
-                                                              ? title.substring(
-                                                                      0, 30) +
-                                                                  "..."
-                                                              : title,
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 17,
-                                                            color: snapshot.data
-                                                                            .docs[index][
-                                                                        'responderNumber'] ==
-                                                                    FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .phoneNumber
-                                                                ? (snapshot.data
-                                                                            .docs[index]
-                                                                        [
-                                                                        'responderMessageSeen']
-                                                                    ? Colors
-                                                                        .white54
-                                                                    : Colors
-                                                                        .white)
-                                                                : (snapshot.data
-                                                                            .docs[index][
-                                                                        'ownerMessageSeen']
-                                                                    ? Colors
-                                                                        .white54
-                                                                    : Colors
-                                                                        .white),
+                                                          Text(
+                                                            userDocument[
+                                                                "name"],
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 15,
+                                                              color: snapshot.data.docs[index][
+                                                                          'responderNumber'] ==
+                                                                      FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser
+                                                                          .phoneNumber
+                                                                  ? (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'responderMessageSeen']
+                                                                      ? Colors
+                                                                          .white54
+                                                                      : Colors
+                                                                          .white)
+                                                                  : (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'ownerMessageSeen']
+                                                                      ? Colors
+                                                                          .white54
+                                                                      : Colors
+                                                                          .white),
+                                                            ),
                                                           ),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 5,
-                                                        ),
-                                                        Text(
-                                                          snapshot.data
-                                                                  .docs[index]
-                                                              ['lastMessage'],
-                                                          style: TextStyle(
-                                                            color: snapshot.data
-                                                                            .docs[index][
-                                                                        'responderNumber'] ==
-                                                                    FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .phoneNumber
-                                                                ? (snapshot.data
-                                                                            .docs[index]
-                                                                        [
-                                                                        'responderMessageSeen']
-                                                                    ? Colors
-                                                                        .white70
-                                                                    : Colors
-                                                                        .white)
-                                                                : (snapshot.data
-                                                                            .docs[index][
-                                                                        'ownerMessageSeen']
-                                                                    ? Colors
-                                                                        .white70
-                                                                    : Colors
-                                                                        .white),
+                                                          Text(
+                                                            title.length > 30
+                                                                ? title.substring(
+                                                                        0, 30) +
+                                                                    "..."
+                                                                : title,
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 15,
+                                                              color: snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'responderNumber'] ==
+                                                                      FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser
+                                                                          .phoneNumber
+                                                                  ? (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'responderMessageSeen']
+                                                                      ? Colors.amber[
+                                                                          100]
+                                                                      : Constants
+                                                                          .searchIcon)
+                                                                  : (snapshot
+                                                                          .data
+                                                                          .docs[index]['ownerMessageSeen']
+                                                                      ? Colors.amber[100]
+                                                                      : Constants.searchIcon),
+                                                            ),
                                                           ),
-                                                        ),
-                                                      ],
-                                                    )
-                                                  ],
-                                                )),
+                                                          SizedBox(
+                                                            height: 4,
+                                                          ),
+                                                          Text(
+                                                            lastMessage.length >
+                                                                    25
+                                                                ? lastMessage
+                                                                        .substring(
+                                                                            0,
+                                                                            25) +
+                                                                    "..."
+                                                                : lastMessage,
+                                                            style: TextStyle(
+                                                              fontSize: 13,
+                                                              color: snapshot.data.docs[index][
+                                                                          'responderNumber'] ==
+                                                                      FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser
+                                                                          .phoneNumber
+                                                                  ? (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'responderMessageSeen']
+                                                                      ? Colors
+                                                                          .white70
+                                                                      : Colors
+                                                                          .white)
+                                                                  : (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'ownerMessageSeen']
+                                                                      ? Colors
+                                                                          .white70
+                                                                      : Colors
+                                                                          .white),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    ],
+                                                  )),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    Visibility(
-                                      visible: snapshot.data.docs[index]
-                                                  ['responderNumber'] ==
-                                              FirebaseAuth.instance.currentUser
-                                                  .phoneNumber
-                                          ? (snapshot.data.docs[index]
-                                                  ['responderMessageSeen']
-                                              ? false
-                                              : true)
-                                          : (snapshot.data.docs[index]
-                                                  ['ownerMessageSeen']
-                                              ? false
-                                              : true),
-                                      child: Positioned(
-                                          left: queryData.width * 0.89,
-                                          top: 35,
-                                          child: Center(
-                                            child: Icon(
-                                              Icons.brightness_1,
-                                              size: 12.0,
-                                              color: Colors.red,
-                                            ),
-                                          )),
-                                    ),
-                                  ],
+                                      Visibility(
+                                        visible: snapshot.data.docs[index]
+                                                    ['responderNumber'] ==
+                                                FirebaseAuth.instance
+                                                    .currentUser.phoneNumber
+                                            ? (snapshot.data.docs[index]
+                                                    ['responderMessageSeen']
+                                                ? false
+                                                : true)
+                                            : (snapshot.data.docs[index]
+                                                    ['ownerMessageSeen']
+                                                ? false
+                                                : true),
+                                        child: Positioned(
+                                            left: queryData.width * 0.89,
+                                            top: 35,
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.brightness_1,
+                                                size: 12.0,
+                                                color: Colors.red,
+                                              ),
+                                            )),
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) => chatRoom(
+                                              snapshot.data.docs[index]
+                                                  ['ticketId'],
+                                              snapshot.data.docs[index]
+                                                  ['responderNumber'],
+                                              snapshot.data.docs[index]
+                                                  ['ticketTitle'],
+                                              snapshot.data.docs[index]['id'],
+                                              userDocument["name"],
+                                              userDocument2["uplodedPhoto"],
+                                              mobile,
+                                            ));
+                                  },
                                 ),
                               ),
                             );
@@ -674,6 +654,7 @@ class _sellingMessagesState extends State<sellingMessages> {
               itemCount: snapshot.data.docs.length,
               itemBuilder: (context, index) {
                 String title = snapshot.data.docs[index]['ticketTitle'];
+                String lastMessage = snapshot.data.docs[index]['lastMessage'];
                 String mobile;
                 if (snapshot.data.docs[index]['ticket_creater_mobile'] ==
                     FirebaseAuth.instance.currentUser.phoneNumber) {
@@ -682,7 +663,7 @@ class _sellingMessagesState extends State<sellingMessages> {
                     FirebaseAuth.instance.currentUser.phoneNumber) {
                   mobile = snapshot.data.docs[index]['ticket_creater_mobile'];
                 }
-                print(mobile);
+
                 return StreamBuilder(
                     stream: FirebaseFirestore.instance
                         .collection("user_account")
@@ -697,215 +678,213 @@ class _sellingMessagesState extends State<sellingMessages> {
                               .snapshots(),
                           builder: (context, snapshot3) {
                             var userDocument2 = snapshot3.data;
-                            return Align(
-                              heightFactor: 0.92,
-                              child: GestureDetector(
-                                onTap: () {
-                                  AdMobService.createInterstitialAd();
-                                  AdMobService.showInterstitialAd();
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) => chatRoom(
-                                            snapshot.data.docs[index]
-                                                ['ticketId'],
-                                            snapshot.data.docs[index]
-                                                ['responderNumber'],
-                                            snapshot.data.docs[index]
-                                                ['ticketTitle'],
-                                            snapshot.data.docs[index]['id'],
-                                            userDocument["name"],
-                                            userDocument2["uplodedPhoto"],
-                                            mobile,
-                                          ));
-                                },
-                                child: Stack(
-                                  children: [
-                                    Card(
-                                      color: Constants.scaffoldBackground,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Flexible(
-                                            child: SizedBox(
-                                              height: 80,
-                                              child: Center(
-                                                child: Container(
-                                                    child: Row(
-                                                  children: [
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: SizedBox(
-                                                        height: 60,
-                                                        width: 60,
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 5, right: 5),
+                              child: Align(
+                                heightFactor: 0.915,
+                                child: GestureDetector(
+                                  child: Stack(
+                                    children: [
+                                      Card(
+                                        // color: Constants.scaffoldBackground,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Flexible(
+                                              child: SizedBox(
+                                                height: 80,
+                                                child: Center(
+                                                  child: Container(
+                                                      child: Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
                                                         child: ClipRRect(
                                                           borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          30)),
-                                                          // child:
-                                                          //     CachedNetworkImage(
-                                                          //   fit: BoxFit.cover,
-                                                          //   imageUrl: userDocument2[
-                                                          //       "uplodedPhoto"],
-                                                          //   errorWidget:
-                                                          //       (context, url,
-                                                          //               error) =>
-                                                          //           Icon(Icons
-                                                          //               .error),
-                                                          // ),
-                                                          child: Image(
-                                                            fit: BoxFit.cover,
-                                                            image: NetworkImage(
-                                                              userDocument2[
-                                                                  "uplodedPhoto"],
-                                                            ),
-                                                          ),
+                                                              BorderRadius
+                                                                  .circular(50),
+                                                          child: SizedBox(
+                                                              height: 60,
+                                                              width: 60,
+                                                              child:
+                                                                  Image.network(
+                                                                userDocument2[
+                                                                    "uplodedPhoto"],
+                                                                cacheHeight:
+                                                                    100,
+                                                                cacheWidth: 100,
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                              )),
                                                         ),
                                                       ),
-                                                    ),
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        Text(
-                                                          userDocument["name"],
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 17,
-                                                            color: snapshot.data
-                                                                            .docs[index][
-                                                                        'responderNumber'] ==
-                                                                    FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .phoneNumber
-                                                                ? (snapshot.data
-                                                                            .docs[index]
-                                                                        [
-                                                                        'responderMessageSeen']
-                                                                    ? Colors
-                                                                        .white54
-                                                                    : Colors
-                                                                        .white)
-                                                                : (snapshot.data
-                                                                            .docs[index][
-                                                                        'ownerMessageSeen']
-                                                                    ? Colors
-                                                                        .white54
-                                                                    : Colors
-                                                                        .white),
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          SizedBox(
+                                                            height: 10,
                                                           ),
-                                                        ),
-                                                        Text(
-                                                          title.length > 30
-                                                              ? title.substring(
-                                                                      0, 30) +
-                                                                  "..."
-                                                              : title,
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 17,
-                                                            color: snapshot.data
-                                                                            .docs[index][
-                                                                        'responderNumber'] ==
-                                                                    FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .phoneNumber
-                                                                ? (snapshot.data
-                                                                            .docs[index]
-                                                                        [
-                                                                        'responderMessageSeen']
-                                                                    ? Colors
-                                                                        .white54
-                                                                    : Colors
-                                                                        .white)
-                                                                : (snapshot.data
-                                                                            .docs[index][
-                                                                        'ownerMessageSeen']
-                                                                    ? Colors
-                                                                        .white54
-                                                                    : Colors
-                                                                        .white),
+                                                          Text(
+                                                            userDocument[
+                                                                "name"],
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 15,
+                                                              color: snapshot.data.docs[index][
+                                                                          'responderNumber'] ==
+                                                                      FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser
+                                                                          .phoneNumber
+                                                                  ? (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'responderMessageSeen']
+                                                                      ? Colors
+                                                                          .white54
+                                                                      : Colors
+                                                                          .white)
+                                                                  : (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'ownerMessageSeen']
+                                                                      ? Colors
+                                                                          .white54
+                                                                      : Colors
+                                                                          .white),
+                                                            ),
                                                           ),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 5,
-                                                        ),
-                                                        Text(
-                                                          snapshot.data
-                                                                  .docs[index]
-                                                              ['lastMessage'],
-                                                          style: TextStyle(
-                                                            color: snapshot.data
-                                                                            .docs[index][
-                                                                        'responderNumber'] ==
-                                                                    FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser
-                                                                        .phoneNumber
-                                                                ? (snapshot.data
-                                                                            .docs[index]
-                                                                        [
-                                                                        'responderMessageSeen']
-                                                                    ? Colors
-                                                                        .white70
-                                                                    : Colors
-                                                                        .white)
-                                                                : (snapshot.data
-                                                                            .docs[index][
-                                                                        'ownerMessageSeen']
-                                                                    ? Colors
-                                                                        .white70
-                                                                    : Colors
-                                                                        .white),
+                                                          Text(
+                                                            title.length > 30
+                                                                ? title.substring(
+                                                                        0, 30) +
+                                                                    "..."
+                                                                : title,
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 15,
+                                                              color: snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'responderNumber'] ==
+                                                                      FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser
+                                                                          .phoneNumber
+                                                                  ? (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'responderMessageSeen']
+                                                                      ? Colors.amber[
+                                                                          100]
+                                                                      : Constants
+                                                                          .searchIcon)
+                                                                  : (snapshot
+                                                                          .data
+                                                                          .docs[index]['ownerMessageSeen']
+                                                                      ? Colors.amber[100]
+                                                                      : Constants.searchIcon),
+                                                            ),
                                                           ),
-                                                        ),
-                                                      ],
-                                                    )
-                                                  ],
-                                                )),
+                                                          SizedBox(
+                                                            height: 4,
+                                                          ),
+                                                          Text(
+                                                            lastMessage.length >
+                                                                    25
+                                                                ? lastMessage
+                                                                        .substring(
+                                                                            0,
+                                                                            25) +
+                                                                    "..."
+                                                                : lastMessage,
+                                                            style: TextStyle(
+                                                              fontSize: 13,
+                                                              color: snapshot.data.docs[index][
+                                                                          'responderNumber'] ==
+                                                                      FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser
+                                                                          .phoneNumber
+                                                                  ? (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'responderMessageSeen']
+                                                                      ? Colors
+                                                                          .white70
+                                                                      : Colors
+                                                                          .white)
+                                                                  : (snapshot.data
+                                                                              .docs[index]
+                                                                          [
+                                                                          'ownerMessageSeen']
+                                                                      ? Colors
+                                                                          .white70
+                                                                      : Colors
+                                                                          .white),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    ],
+                                                  )),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    Visibility(
-                                      visible: snapshot.data.docs[index]
-                                                  ['responderNumber'] ==
-                                              FirebaseAuth.instance.currentUser
-                                                  .phoneNumber
-                                          ? (snapshot.data.docs[index]
-                                                  ['responderMessageSeen']
-                                              ? false
-                                              : true)
-                                          : (snapshot.data.docs[index]
-                                                  ['ownerMessageSeen']
-                                              ? false
-                                              : true),
-                                      child: Positioned(
-                                          left: queryData.width * 0.89,
-                                          top: 35,
-                                          child: Center(
-                                            child: Icon(
-                                              Icons.brightness_1,
-                                              size: 12.0,
-                                              color: Colors.red,
-                                            ),
-                                          )),
-                                    ),
-                                  ],
+                                      Visibility(
+                                        visible: snapshot.data.docs[index]
+                                                    ['responderNumber'] ==
+                                                FirebaseAuth.instance
+                                                    .currentUser.phoneNumber
+                                            ? (snapshot.data.docs[index]
+                                                    ['responderMessageSeen']
+                                                ? false
+                                                : true)
+                                            : (snapshot.data.docs[index]
+                                                    ['ownerMessageSeen']
+                                                ? false
+                                                : true),
+                                        child: Positioned(
+                                            left: queryData.width * 0.89,
+                                            top: 35,
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.brightness_1,
+                                                size: 12.0,
+                                                color: Colors.red,
+                                              ),
+                                            )),
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) => chatRoom(
+                                              snapshot.data.docs[index]
+                                                  ['ticketId'],
+                                              snapshot.data.docs[index]
+                                                  ['responderNumber'],
+                                              snapshot.data.docs[index]
+                                                  ['ticketTitle'],
+                                              snapshot.data.docs[index]['id'],
+                                              userDocument["name"],
+                                              userDocument2["uplodedPhoto"],
+                                              mobile,
+                                            ));
+                                  },
                                 ),
                               ),
                             );

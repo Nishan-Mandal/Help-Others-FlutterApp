@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -119,6 +120,7 @@ class _myAdsState extends State<myAds> {
               .collection('global_ticket')
               .where('ticket_owner',
                   isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
+              .orderBy("time", descending: true)
               .snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
@@ -177,27 +179,81 @@ class _myAdsState extends State<myAds> {
                                       Flexible(
                                         child: Padding(
                                           padding: const EdgeInsets.all(8.0),
-                                          child: Container(
-                                            child: ClipRRect(
-                                              borderRadius: BorderRadius.only(
+                                          child: Stack(children: [
+                                            Container(
+                                              child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(20),
+                                                    topRight:
+                                                        Radius.circular(20),
+                                                    bottomRight:
+                                                        Radius.circular(20),
+                                                  ),
+                                                  child: Image.network(
+                                                    snapshot.data.docs[index]
+                                                        ["uplodedPhoto"],
+                                                    fit: BoxFit.cover,
+                                                    cacheHeight: 250,
+                                                    cacheWidth: 150,
+                                                  )),
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.only(
                                                 topLeft: Radius.circular(20),
                                                 topRight: Radius.circular(20),
-                                              ),
-                                              child: Image(
-                                                fit: BoxFit.cover,
-                                                image: NetworkImage(
-                                                    snapshot.data.docs[index]
-                                                        ["uplodedPhoto"]),
+                                              )),
+                                              height: queryData.height,
+                                              width: queryData.width,
+                                            ),
+                                            Positioned(
+                                              left: 5,
+                                              bottom: 4,
+                                              child: Text(
+                                                snapshot.data.docs[index]
+                                                    ["date"],
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Constants.date),
                                               ),
                                             ),
-                                            decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(20),
-                                              topRight: Radius.circular(20),
-                                            )),
-                                            height: queryData.height,
-                                            width: queryData.width,
-                                          ),
+                                            Positioned(
+                                              bottom: 0,
+                                              right: 0,
+                                              child: Container(
+                                                height: 50,
+                                                constraints: BoxConstraints(
+                                                    minWidth: 30),
+                                                decoration: BoxDecoration(
+                                                    color: Constants.searchIcon,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                      // topRight:
+                                                      //     Radius.circular(10),
+                                                      bottomRight:
+                                                          Radius.circular(10),
+                                                      // bottomLeft:
+                                                      //     Radius.circular(10),
+                                                      topLeft:
+                                                          Radius.circular(10),
+                                                    )),
+                                                child: Column(
+                                                  children: [
+                                                    Icon(Icons.remove_red_eye,
+                                                        color: Colors.black),
+                                                    Text(
+                                                      arrayLength >= 1000
+                                                          ? "1k+"
+                                                          : "$arrayLength",
+                                                      style: TextStyle(
+                                                          color: Colors.black),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                          ]),
                                         ),
                                       ),
                                       Container(
@@ -323,7 +379,10 @@ class _myAdsState extends State<myAds> {
                                     Row(
                                       children: [
                                         Icon(
-                                          Icons.add_ic_call,
+                                          snapshot.data.docs[index]
+                                                  ["share_mobile"]
+                                              ? Icons.add_ic_call
+                                              : Icons.phone_disabled,
                                           size: 22,
                                           color: Constants.callIcon,
                                         ),
@@ -341,34 +400,6 @@ class _myAdsState extends State<myAds> {
                                 ),
                               ),
                             ),
-                            Positioned(
-                              top: 0,
-                              right: 0,
-                              child: Container(
-                                height: 50,
-                                constraints: BoxConstraints(minWidth: 30),
-                                decoration: BoxDecoration(
-                                    color: Constants.searchIcon,
-                                    borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(10),
-                                      // bottomRight: Radius.circular(10),
-                                      bottomLeft: Radius.circular(10),
-                                      // topLeft: Radius.circular(10),
-                                    )),
-                                child: Column(
-                                  children: [
-                                    Icon(Icons.remove_red_eye,
-                                        color: Colors.black),
-                                    Text(
-                                      arrayLength >= 1000
-                                          ? "1k+"
-                                          : "$arrayLength",
-                                      style: TextStyle(color: Colors.black),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
                           ],
                         ),
                       );
@@ -486,17 +517,17 @@ class _favouritesState extends State<favourites> {
                                           padding: const EdgeInsets.all(8.0),
                                           child: Container(
                                             child: ClipRRect(
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(20),
-                                                topRight: Radius.circular(20),
-                                              ),
-                                              child: Image(
-                                                fit: BoxFit.cover,
-                                                image: NetworkImage(
-                                                    snapshot.data.docs[index]
-                                                        ["uplodedPhoto"]),
-                                              ),
-                                            ),
+                                                borderRadius: BorderRadius.only(
+                                                  topLeft: Radius.circular(20),
+                                                  topRight: Radius.circular(20),
+                                                ),
+                                                child: Image.network(
+                                                  snapshot.data.docs[index]
+                                                      ["uplodedPhoto"],
+                                                  fit: BoxFit.cover,
+                                                  cacheHeight: 250,
+                                                  cacheWidth: 150,
+                                                )),
                                             decoration: BoxDecoration(
                                                 borderRadius: BorderRadius.only(
                                               topLeft: Radius.circular(20),
@@ -548,6 +579,16 @@ class _favouritesState extends State<favourites> {
                                     ],
                                   ),
                                 )),
+                            Positioned(
+                              right: 15,
+                              bottom: 80,
+                              child: Text(
+                                snapshot.data.docs[index]["date"],
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Constants.date),
+                              ),
+                            ),
                             Positioned(
                                 right: 0,
                                 child: Container(
@@ -612,7 +653,10 @@ class _favouritesState extends State<favourites> {
                                     Row(
                                       children: [
                                         Icon(
-                                          Icons.add_ic_call,
+                                          snapshot.data.docs[index]
+                                                  ["share_mobile"]
+                                              ? Icons.add_ic_call
+                                              : Icons.phone_disabled,
                                           size: 22,
                                           color: Constants.callIcon,
                                         ),

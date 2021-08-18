@@ -58,7 +58,10 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
-                        "Ph : xxxxxx" +
+                        "Ph :" +
+                            FirebaseAuth.instance.currentUser.phoneNumber
+                                .substring(0, 3) +
+                            "xxxxxx" +
                             widget.ticketOwnweMobileNumber.substring(
                                 widget.ticketOwnweMobileNumber.length - 4,
                                 widget.ticketOwnweMobileNumber.length),
@@ -73,7 +76,7 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
               color: Colors.grey[400],
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(10.0),
               child: Text(
                 "Published Ads",
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
@@ -187,12 +190,12 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                                                       topRight:
                                                           Radius.circular(20),
                                                     ),
-                                                    child: Image(
+                                                    child: Image.network(
+                                                      snapshot.data.docs[index]
+                                                          ["uplodedPhoto"],
+                                                      cacheHeight: 250,
+                                                      cacheWidth: 150,
                                                       fit: BoxFit.cover,
-                                                      image: NetworkImage(
-                                                          snapshot.data
-                                                                  .docs[index]
-                                                              ["uplodedPhoto"]),
                                                     ),
                                                   ),
                                                 ),

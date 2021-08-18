@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:help_others/screens/ChatRoom.dart';
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:help_others/screens/NavigationBar.dart';
 import 'package:help_others/screens/SeeProfileOfTicketOwner.dart';
 import 'package:help_others/services/AdMob.dart';
@@ -649,17 +649,32 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                     height: 20,
                                   ),
                                   Container(
-                                    decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                            image: NetworkImage(widget.photo)),
-                                        gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors:
-                                                Constants.adPhotoContainer)),
-                                    height: 250,
-                                    width: queryData.width,
-                                  ),
+                                      decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                              colors:
+                                                  Constants.adPhotoContainer)),
+                                      height: 250,
+                                      width: queryData.width,
+                                      child: Image.network(
+                                        widget.photo,
+                                        loadingBuilder: (BuildContext context,
+                                            Widget child,
+                                            ImageChunkEvent loadingProgress) {
+                                          if (loadingProgress != null) {
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                            Color>(
+                                                        Constants.searchIcon),
+                                              ),
+                                            );
+                                          }
+                                          return child;
+                                        },
+                                      )),
                                   Divider(
                                     thickness: 1,
                                   ),
@@ -954,6 +969,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                             return ListView.builder(
                                               shrinkWrap: true,
                                               scrollDirection: Axis.horizontal,
+                                              physics: BouncingScrollPhysics(),
                                               itemCount:
                                                   snapshot3.data.docs.length,
                                               itemBuilder: (context, index) {
@@ -1049,14 +1065,25 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                                           topRight:
                                                                               Radius.circular(20),
                                                                         ),
-                                                                        child:
-                                                                            Image(
+                                                                        child: Image
+                                                                            .network(
+                                                                          snapshot3
+                                                                              .data
+                                                                              .docs[index]["uplodedPhoto"],
+                                                                          cacheHeight:
+                                                                              250,
+                                                                          cacheWidth:
+                                                                              150,
                                                                           fit: BoxFit
                                                                               .cover,
-                                                                          image: NetworkImage(snapshot3
-                                                                              .data
-                                                                              .docs[index]["uplodedPhoto"]),
                                                                         ),
+                                                                        //     Image(
+                                                                        //   fit: BoxFit
+                                                                        //       .cover,
+                                                                        //   image: NetworkImage(snapshot3
+                                                                        //       .data
+                                                                        //       .docs[index]["uplodedPhoto"]),
+                                                                        // ),
                                                                       ),
                                                                     ),
                                                                   ),

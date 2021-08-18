@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -25,6 +26,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+
+import 'package:connectivity/connectivity.dart';
 
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'high_importance_channel', // id
@@ -131,23 +134,53 @@ class _LandingPageState extends State<LandingPage> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
   final connectivity = SnackBar(
     content: Text('No internet connection'),
-    duration: Duration(seconds: 5),
+    duration: Duration(hours: 5),
     backgroundColor: Colors.redAccent,
   );
-  checkInternetConnectivity() async {
+
+  StreamSubscription connectivitySubscription;
+
+  ConnectivityResult _previousResult;
+  bool dialogshown = false;
+  Future<bool> checkinternet() async {
     try {
-      final result = await InternetAddress.lookup('example.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {}
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return Future.value(true);
+      }
     } on SocketException catch (_) {
-      ScaffoldMessenger.of(context).showSnackBar(connectivity);
+      return Future.value(false);
     }
   }
 
+  ConnectivityResult previous;
   @override
   void initState() {
     super.initState();
+    checkDefaultTicket();
+
+    connectivitySubscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult connresult) {
+      if (connresult == ConnectivityResult.none) {
+        dialogshown = true;
+        ScaffoldMessenger.of(context).showSnackBar(connectivity);
+      } else if (_previousResult == ConnectivityResult.none) {
+        checkinternet().then((result) {
+          if (result == true) {
+            if (dialogshown == true) {
+              dialogshown = false;
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            }
+          }
+        });
+      }
+
+      _previousResult = connresult;
+    });
+
     // checkDefaultTicket();
-    checkInternetConnectivity();
+    // checkInternetConnectivity();
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       RemoteNotification notification = message.notification;
       AndroidNotification android = message.notification?.android;
@@ -170,7 +203,6 @@ class _LandingPageState extends State<LandingPage> {
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('A new onMessageOpenedApp event was published!');
       RemoteNotification notification = message.notification;
       AndroidNotification android = message.notification?.android;
       if (notification != null && android != null) {
@@ -179,21 +211,32 @@ class _LandingPageState extends State<LandingPage> {
     });
   }
 
-  // bool flag = false;
-  // checkDefaultTicket() async {
-  //   await FirebaseFirestore.instance
-  //       .collection("global_ticket")
-  //       .where("ticket_owner",
-  //           isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
-  //       .get()
-  //       .then((value) {
-  //     value.docs.forEach((element) async {
-  //       setState(() {
-  //         flag = true;
-  //       });
-  //     });
-  //   });
-  // }
+  @override
+  void dispose() {
+    super.dispose();
+
+    connectivitySubscription.cancel();
+  }
+
+  bool flag = false;
+  bool isChecking = true;
+  checkDefaultTicket() async {
+    await FirebaseFirestore.instance
+        .collection("global_ticket")
+        .where("ticket_owner",
+            isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
+        .get()
+        .then((value) {
+      value.docs.forEach((element) async {
+        setState(() {
+          flag = true;
+        });
+      });
+    });
+    setState(() {
+      isChecking = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -204,11 +247,15 @@ class _LandingPageState extends State<LandingPage> {
           User user = snapshot.data;
           if (user == null) {
             return GetStartrdPage();
-          }
-          // else if (!flag) {
-          //   return firstAd(latitudeData1, longitudeData1);
-          // }
-          else {
+          } else if (!flag) {
+            if (isChecking) {
+              return Center(
+                  child: CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Constants.searchIcon)));
+            }
+            return firstAd(latitudeData1, longitudeData1);
+          } else {
             return navigationBar();
           }
         } else {
