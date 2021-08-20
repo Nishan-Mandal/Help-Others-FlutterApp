@@ -98,14 +98,9 @@ class MyApp extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.done) {
           return MaterialApp(
             title: 'BBold',
-            theme: ThemeData(
-                // bottomSheetTheme:
-                //     BottomSheetThemeData(backgroundColor: Colors.red),
-                // primarySwatch: Colors.blue,
-                brightness: Brightness.light),
+            theme: ThemeData(brightness: Brightness.light),
             darkTheme: ThemeData(brightness: Brightness.dark),
             themeMode: ThemeMode.dark,
-            // routes: {'/navigationBar': (context) => navigationBar()},
             home: LandingPage(),
             debugShowCheckedModeBanner: false,
           );
@@ -142,6 +137,7 @@ class _LandingPageState extends State<LandingPage> {
 
   ConnectivityResult _previousResult;
   bool dialogshown = false;
+  ConnectivityResult previous;
   Future<bool> checkinternet() async {
     try {
       final result = await InternetAddress.lookup('google.com');
@@ -153,7 +149,6 @@ class _LandingPageState extends State<LandingPage> {
     }
   }
 
-  ConnectivityResult previous;
   @override
   void initState() {
     super.initState();

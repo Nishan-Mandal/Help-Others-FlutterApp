@@ -5,20 +5,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:help_others/screens/GetStartedPage.dart';
-
+import 'package:store_redirect/store_redirect.dart';
 import 'package:help_others/services/Constants.dart';
 import 'package:help_others/services/Database.dart';
 import 'package:help_others/services/AdMob.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:image_picker/image_picker.dart';
+
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import '../main.dart';
 import 'FirstAd.dart';
 import 'NavigationBar.dart';
 
 class drawer extends StatefulWidget {
-  drawer({Key key}) : super(key: key);
+  drawer({
+    Key key,
+  }) : super(
+          key: key,
+        );
 
   @override
   _drawerState createState() => _drawerState();
@@ -106,6 +112,18 @@ class _drawerState extends State<drawer> {
         (route) => false);
   }
 
+  feedback_HelpSupportByEmail(
+      String toEmail, String subject, String body) async {
+    final url =
+        'mailto:$toEmail?subject=${Uri.encodeFull(subject)}&body=${Uri.encodeFull(body)}';
+
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   Future<bool> onDeleteAccount() {
     return showDialog(
       context: context,
@@ -191,6 +209,121 @@ class _drawerState extends State<drawer> {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  rateUs() {
+    double ratingStars = 0;
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+
+        child: Container(
+          height: 300,
+          width: 400,
+          decoration: BoxDecoration(
+            color: Colors.black26,
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Stack(children: [
+            Align(
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Container(
+                    height: 100,
+                    width: 100,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        image: DecorationImage(image: AssetImage("logo.png"))),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    "Enjoying BBold?",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 16),
+                  ),
+                  Text("Tap a star to rate it on the"),
+                  Text("Play Store."),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Divider(
+                    thickness: 1,
+                    height: 6,
+                  ),
+                  RatingBar.builder(
+                    initialRating: 0,
+                    minRating: 0,
+                    direction: Axis.horizontal,
+                    itemCount: 5,
+                    itemBuilder: (context, _) => Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    ),
+                    onRatingUpdate: (rating) {
+                      setState(() {
+                        print(ratingStars);
+                        ratingStars = rating;
+                      });
+                    },
+                  ),
+                  Divider(
+                    thickness: 1,
+                    height: 6,
+                  ),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  InkWell(
+                    child: Text(
+                      "SUBMIT",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber),
+                    ),
+                    onTap: () {
+                      if (ratingStars > 2) {
+                        StoreRedirect.redirect(
+                          androidAppId: "com.android.chrome",
+                        );
+                      } else {
+                        Navigator.pop(context);
+                      }
+                    },
+                  )
+                ],
+              ),
+            ),
+            Positioned(
+              top: 5,
+              right: 5,
+              child: IconButton(
+                icon: Icon(
+                  Icons.cancel,
+                  color: Colors.orange,
+                  size: 25,
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            )
+          ]),
+        ),
+        // backgroundColor: Colors.amber[300],
       ),
     );
   }
@@ -328,15 +461,35 @@ class _drawerState extends State<drawer> {
                       ),
                       ListTile(
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => firstAd(1, 1),
-                              ));
+                          feedback_HelpSupportByEmail(
+                              'ultimaterocker1994@gmail.com',
+                              'Feedback |${FirebaseAuth.instance.currentUser.phoneNumber} |$initialText',
+                              "");
                         },
                         leading:
                             Icon(Icons.feedback, color: Constants.searchIcon),
                         title: Text("Feedback",
+                            style: TextStyle(
+                                fontSize: 17, color: Constants.searchIcon)),
+                      ),
+                      ListTile(
+                        onTap: () {
+                          feedback_HelpSupportByEmail(
+                              'ultimaterocker1994@gmail.com',
+                              'Help support |${FirebaseAuth.instance.currentUser.phoneNumber} |$initialText',
+                              "");
+                        },
+                        leading: Icon(Icons.contact_support,
+                            color: Constants.searchIcon),
+                        title: Text("Help & Support",
+                            style: TextStyle(
+                                fontSize: 17, color: Constants.searchIcon)),
+                      ),
+                      ListTile(
+                        onTap: () => rateUs(),
+                        leading: Icon(Icons.rate_review,
+                            color: Constants.searchIcon),
+                        title: Text("Rate us",
                             style: TextStyle(
                                 fontSize: 17, color: Constants.searchIcon)),
                       ),
@@ -442,7 +595,8 @@ class _drawerState extends State<drawer> {
   );
 
   void takePhoto(ImageSource source) async {
-    final pickerFile = await picker.getImage(source: source, imageQuality: 25);
+    final pickerFile = await picker.getImage(
+        source: source, imageQuality: 25, maxHeight: 500, maxWidth: 500);
     var bytes = new File(pickerFile.path);
     var enc = await bytes.readAsBytes();
 

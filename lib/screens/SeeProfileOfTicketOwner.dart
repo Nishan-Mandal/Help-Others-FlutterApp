@@ -182,6 +182,18 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                                                 child: Container(
                                                   height: 180,
                                                   width: 160,
+                                                  decoration: BoxDecoration(
+                                                      image: DecorationImage(
+                                                          fit: BoxFit.cover,
+                                                          image: AssetImage(
+                                                              "loadingImage.png")),
+                                                      borderRadius:
+                                                          BorderRadius.only(
+                                                        topLeft:
+                                                            Radius.circular(20),
+                                                        topRight:
+                                                            Radius.circular(20),
+                                                      )),
                                                   child: ClipRRect(
                                                     borderRadius:
                                                         BorderRadius.only(

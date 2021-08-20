@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:help_others/screens/ChatRoom.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:help_others/screens/NavigationBar.dart';
 import 'package:help_others/screens/SeeProfileOfTicketOwner.dart';
 import 'package:help_others/services/AdMob.dart';
@@ -1056,6 +1056,14 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                                           180,
                                                                       width:
                                                                           160,
+                                                                      decoration: BoxDecoration(
+                                                                          image: DecorationImage(fit: BoxFit.cover, image: AssetImage("loadingImage.png")),
+                                                                          borderRadius: BorderRadius.only(
+                                                                            topLeft:
+                                                                                Radius.circular(20),
+                                                                            topRight:
+                                                                                Radius.circular(20),
+                                                                          )),
                                                                       child:
                                                                           ClipRRect(
                                                                         borderRadius:

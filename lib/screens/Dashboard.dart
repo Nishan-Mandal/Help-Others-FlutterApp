@@ -15,13 +15,12 @@ import 'package:help_others/services/Constants.dart';
 import 'package:help_others/services/CustomPageRoute.dart';
 import 'package:help_others/services/Database.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 import 'TicketViewScreen.dart' show ticketViewScreen;
 import 'package:help_others/services/BannerAds.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:progressive_image/progressive_image.dart';
 
 String sc;
 
@@ -766,8 +765,10 @@ class _dashboardState extends State<dashboard> {
                                                                                     color: Colors.amber,
                                                                                   ),
                                                                                   onPressed: () {
-                                                                                    adMobService.showRewardedAd2();
-                                                                                    adMobService.loadRewardedAd2();
+                                                                                    Future.delayed(const Duration(seconds: 1), () {
+                                                                                      adMobService.showRewardedAd2();
+                                                                                      adMobService.loadRewardedAd2();
+                                                                                    });
                                                                                     callTicketOwner(
                                                                                       products[index]["ticket_owner"],
                                                                                     );
@@ -1071,13 +1072,7 @@ class _dashboardState extends State<dashboard> {
                                                                           fit: BoxFit
                                                                               .cover,
                                                                           image: AssetImage(
-                                                                              "loadingImage.png")
-                                                                          // CachedNetworkImageProvider(
-                                                                          //   products[index]["uplodedPhoto"],
-                                                                          //   maxHeight: 300,
-                                                                          //   maxWidth: 200,
-                                                                          // ),
-                                                                          ),
+                                                                              "loadingImage.png")),
                                                                       borderRadius:
                                                                           BorderRadius
                                                                               .only(
@@ -1333,8 +1328,10 @@ class _dashboardState extends State<dashboard> {
                                                                                     color: Colors.amber,
                                                                                   ),
                                                                                   onPressed: () {
-                                                                                    adMobService.showRewardedAd2();
-                                                                                    adMobService.loadRewardedAd2();
+                                                                                    Future.delayed(const Duration(seconds: 1), () {
+                                                                                      adMobService.showRewardedAd2();
+                                                                                      adMobService.loadRewardedAd2();
+                                                                                    });
                                                                                     callTicketOwner(
                                                                                       products[index]["ticket_owner"],
                                                                                     );

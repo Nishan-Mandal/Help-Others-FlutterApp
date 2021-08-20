@@ -49,10 +49,11 @@ dependencies:
   firebase_messaging: ^10.0.4
   flutter_local_notifications: ^5.0.0+4
   intl: ^0.17.0
-  cached_network_image: ^3.1.0
   connectivity: ^3.0.6
   flutter_neumorphic: ^3.1.0
-  progressive_image: ^2.0.0
+  store_redirect: ^2.0.0
+  flutter_rating_bar: ^4.0.0
+  
 
  
   
@@ -93,6 +94,7 @@ flutter:
     - getStartedPage2.png
     - getStartedPage3.png
     - loadingImage.png
+    - logo.png
    
       
 

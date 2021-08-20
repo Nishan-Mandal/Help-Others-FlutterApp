@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -278,15 +277,26 @@ class _searchBoxState extends State<searchBox> {
                                                   // )
                                                   ),
                                               decoration: BoxDecoration(
+                                                  image: DecorationImage(
+                                                      fit: BoxFit.cover,
+                                                      image: AssetImage(
+                                                          "loadingImage.png")),
                                                   borderRadius:
                                                       BorderRadius.only(
-                                                topLeft: Radius.circular(20),
-                                                topRight: Radius.circular(20),
-                                              )),
+                                                    topLeft:
+                                                        Radius.circular(20),
+                                                    topRight:
+                                                        Radius.circular(20),
+                                                  )),
                                               height: queryData.height,
                                               width: queryData.width,
                                             ),
                                           ),
+                                        ),
+                                        Divider(
+                                          height: 2,
+                                          thickness: 1,
+                                          color: Constants.divider,
                                         ),
                                         Container(
                                           height: 70,
@@ -406,7 +416,9 @@ class _searchBoxState extends State<searchBox> {
                                       Row(
                                         children: [
                                           Icon(
-                                            Icons.add_ic_call,
+                                            _resultsList[index]["share_mobile"]
+                                                ? Icons.call
+                                                : Icons.phone_disabled,
                                             size: 22,
                                             color: Constants.callIcon,
                                           ),
@@ -424,6 +436,19 @@ class _searchBoxState extends State<searchBox> {
                                   ),
                                 ),
                               ),
+                              Positioned(
+                                right: 15,
+                                bottom: 85,
+                                child: Text(
+                                  _resultsList[index]["date"],
+                                  // snapshot.data
+                                  //         .docs[index]
+                                  //     ["date"],
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Constants.date),
+                                ),
+                              )
                             ],
                           ),
                         );

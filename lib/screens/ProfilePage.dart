@@ -312,7 +312,8 @@ class _userSignupPageState extends State<userSignupPage> {
     backgroundColor: Colors.redAccent,
   );
   void takePhoto(ImageSource source) async {
-    final pickerFile = await picker.getImage(source: source, imageQuality: 25);
+    final pickerFile = await picker.getImage(
+        source: source, imageQuality: 25, maxHeight: 200, maxWidth: 200);
     var bytes = new File(pickerFile.path);
     var enc = await bytes.readAsBytes();
 
