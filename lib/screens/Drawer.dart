@@ -42,9 +42,6 @@ class _drawerState extends State<drawer> {
   @override
   void initState() {
     super.initState();
-
-    // onDeleteAccount();
-
     _editingController = TextEditingController(text: initialText);
   }
 
@@ -128,8 +125,6 @@ class _drawerState extends State<drawer> {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        // shape:
-        //     RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
         title: Column(
           children: [
             Text(
@@ -155,7 +150,6 @@ class _drawerState extends State<drawer> {
             ),
           ],
         ),
-        // backgroundColor: Colors.amber[300],
         actions: [
           ElevatedButton(
             child: Text(
@@ -220,7 +214,6 @@ class _drawerState extends State<drawer> {
       builder: (context) => Dialog(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-
         child: Container(
           height: 300,
           width: 400,
@@ -297,8 +290,9 @@ class _drawerState extends State<drawer> {
                     onTap: () {
                       if (ratingStars > 2) {
                         StoreRedirect.redirect(
-                          androidAppId: "com.android.chrome",
+                          androidAppId: "com.ultimaterocker.bbold",
                         );
+                        Navigator.pop(context);
                       } else {
                         Navigator.pop(context);
                       }
@@ -323,7 +317,6 @@ class _drawerState extends State<drawer> {
             )
           ]),
         ),
-        // backgroundColor: Colors.amber[300],
       ),
     );
   }
@@ -383,11 +376,6 @@ class _drawerState extends State<drawer> {
                                           ? NetworkImage(
                                               userDocument['photo'],
                                             )
-                                          //  Image.network(
-                                          //     userDocument['photo'],
-                                          //     cacheHeight: 120,
-                                          //     cacheWidth: 120,
-                                          //   )
                                           : FileImage(File(imageFile.path))),
                                   Positioned(
                                       bottom: 15.0,
@@ -408,9 +396,6 @@ class _drawerState extends State<drawer> {
                                 ],
                               ),
                             ),
-                            // SizedBox(
-                            //   height: 10,
-                            // ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [

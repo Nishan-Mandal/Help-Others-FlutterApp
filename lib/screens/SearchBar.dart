@@ -25,11 +25,9 @@ class searchBox extends StatefulWidget {
 }
 
 class _searchBoxState extends State<searchBox> {
-  // String sc;
-  // final geo = Geoflutterfire();
   DatabaseMethods databaseMethods = new DatabaseMethods();
   TextEditingController _searchController = TextEditingController();
-  // final CategoriesScroller categoriesScroller = CategoriesScroller();
+
   ScrollController controller = ScrollController();
   bool closeTopContainer = false;
   double topContainer = 0;
@@ -48,12 +46,6 @@ class _searchBoxState extends State<searchBox> {
 
     controller.addListener(() {
       double value = controller.offset / 140;
-
-      // setState(() {
-      //   topContainer = value;
-      //   closeTopContainer = controller.offset > 50;
-      // }
-      // );
     });
   }
 
@@ -96,8 +88,6 @@ class _searchBoxState extends State<searchBox> {
         }
       }
     } else if (_searchController.text == "" && widget.searchRadius != 0) {
-      // showResults = List.from(_allResults);
-
       for (var distance in _allResults) {
         double ticketLatitude = Search.fromSnapshot(distance).latitude;
         double ticketLongitude = Search.fromSnapshot(distance).longitude;
@@ -126,8 +116,6 @@ class _searchBoxState extends State<searchBox> {
     if (this.mounted) {
       setState(() {
         _resultsList = showResults;
-
-        // _resultsList = _allResults;
       });
     }
   }
@@ -162,9 +150,6 @@ class _searchBoxState extends State<searchBox> {
           appBar: AppBar(
             backgroundColor: Constants.appBar,
             title: Container(
-              // decoration: BoxDecoration(
-              //     border: Border.all(color: Colors.white),
-              //     borderRadius: BorderRadius.circular(15)),
               child: TextField(
                 readOnly: true,
                 onTap: () {
@@ -201,6 +186,7 @@ class _searchBoxState extends State<searchBox> {
                       itemBuilder: (BuildContext context, int index) {
                         String title = _resultsList[index]['title'];
                         String description = _resultsList[index]['description'];
+                        String address = snapshot.data.docs[index]["address"];
                         bool myFavFlag = false;
 
                         try {
@@ -238,10 +224,7 @@ class _searchBoxState extends State<searchBox> {
                             children: [
                               new Container(
                                   decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: Constants.gradientColorOnAd),
+                                      color: Colors.grey[800],
                                       borderRadius: BorderRadius.all(
                                           Radius.circular(20))),
                                   child: new Center(
@@ -265,17 +248,7 @@ class _searchBoxState extends State<searchBox> {
                                                     fit: BoxFit.cover,
                                                     cacheHeight: 300,
                                                     cacheWidth: 200,
-                                                  )
-
-                                                  // CachedNetworkImage(
-                                                  //   imageUrl:
-                                                  //       _resultsList[index]
-                                                  //           ["uplodedPhoto"],
-                                                  //   fit: BoxFit.cover,
-                                                  //   height: 300,
-                                                  //   width: 200,
-                                                  // )
-                                                  ),
+                                                  )),
                                               decoration: BoxDecoration(
                                                   image: DecorationImage(
                                                       fit: BoxFit.cover,
@@ -403,8 +376,10 @@ class _searchBoxState extends State<searchBox> {
                                               size: 15,
                                             ),
                                             Text(
-                                              snapshot.data.docs[index]
-                                                  ["address"],
+                                              address.length > 7
+                                                  ? address.substring(0, 8) +
+                                                      ".."
+                                                  : address,
                                               style: TextStyle(
                                                   color:
                                                       Constants.locationMarker,
@@ -441,9 +416,6 @@ class _searchBoxState extends State<searchBox> {
                                 bottom: 85,
                                 child: Text(
                                   _resultsList[index]["date"],
-                                  // snapshot.data
-                                  //         .docs[index]
-                                  //     ["date"],
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Constants.date),

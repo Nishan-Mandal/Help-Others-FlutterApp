@@ -141,6 +141,28 @@ class _userSignupPageState extends State<userSignupPage> {
     }
   }
 
+  defaultAccountDetails() {
+    String userImageUrl =
+        "https://firebasestorage.googleapis.com/v0/b/bbold-6f546.appspot.com/o/person%20icon.png?alt=media&token=2f605669-8a3e-4fcd-b03a-f1a368e3179b";
+    String uid = FirebaseAuth.instance.currentUser.uid;
+    String defaultName =
+        uid.substring(0, 5) + uid.substring(uid.length - 5, uid.length - 1);
+    databaseMethods.uploadUserInfo(
+      defaultName,
+      FirebaseAuth.instance.currentUser.phoneNumber,
+      userImageUrl,
+      FirebaseAuth.instance.currentUser.uid,
+      widget.acceptAllTermsAndConditions,
+      widget.iam18Plus,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    defaultAccountDetails();
+  }
+
   @override
   Widget build(BuildContext context) {
     MediaQueryData queryData;

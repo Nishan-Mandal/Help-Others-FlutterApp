@@ -114,6 +114,8 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                                       snapshot.data.docs[index]["title"];
                                   String description =
                                       snapshot.data.docs[index]["description"];
+                                  String address =
+                                      snapshot.data.docs[index]["address"];
                                   try {
                                     List l = snapshot2.data.docs[index]
                                         ["favourites"];
@@ -162,11 +164,7 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                                           height: 50,
                                           width: 180,
                                           decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                  begin: Alignment.topLeft,
-                                                  end: Alignment.bottomRight,
-                                                  colors: Constants
-                                                      .gradientColorOnAd),
+                                              color: Colors.grey[800],
                                               border: Border.all(),
                                               borderRadius:
                                                   BorderRadius.circular(20)),
@@ -212,6 +210,11 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                                                   ),
                                                 ),
                                               ),
+                                              Divider(
+                                                height: 2,
+                                                thickness: 1,
+                                                color: Constants.divider,
+                                              ),
                                               Padding(
                                                 padding:
                                                     const EdgeInsets.all(8.0),
@@ -243,7 +246,7 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                                               ),
                                               Padding(
                                                 padding: const EdgeInsets.only(
-                                                    left: 8, top: 12),
+                                                    left: 8, top: 8),
                                                 child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment
@@ -262,9 +265,13 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                                                           size: 15,
                                                         ),
                                                         Text(
-                                                          snapshot.data
-                                                                  .docs[index]
-                                                              ["address"],
+                                                          address.length > 7
+                                                              ? address
+                                                                      .substring(
+                                                                          0,
+                                                                          8) +
+                                                                  ".."
+                                                              : address,
                                                           style: TextStyle(
                                                               color: Constants
                                                                   .locationMarker,
@@ -280,7 +287,12 @@ class _seeProfileOfTicketOwnerState extends State<seeProfileOfTicketOwner> {
                                                       child: Row(
                                                         children: [
                                                           Icon(
-                                                            Icons.add_ic_call,
+                                                            snapshot.data.docs[
+                                                                        index][
+                                                                    "share_mobile"]
+                                                                ? Icons.call
+                                                                : Icons
+                                                                    .phone_disabled,
                                                             size: 22,
                                                             color: Constants
                                                                 .callIcon,

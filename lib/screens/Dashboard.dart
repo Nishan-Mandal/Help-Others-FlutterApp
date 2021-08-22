@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:geolocator/geolocator.dart';
@@ -62,7 +62,7 @@ class _dashboardState extends State<dashboard> {
     String text,
   ) async {
     Navigator.pop(context);
-    // showOverlay(context);
+
     String name;
     await FirebaseFirestore.instance
         .collection("user_account")
@@ -74,7 +74,7 @@ class _dashboardState extends State<dashboard> {
       });
     });
     databaseMethods.uploadTicketResponse(id, ticketOwnweMobileNumber, title,
-        text, name, photo, ticketOwnweMobileNumber1, context);
+        text, name, photo, ticketOwnweMobileNumber1, context, false);
   }
 
   void _tripEditModalBottomSheet(
@@ -297,39 +297,58 @@ class _dashboardState extends State<dashboard> {
     try {
       lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
     } catch (e) {}
-    // print(querySnapshot.docs.length - 1);
-    // int lastIndexOfProductList = products.length;
-    products.addAll(querySnapshot.docs);
 
-    // await Future.wait(products
-    //     .map((images) => cacheImage(context, images["uplodedPhoto"]))
-    //     .toList());
+    products.addAll(querySnapshot.docs);
 
     setState(() {});
     gettingMoreProducts = false;
   }
 
-  // bool imageLoading = true;
-  // Future loadImages() async {
-  //   print("++++++++++++++++++++++++++++++++");
-  //   setState(() {
-  //     imageLoading = true;
-  //   });
+  final connectivity = SnackBar(
+    content: Text('No internet connection'),
+    duration: Duration(hours: 5),
+    backgroundColor: Colors.redAccent,
+  );
+  StreamSubscription connectivitySubscription;
 
-  //   setState(() {
-  //     imageLoading = false;
-  //   });
-  // }
+  ConnectivityResult _previousResult;
+  bool dialogshown = false;
+  Future<bool> checkinternet() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return Future.value(true);
+      }
+    } on SocketException catch (_) {
+      return Future.value(false);
+    }
+  }
 
-  // Future cacheImage(BuildContext context, String urlImage) => precacheImage(
-  //     CachedNetworkImageProvider(
-  //       urlImage,
-  //     ),
-  //     context);
   bool responded = false;
+
   @override
   void initState() {
     super.initState();
+    connectivitySubscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult connresult) {
+      if (connresult == ConnectivityResult.none) {
+        dialogshown = true;
+        ScaffoldMessenger.of(context).showSnackBar(connectivity);
+      } else if (_previousResult == ConnectivityResult.none) {
+        checkinternet().then((result) {
+          if (result == true) {
+            if (dialogshown == true) {
+              dialogshown = false;
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            }
+          }
+        });
+      }
+
+      _previousResult = connresult;
+    });
+    adMobService.loadRewardedAd1();
     adMobService.loadRewardedAd2();
     getProducts();
     scrollController.addListener(() {
@@ -349,22 +368,6 @@ class _dashboardState extends State<dashboard> {
       cacheWidth: 150,
       fit: BoxFit.cover,
     );
-    //     ProgressiveImage(
-    //   fit: BoxFit.fill,
-    //   placeholder: AssetImage('map.jpg'),
-    //   // size: 1.87KB
-    //   thumbnail: NetworkImage(urlImage),
-    //   // size: 1.29MB
-    //   image: NetworkImage(urlImage),
-    //   height: 500,
-    //   width: 300,
-    // );
-    // CachedNetworkImage(imageUrl: urlImage, fit: BoxFit.cover);
-    //     Image(
-    //   image:
-    //       CachedNetworkImageProvider(urlImage, maxHeight: 300, maxWidth: 200),
-    //   fit: BoxFit.cover,
-    // );
   }
 
   Future _refreshData() async {
@@ -383,15 +386,12 @@ class _dashboardState extends State<dashboard> {
     }
   }
 
-  // Color bg = Colors.amber[300];
-
   @override
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Container(
       height: queryData.height,
       child: Scaffold(
-        // backgroundColor: Colors.amber,
         appBar: AppBar(
           backgroundColor: Colors.grey[900],
           actions: [
@@ -441,7 +441,7 @@ class _dashboardState extends State<dashboard> {
                   Icons.search,
                   color: Constants.searchIcon,
                 ),
-                hintText: "Search...",
+                hintText: "What are you looking for?",
                 hintStyle: TextStyle(color: Constants.textFieldHintText),
               ),
             ),
@@ -499,454 +499,382 @@ class _dashboardState extends State<dashboard> {
                               }
 
                               // /+++++++++++++++++++++++++++++++++++++++++
-                              return InkWell(
-                                onTap: () {
-                                  Navigator.of(context)
-                                      .push(CustomPageRouteAnimation(
-                                    child: ticketViewScreen(
-                                      products[index]["ticket_owner"],
-                                      products[index]["title"],
-                                      products[index]["description"],
-                                      products[index]["id"],
-                                      products[index]["uplodedPhoto"],
-                                      products[index]["latitude"],
-                                      products[index]["longitude"],
-                                      products[index]["date"],
-                                      products[index]["share_mobile"],
-                                      myFavFlag,
-                                      products[index]["address"],
-                                      products[index]["category"],
-                                    ),
-                                  ));
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(20.0),
-                                  child: Neumorphic(
-                                    style: NeumorphicStyle(
-                                      intensity: .6,
-                                      // surfaceIntensity: 1,
-                                      // border: NeumorphicBorder(),
-                                      shape: NeumorphicShape.flat,
-                                      boxShape: NeumorphicBoxShape.roundRect(
-                                          BorderRadius.circular(12)),
-                                      depth: 4,
-                                      lightSource: LightSource.bottomRight,
-                                      color: Colors.transparent,
-                                    ),
-                                    child: Container(
-                                        padding: EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                            // gradient: LinearGradient(
-                                            //     begin: Alignment.topLeft,
-                                            //     end: Alignment.bottomRight,
-                                            //     colors:
-                                            //         Constants.gradientColorOnAd),
-                                            // borderRadius:
-                                            //     BorderRadius.all(Radius.circular(20)),
-                                            // borderRadius: BorderRadius.only(
-                                            //     bottomRight: Radius.circular(20)),
-                                            // border: Border.all()
+                              return StreamBuilder(
+                                  stream: FirebaseFirestore.instance
+                                      .collection("global_ticket")
+                                      .doc(products[index]["id"])
+                                      .collection("responses")
+                                      .doc(FirebaseAuth
+                                          .instance.currentUser.phoneNumber)
+                                      .snapshots(),
+                                  builder: (context, snapshot2) {
+                                    var userTicketDocument = snapshot2.data;
+                                    try {
+                                      responded =
+                                          userTicketDocument["responseViaChat"];
+                                    } catch (e) {
+                                      responded = false;
+                                    }
 
-                                            // border: Border(
-                                            //   // left: BorderSide(color: Colors.white),
-                                            //   // top: BorderSide(color: Colors.white),
-                                            //   bottom: BorderSide(color: Colors.white30),
-                                            //   // right: BorderSide(color: Colors.white)
-                                            // ),
-                                            ),
-                                        height: 200,
-                                        width: queryData.width,
-                                        child: Stack(
-                                          children: [
-                                            Positioned(
-                                                left: 10,
-                                                top: 10,
-                                                bottom: 10,
-                                                child: Container(
-                                                  child: ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.only(
-                                                              topLeft: Radius
-                                                                  .circular(20),
-                                                              topRight: Radius
-                                                                  .circular(20),
-                                                              bottomLeft: Radius
-                                                                  .circular(
-                                                                      20)),
-                                                      child: Image.network(
-                                                        products[index]
-                                                            ["uplodedPhoto"],
-                                                        fit: BoxFit.cover,
-                                                        cacheHeight: 200,
-                                                        cacheWidth: 140,
-                                                        // filterQuality:
-                                                        //     FilterQuality.none,
-                                                      )
-                                                      //  buildImage(
-                                                      //   products[index]["uplodedPhoto"],
-                                                      // ),
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                      image: DecorationImage(
-                                                          fit: BoxFit.cover,
-                                                          image: AssetImage(
-                                                              "loadingImage.png")
-                                                          // CachedNetworkImageProvider(
-                                                          //   products[index]["uplodedPhoto"],
-                                                          //   maxHeight: 300,
-                                                          //   maxWidth: 200,
-                                                          // ),
-                                                          ),
-                                                      borderRadius:
-                                                          BorderRadius.only(
-                                                              topLeft: Radius
-                                                                  .circular(20),
-                                                              topRight: Radius
-                                                                  .circular(20),
-                                                              bottomLeft: Radius
-                                                                  .circular(
-                                                                      20))),
-                                                  height: 190,
-                                                  width: queryData.width * 0.39,
-                                                )),
-                                            Positioned(
-                                                left: 100,
-                                                bottom: 15,
-                                                child: Text(
-                                                  products[index]["date"],
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                )),
-                                            Positioned(
-                                                top: 10,
-                                                left: 170,
-                                                right: 10,
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(
-                                                      height: 5,
-                                                    ),
-                                                    Text(
-                                                      title.length > 48
-                                                          ? title.substring(
-                                                                  0, 48) +
-                                                              "..."
-                                                          : title,
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.amber,
-                                                          fontSize: 14),
-                                                    ),
-                                                    Divider(
-                                                      // thickness: 1,
-                                                      height: 5,
-                                                      color: Colors.grey,
-                                                    ),
-                                                    Text(
-                                                      description.length > 35
-                                                          ? description
-                                                                  .substring(
-                                                                      0, 35) +
-                                                              "..."
-                                                          : description,
-                                                      style: TextStyle(
-                                                          fontSize: 12,
-                                                          color:
-                                                              Colors.white60),
-                                                    )
-                                                  ],
-                                                )),
-                                            Positioned(
-                                              bottom: 10,
-                                              left: 170,
-                                              right: 10,
-                                              child: Column(
+                                    return InkWell(
+                                      onTap: () {
+                                        Navigator.of(context)
+                                            .push(CustomPageRouteAnimation(
+                                          child: ticketViewScreen(
+                                            products[index]["ticket_owner"],
+                                            products[index]["title"],
+                                            products[index]["description"],
+                                            products[index]["id"],
+                                            products[index]["uplodedPhoto"],
+                                            products[index]["latitude"],
+                                            products[index]["longitude"],
+                                            products[index]["date"],
+                                            products[index]["share_mobile"],
+                                            myFavFlag,
+                                            products[index]["address"],
+                                            products[index]["category"],
+                                          ),
+                                        ));
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(20.0),
+                                        child: Neumorphic(
+                                          style: NeumorphicStyle(
+                                            intensity: .6,
+                                            shape: NeumorphicShape.flat,
+                                            boxShape:
+                                                NeumorphicBoxShape.roundRect(
+                                                    BorderRadius.circular(12)),
+                                            depth: 4,
+                                            lightSource:
+                                                LightSource.bottomRight,
+                                            color: Colors.transparent,
+                                          ),
+                                          child: Container(
+                                              padding: EdgeInsets.all(10),
+                                              decoration: BoxDecoration(),
+                                              height: queryData.height * 0.25,
+                                              width: queryData.width,
+                                              child: Stack(
                                                 children: [
-                                                  Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons
-                                                            .location_on_outlined,
-                                                        size: 15,
-                                                      ),
-                                                      Text(
-                                                        products[index]
-                                                            ["address"],
+                                                  Positioned(
+                                                      left: 10,
+                                                      top: 10,
+                                                      bottom: 10,
+                                                      child: Container(
+                                                        child: ClipRRect(
+                                                            borderRadius: BorderRadius.only(
+                                                                topLeft: Radius
+                                                                    .circular(
+                                                                        20),
+                                                                topRight: Radius
+                                                                    .circular(
+                                                                        20),
+                                                                bottomLeft: Radius
+                                                                    .circular(
+                                                                        20)),
+                                                            child:
+                                                                Image.network(
+                                                              products[index][
+                                                                  "uplodedPhoto"],
+                                                              fit: BoxFit.cover,
+                                                              cacheHeight: 200,
+                                                              cacheWidth: 140,
+                                                            )),
+                                                        decoration: BoxDecoration(
+                                                            image: DecorationImage(
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                                image: AssetImage(
+                                                                    "loadingImage.png")),
+                                                            borderRadius: BorderRadius.only(
+                                                                topLeft: Radius
+                                                                    .circular(
+                                                                        20),
+                                                                topRight: Radius
+                                                                    .circular(
+                                                                        20),
+                                                                bottomLeft: Radius
+                                                                    .circular(
+                                                                        20))),
+                                                        height:
+                                                            queryData.height *
+                                                                0.2,
+                                                        width: queryData.width *
+                                                            0.39,
+                                                      )),
+                                                  Positioned(
+                                                      left: 100,
+                                                      bottom: 15,
+                                                      child: Text(
+                                                        products[index]["date"],
                                                         style: TextStyle(
-                                                          fontSize: 13,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Divider(
-                                                    // thickness: 1,
-                                                    height: 6,
-                                                    color: Colors.grey,
-                                                  ),
-                                                  SizedBox(
-                                                    height: 5,
-                                                  ),
-                                                  products[index][
-                                                              "ticket_owner"] !=
-                                                          FirebaseAuth
-                                                              .instance
-                                                              .currentUser
-                                                              .phoneNumber
-                                                      ? Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceAround,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .end,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      )),
+                                                  Positioned(
+                                                      top: 10,
+                                                      left: queryData.width *
+                                                          0.47,
+                                                      right: 10,
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Text(
+                                                            title.length > 48
+                                                                ? title.substring(
+                                                                        0, 48) +
+                                                                    "..."
+                                                                : title,
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: Colors
+                                                                    .amber,
+                                                                fontSize: 14),
+                                                          ),
+                                                          Divider(
+                                                            height: 5,
+                                                            color: Colors.grey,
+                                                          ),
+                                                          SizedBox(
+                                                            height: 50,
+                                                            child: Text(
+                                                              description.length >
+                                                                      35
+                                                                  ? description
+                                                                          .substring(
+                                                                              0,
+                                                                              35) +
+                                                                      "..."
+                                                                  : description,
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .white60),
+                                                            ),
+                                                          )
+                                                        ],
+                                                      )),
+                                                  Positioned(
+                                                    bottom: 10,
+                                                    left:
+                                                        queryData.width * 0.47,
+                                                    right: 10,
+                                                    child: Column(
+                                                      children: [
+                                                        Row(
                                                           children: [
-                                                            Neumorphic(
-                                                              style:
-                                                                  NeumorphicStyle(
-                                                                intensity: 0.6,
-                                                                // surfaceIntensity: 1,
-                                                                // border: NeumorphicBorder(),
-                                                                shape:
-                                                                    NeumorphicShape
-                                                                        .convex,
-                                                                boxShape:
-                                                                    NeumorphicBoxShape
-                                                                        .circle(),
-
-                                                                depth: 2,
-                                                                lightSource:
-                                                                    LightSource
-                                                                        .bottomRight,
-                                                                color: Colors
-                                                                    .black12,
-                                                              ),
-                                                              child: Container(
-                                                                height: 35,
-                                                                width: 35,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                        // color: Colors.red,
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(10)),
-                                                                child:
-                                                                    StreamBuilder(
-                                                                        stream: FirebaseFirestore
-                                                                            .instance
-                                                                            .collection(
-                                                                                "global_ticket")
-                                                                            .doc(products[index][
-                                                                                "id"])
-                                                                            .collection(
-                                                                                "responses")
-                                                                            .doc(FirebaseAuth
-                                                                                .instance.currentUser.phoneNumber)
-                                                                            .snapshots(),
-                                                                        builder:
-                                                                            (context,
-                                                                                snapshot2) {
-                                                                          var userTicketDocument =
-                                                                              snapshot2.data;
-                                                                          try {
-                                                                            responded =
-                                                                                userTicketDocument["responseViaChat"];
-                                                                          } catch (e) {
-                                                                            responded =
-                                                                                false;
-                                                                          }
-                                                                          return products[index]["share_mobile"]
-                                                                              ? IconButton(
-                                                                                  icon: Icon(
-                                                                                    Icons.call,
-                                                                                    size: 20,
-                                                                                    color: Colors.amber,
-                                                                                  ),
-                                                                                  onPressed: () {
-                                                                                    Future.delayed(const Duration(seconds: 1), () {
-                                                                                      adMobService.showRewardedAd2();
-                                                                                      adMobService.loadRewardedAd2();
-                                                                                    });
-                                                                                    callTicketOwner(
-                                                                                      products[index]["ticket_owner"],
-                                                                                    );
-                                                                                    databaseMethods.uploadTicketResponseByCall(
-                                                                                      products[index]["id"],
-                                                                                      responded,
-                                                                                    );
-                                                                                    // if (callAdCounter == 0) {
-                                                                                    //   callAdCounter = callAdCounter + 1;
-
-                                                                                    //   adMobService.showRewardedAd2();
-                                                                                    // } else if (callAdCounter >= 1) {
-                                                                                    //   callTicketOwner(
-                                                                                    //     products[index]["ticket_owner"],
-                                                                                    //   );
-                                                                                    //   databaseMethods.uploadTicketResponseByCall(
-                                                                                    //     products[index]["id"],
-                                                                                    //     responded,
-                                                                                    //   );
-                                                                                    //   callAdCounter = 0;
-                                                                                    //   adMobService.loadRewardedAd2();
-                                                                                    // }
-                                                                                  },
-                                                                                )
-                                                                              : Icon(Icons.phone_disabled, size: 20);
-                                                                        }),
+                                                            Icon(
+                                                              Icons
+                                                                  .location_on_outlined,
+                                                              size: 15,
+                                                            ),
+                                                            Text(
+                                                              products[index]
+                                                                  ["address"],
+                                                              style: TextStyle(
+                                                                fontSize: 13,
                                                               ),
                                                             ),
-                                                            Neumorphic(
-                                                              style:
-                                                                  NeumorphicStyle(
-                                                                intensity: 0.6,
-                                                                // surfaceIntensity: 1,
-                                                                // border: NeumorphicBorder(),
-                                                                shape:
-                                                                    NeumorphicShape
-                                                                        .convex,
-                                                                boxShape:
-                                                                    NeumorphicBoxShape
-                                                                        .circle(),
-
-                                                                depth: 2,
-                                                                lightSource:
-                                                                    LightSource
-                                                                        .bottomRight,
-                                                                color: Colors
-                                                                    .black12,
-                                                              ),
-                                                              child: Container(
-                                                                height: 35,
-                                                                width: 35,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                        // color: Colors.red,
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(10)),
-                                                                child:
-                                                                    IconButton(
-                                                                  icon: Icon(
-                                                                    FontAwesome
-                                                                        .comments_o,
-                                                                    size: 20,
-                                                                    color: Colors
-                                                                        .amber,
-                                                                  ),
-                                                                  onPressed:
-                                                                      () {
-                                                                    _tripEditModalBottomSheet(
-                                                                      context,
-                                                                      products[
-                                                                              index]
-                                                                          [
-                                                                          "id"],
-                                                                      products[
-                                                                              index]
-                                                                          [
-                                                                          "ticket_owner"],
-                                                                      title,
-                                                                      products[
-                                                                              index]
-                                                                          [
-                                                                          "uplodedPhoto"],
-                                                                      products[
-                                                                              index]
-                                                                          [
-                                                                          "ticket_owner"],
-                                                                    );
-                                                                  },
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            Neumorphic(
-                                                              style:
-                                                                  NeumorphicStyle(
-                                                                intensity: 0.6,
-                                                                // surfaceIntensity: 1,
-                                                                // border: NeumorphicBorder(),
-                                                                shape:
-                                                                    NeumorphicShape
-                                                                        .convex,
-                                                                boxShape:
-                                                                    NeumorphicBoxShape
-                                                                        .circle(),
-
-                                                                depth: 2,
-                                                                lightSource:
-                                                                    LightSource
-                                                                        .bottomRight,
-                                                                color: Colors
-                                                                    .black12,
-                                                              ),
-                                                              child: Container(
-                                                                height: 35,
-                                                                width: 35,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                        // color: Colors.red,
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(10)),
-                                                                child:
-                                                                    IconButton(
-                                                                  icon: myFavFlag
-                                                                      ? Icon(
-                                                                          Icons
-                                                                              .favorite,
-                                                                          color:
-                                                                              Constants.myFavIconTrue,
-                                                                          size:
-                                                                              20,
-                                                                        )
-                                                                      : Icon(
-                                                                          Icons
-                                                                              .favorite_border,
-                                                                          size:
-                                                                              20,
-                                                                          color:
-                                                                              Colors.amber,
-                                                                        ),
-                                                                  onPressed:
-                                                                      () {
-                                                                    setState(
-                                                                        () {
-                                                                      // myFavFlag = true;
-                                                                      if (myFavFlag) {
-                                                                        myFavFlag =
-                                                                            false;
-                                                                        databaseMethods
-                                                                            .undomyFavourite(
-                                                                          snapshot
-                                                                              .data
-                                                                              .docs[index]["id"],
-                                                                        );
-                                                                      } else {
-                                                                        myFavFlag =
-                                                                            true;
-                                                                        databaseMethods
-                                                                            .myFavourites(
-                                                                          snapshot
-                                                                              .data
-                                                                              .docs[index]["id"],
-                                                                        );
-                                                                      }
-                                                                    });
-                                                                  },
-                                                                ),
-                                                              ),
-                                                            )
                                                           ],
-                                                        )
-                                                      : Text(""),
+                                                        ),
+                                                        Divider(
+                                                          height: 6,
+                                                          color: Colors.grey,
+                                                        ),
+                                                        SizedBox(
+                                                          height: 5,
+                                                        ),
+                                                        products[index][
+                                                                    "ticket_owner"] !=
+                                                                FirebaseAuth
+                                                                    .instance
+                                                                    .currentUser
+                                                                    .phoneNumber
+                                                            ? Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceAround,
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .end,
+                                                                children: [
+                                                                  Neumorphic(
+                                                                    style:
+                                                                        NeumorphicStyle(
+                                                                      intensity:
+                                                                          0.6,
+                                                                      shape: NeumorphicShape
+                                                                          .convex,
+                                                                      boxShape:
+                                                                          NeumorphicBoxShape
+                                                                              .circle(),
+                                                                      depth: 2,
+                                                                      lightSource:
+                                                                          LightSource
+                                                                              .bottomRight,
+                                                                      color: Colors
+                                                                          .black12,
+                                                                    ),
+                                                                    child:
+                                                                        Container(
+                                                                      height:
+                                                                          35,
+                                                                      width: 35,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                              borderRadius: BorderRadius.circular(10)),
+                                                                      child: products[index]
+                                                                              [
+                                                                              "share_mobile"]
+                                                                          ? IconButton(
+                                                                              icon: Icon(
+                                                                                Icons.call,
+                                                                                size: 20,
+                                                                                color: Colors.amber,
+                                                                              ),
+                                                                              onPressed: () {
+                                                                                callTicketOwner(
+                                                                                  products[index]["ticket_owner"],
+                                                                                );
+                                                                                databaseMethods.uploadTicketResponseByCall(
+                                                                                  products[index]["id"],
+                                                                                  responded,
+                                                                                );
+                                                                                adMobService.showRewardedAd1();
+                                                                                adMobService.loadRewardedAd1();
+                                                                              },
+                                                                            )
+                                                                          : Icon(
+                                                                              Icons.phone_disabled,
+                                                                              size: 20),
+                                                                    ),
+                                                                  ),
+                                                                  Neumorphic(
+                                                                    style:
+                                                                        NeumorphicStyle(
+                                                                      intensity:
+                                                                          0.6,
+                                                                      shape: NeumorphicShape
+                                                                          .convex,
+                                                                      boxShape:
+                                                                          NeumorphicBoxShape
+                                                                              .circle(),
+                                                                      depth: 2,
+                                                                      lightSource:
+                                                                          LightSource
+                                                                              .bottomRight,
+                                                                      color: Colors
+                                                                          .black12,
+                                                                    ),
+                                                                    child: Container(
+                                                                        height: 35,
+                                                                        width: 35,
+                                                                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                                                                        child: !responded
+                                                                            ? IconButton(
+                                                                                icon: Icon(
+                                                                                  FontAwesome.comments_o,
+                                                                                  size: 20,
+                                                                                  color: Colors.amber,
+                                                                                ),
+                                                                                onPressed: () {
+                                                                                  _tripEditModalBottomSheet(
+                                                                                    context,
+                                                                                    products[index]["id"],
+                                                                                    products[index]["ticket_owner"],
+                                                                                    title,
+                                                                                    products[index]["uplodedPhoto"],
+                                                                                    products[index]["ticket_owner"],
+                                                                                  );
+                                                                                  adMobService.showRewardedAd2();
+                                                                                  adMobService.loadRewardedAd2();
+                                                                                },
+                                                                              )
+                                                                            : Icon(
+                                                                                Icons.history,
+                                                                                size: 20,
+                                                                                color: Colors.amber,
+                                                                              )),
+                                                                  ),
+                                                                  Neumorphic(
+                                                                    style:
+                                                                        NeumorphicStyle(
+                                                                      intensity:
+                                                                          0.6,
+                                                                      shape: NeumorphicShape
+                                                                          .convex,
+                                                                      boxShape:
+                                                                          NeumorphicBoxShape
+                                                                              .circle(),
+                                                                      depth: 2,
+                                                                      lightSource:
+                                                                          LightSource
+                                                                              .bottomRight,
+                                                                      color: Colors
+                                                                          .black12,
+                                                                    ),
+                                                                    child:
+                                                                        Container(
+                                                                      height:
+                                                                          35,
+                                                                      width: 35,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                              borderRadius: BorderRadius.circular(10)),
+                                                                      child:
+                                                                          IconButton(
+                                                                        icon: myFavFlag
+                                                                            ? Icon(
+                                                                                Icons.favorite,
+                                                                                color: Constants.myFavIconTrue,
+                                                                                size: 20,
+                                                                              )
+                                                                            : Icon(
+                                                                                Icons.favorite_border,
+                                                                                size: 20,
+                                                                                color: Colors.amber,
+                                                                              ),
+                                                                        onPressed:
+                                                                            () {
+                                                                          setState(
+                                                                              () {
+                                                                            if (myFavFlag) {
+                                                                              myFavFlag = false;
+                                                                              databaseMethods.undomyFavourite(
+                                                                                snapshot.data.docs[index]["id"],
+                                                                              );
+                                                                            } else {
+                                                                              myFavFlag = true;
+                                                                              databaseMethods.myFavourites(
+                                                                                snapshot.data.docs[index]["id"],
+                                                                              );
+                                                                            }
+                                                                          });
+                                                                        },
+                                                                      ),
+                                                                    ),
+                                                                  )
+                                                                ],
+                                                              )
+                                                            : Text(""),
+                                                      ],
+                                                    ),
+                                                  ),
                                                 ],
-                                              ),
-                                            ),
-                                          ],
-                                        )),
-                                  ),
-                                ),
-                              );
+                                              )),
+                                        ),
+                                      ),
+                                    );
+                                  });
                             },
                           );
                         }),
@@ -976,15 +904,14 @@ class _dashboardState extends State<dashboard> {
                                   itemCount: moreProductsAvaliable
                                       ? products.length + 2
                                       : products.length,
-                                  // shrinkWrap: true,
                                   controller: scrollController,
                                   itemBuilder:
                                       (BuildContext context, int index) {
                                     String title = products[index]["title"];
-                                    // snapshot.data.docs[index]["title"];
+                                    String address = products[index]["address"];
                                     String description =
                                         products[index]["description"];
-                                    // snapshot.data.docs[index]["description"];
+
                                     bool myFavFlag = false;
 
                                     try {
@@ -998,464 +925,432 @@ class _dashboardState extends State<dashboard> {
                                       myFavFlag = false;
                                     }
 
-                                    return GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ticketViewScreen(
-                                                products[index]["ticket_owner"],
-                                                products[index]["title"],
-                                                products[index]["description"],
-                                                products[index]["id"],
-                                                products[index]["uplodedPhoto"],
-                                                products[index]["latitude"],
-                                                products[index]["longitude"],
-                                                products[index]["date"],
-                                                products[index]["share_mobile"],
-                                                myFavFlag,
-                                                products[index]["address"],
-                                                products[index]["category"],
-                                              ),
-                                            ));
-                                      },
-                                      child: Stack(
-                                        children: [
-                                          new Container(
-                                              // height: queryData.height,
-                                              decoration: BoxDecoration(
-                                                  gradient: LinearGradient(
-                                                      begin: Alignment.topLeft,
-                                                      end:
-                                                          Alignment.bottomRight,
-                                                      colors: Constants
-                                                          .gradientColorOnAd),
-                                                  // color: Colors.grey[800],
-
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(20))),
-                                              child: new Center(
-                                                child: Column(
-                                                  children: [
-                                                    Flexible(
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8),
-                                                        child: Stack(
+                                    return StreamBuilder(
+                                        stream: FirebaseFirestore.instance
+                                            .collection("global_ticket")
+                                            .doc(products[index]["id"])
+                                            .collection("responses")
+                                            .doc(FirebaseAuth.instance
+                                                .currentUser.phoneNumber)
+                                            .snapshots(),
+                                        builder: (context, snapshot2) {
+                                          var userTicketDocument =
+                                              snapshot2.data;
+                                          try {
+                                            responded = userTicketDocument[
+                                                "responseViaChat"];
+                                          } catch (e) {
+                                            responded = false;
+                                          }
+                                          return GestureDetector(
+                                            onTap: () {
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ticketViewScreen(
+                                                      products[index]
+                                                          ["ticket_owner"],
+                                                      products[index]["title"],
+                                                      products[index]
+                                                          ["description"],
+                                                      products[index]["id"],
+                                                      products[index]
+                                                          ["uplodedPhoto"],
+                                                      products[index]
+                                                          ["latitude"],
+                                                      products[index]
+                                                          ["longitude"],
+                                                      products[index]["date"],
+                                                      products[index]
+                                                          ["share_mobile"],
+                                                      myFavFlag,
+                                                      products[index]
+                                                          ["address"],
+                                                      products[index]
+                                                          ["category"],
+                                                    ),
+                                                  ));
+                                            },
+                                            child: Stack(
+                                              children: [
+                                                Neumorphic(
+                                                  style: NeumorphicStyle(
+                                                    intensity: .6,
+                                                    shape: NeumorphicShape.flat,
+                                                    boxShape: NeumorphicBoxShape
+                                                        .roundRect(BorderRadius
+                                                            .circular(20)),
+                                                    depth: 3,
+                                                    lightSource:
+                                                        LightSource.bottomRight,
+                                                    color: Colors.transparent,
+                                                  ),
+                                                  child: new Container(
+                                                      height: 400,
+                                                      decoration: BoxDecoration(
+                                                          color:
+                                                              Colors.grey[800],
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          20))),
+                                                      child: new Center(
+                                                        child: Column(
                                                           children: [
-                                                            Container(
-                                                              child: ClipRRect(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .only(
-                                                                  topLeft: Radius
-                                                                      .circular(
-                                                                          20),
-                                                                  topRight: Radius
-                                                                      .circular(
-                                                                          20),
-                                                                ),
-                                                                child:
-                                                                    buildImage(
-                                                                  products[
-                                                                          index]
-                                                                      [
-                                                                      "uplodedPhoto"],
+                                                            Flexible(
+                                                              child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(8),
+                                                                child: Stack(
+                                                                  children: [
+                                                                    Container(
+                                                                      child:
+                                                                          ClipRRect(
+                                                                        borderRadius:
+                                                                            BorderRadius.only(
+                                                                          topLeft:
+                                                                              Radius.circular(20),
+                                                                          topRight:
+                                                                              Radius.circular(20),
+                                                                        ),
+                                                                        child:
+                                                                            buildImage(
+                                                                          products[index]
+                                                                              [
+                                                                              "uplodedPhoto"],
+                                                                        ),
+                                                                      ),
+                                                                      decoration: BoxDecoration(
+                                                                          image: DecorationImage(fit: BoxFit.cover, image: AssetImage("loadingImage.png")),
+                                                                          borderRadius: BorderRadius.only(
+                                                                            topLeft:
+                                                                                Radius.circular(20),
+                                                                            topRight:
+                                                                                Radius.circular(20),
+                                                                          )),
+                                                                      height: queryData
+                                                                          .height,
+                                                                      width: queryData
+                                                                          .width,
+                                                                    ),
+                                                                    Positioned(
+                                                                      right: 5,
+                                                                      bottom: 4,
+                                                                      child:
+                                                                          Text(
+                                                                        products[index]
+                                                                            [
+                                                                            "date"],
+                                                                        style: TextStyle(
+                                                                            fontWeight:
+                                                                                FontWeight.bold,
+                                                                            color: Constants.date),
+                                                                      ),
+                                                                    )
+                                                                  ],
                                                                 ),
                                                               ),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                      image: DecorationImage(
-                                                                          fit: BoxFit
-                                                                              .cover,
-                                                                          image: AssetImage(
-                                                                              "loadingImage.png")),
-                                                                      borderRadius:
-                                                                          BorderRadius
-                                                                              .only(
-                                                                        topLeft:
-                                                                            Radius.circular(20),
-                                                                        topRight:
-                                                                            Radius.circular(20),
-                                                                      )),
-                                                              height: queryData
-                                                                  .height,
+                                                            ),
+                                                            Divider(
+                                                              height: 2,
+                                                              thickness: 1,
+                                                              color: Constants
+                                                                  .divider,
+                                                            ),
+                                                            Container(
+                                                              height: 70,
                                                               width: queryData
                                                                   .width,
-                                                            ),
-                                                            Positioned(
-                                                              right: 5,
-                                                              bottom: 4,
-                                                              child: Text(
-                                                                products[index]
-                                                                    ["date"],
-                                                                // snapshot.data
-                                                                //         .docs[index]
-                                                                //     ["date"],
-                                                                style: TextStyle(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    color: Constants
-                                                                        .date),
+                                                              child: Column(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                      title.length >
+                                                                              23
+                                                                          ? "  " +
+                                                                              title.substring(0,
+                                                                                  23) +
+                                                                              ".."
+                                                                          : "  " +
+                                                                              title,
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            13,
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                        color: Constants
+                                                                            .titleText,
+                                                                      )),
+                                                                  Text(
+                                                                    description.length >
+                                                                            20
+                                                                        ? "  " +
+                                                                            description.substring(0,
+                                                                                20) +
+                                                                            ".."
+                                                                        : "  " +
+                                                                            description,
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            12,
+                                                                        color: Constants
+                                                                            .descriptionText),
+                                                                  ),
+                                                                ],
                                                               ),
                                                             )
                                                           ],
                                                         ),
-                                                      ),
-                                                    ),
-                                                    Divider(
-                                                      height: 2,
-                                                      thickness: 1,
-                                                      color: Constants.divider,
-                                                    ),
-                                                    Container(
-                                                      height: 70,
-                                                      width: queryData.width,
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                              title.length > 23
-                                                                  ? "  " +
-                                                                      title.substring(
-                                                                          0,
-                                                                          23) +
-                                                                      ".."
-                                                                  : "  " +
-                                                                      title,
-                                                              style: TextStyle(
-                                                                fontSize: 13,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color: Constants
-                                                                    .titleText,
-                                                              )),
-                                                          // SizedBox(
-                                                          //   height: 5,
-                                                          // ),
-                                                          Text(
-                                                            description.length >
-                                                                    20
-                                                                ? "  " +
-                                                                    description
-                                                                        .substring(
-                                                                            0,
-                                                                            20) +
-                                                                    ".."
-                                                                : "  " +
-                                                                    description,
-                                                            style: TextStyle(
-                                                                fontSize: 12,
-                                                                color: Constants
-                                                                    .descriptionText),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  ],
+                                                      )),
                                                 ),
-                                              )),
-                                          Positioned(
-                                              right: 0,
-                                              child: snapshot.data.docs[index]
-                                                          ["ticket_owner"] !=
-                                                      FirebaseAuth
-                                                          .instance
-                                                          .currentUser
-                                                          .phoneNumber
-                                                  ? Container(
-                                                      decoration: BoxDecoration(
-                                                          color: Constants
-                                                              .myFavIconBackground,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      100)),
-                                                      child: IconButton(
-                                                        icon: myFavFlag
-                                                            ? Icon(
-                                                                Icons.favorite,
-                                                                color: Constants
-                                                                    .myFavIconTrue,
-                                                                size: 20,
-                                                              )
-                                                            : Icon(
-                                                                Icons
-                                                                    .favorite_border,
-                                                                size: 20,
-                                                                color: Constants
-                                                                    .myFavIconFalse,
-                                                              ),
-                                                        onPressed: () {
-                                                          setState(() {
-                                                            if (myFavFlag) {
-                                                              databaseMethods
-                                                                  .undomyFavourite(
-                                                                snapshot.data
-                                                                        .docs[
-                                                                    index]["id"],
-                                                              );
-                                                              myFavFlag = false;
-                                                            } else {
-                                                              databaseMethods
-                                                                  .myFavourites(
-                                                                snapshot.data
-                                                                        .docs[
-                                                                    index]["id"],
-                                                              );
-                                                              myFavFlag = true;
-                                                            }
-                                                          });
-                                                        },
-                                                      ),
-                                                    )
-                                                  : Text("")),
-                                          Align(
-                                            alignment: Alignment.bottomRight,
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                  bottom: 5, right: 10),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Padding(
+                                                Positioned(
+                                                    right: 0,
+                                                    child: snapshot.data
+                                                                    .docs[index]
+                                                                [
+                                                                "ticket_owner"] !=
+                                                            FirebaseAuth
+                                                                .instance
+                                                                .currentUser
+                                                                .phoneNumber
+                                                        ? Container(
+                                                            decoration: BoxDecoration(
+                                                                color: Colors
+                                                                    .grey[800],
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            100)),
+                                                            child: IconButton(
+                                                              icon: myFavFlag
+                                                                  ? Icon(
+                                                                      Icons
+                                                                          .favorite,
+                                                                      color: Constants
+                                                                          .myFavIconTrue,
+                                                                      size: 20,
+                                                                    )
+                                                                  : Icon(
+                                                                      Icons
+                                                                          .favorite_border,
+                                                                      size: 20,
+                                                                      color: Constants
+                                                                          .myFavIconFalse,
+                                                                    ),
+                                                              onPressed: () {
+                                                                setState(() {
+                                                                  if (myFavFlag) {
+                                                                    databaseMethods
+                                                                        .undomyFavourite(
+                                                                      snapshot
+                                                                          .data
+                                                                          .docs[index]["id"],
+                                                                    );
+                                                                    myFavFlag =
+                                                                        false;
+                                                                  } else {
+                                                                    databaseMethods
+                                                                        .myFavourites(
+                                                                      snapshot
+                                                                          .data
+                                                                          .docs[index]["id"],
+                                                                    );
+                                                                    myFavFlag =
+                                                                        true;
+                                                                  }
+                                                                });
+                                                              },
+                                                            ),
+                                                          )
+                                                        : Text("")),
+                                                Align(
+                                                  alignment:
+                                                      Alignment.bottomRight,
+                                                  child: Padding(
                                                     padding:
                                                         const EdgeInsets.only(
-                                                            top: 8, left: 8),
+                                                            bottom: 5,
+                                                            right: 10),
                                                     child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
                                                       children: [
-                                                        Icon(
-                                                          Icons
-                                                              .location_on_outlined,
-                                                          color: Constants
-                                                              .locationMarker,
-                                                          size: 15,
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                      .only(
+                                                                  top: 8,
+                                                                  left: 8),
+                                                          child: Row(
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .location_on_outlined,
+                                                                color: Constants
+                                                                    .locationMarker,
+                                                                size: 15,
+                                                              ),
+                                                              Text(
+                                                                address.length >
+                                                                        7
+                                                                    ? address.substring(
+                                                                            0,
+                                                                            8) +
+                                                                        ".."
+                                                                    : address,
+                                                                style: TextStyle(
+                                                                    color: Constants
+                                                                        .addressText,
+                                                                    fontSize:
+                                                                        12),
+                                                              )
+                                                            ],
+                                                          ),
                                                         ),
-                                                        Text(
-                                                          products[index]
-                                                              ["address"],
-                                                          // snapshot.data.docs[index]
-                                                          //     ["address"],
-                                                          style: TextStyle(
-                                                              color: Constants
-                                                                  .addressText,
-                                                              fontSize: 12),
-                                                        )
+                                                        products[index][
+                                                                    "ticket_owner"] !=
+                                                                FirebaseAuth
+                                                                    .instance
+                                                                    .currentUser
+                                                                    .phoneNumber
+                                                            ? Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceBetween,
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .end,
+                                                                children: [
+                                                                  Neumorphic(
+                                                                    style:
+                                                                        NeumorphicStyle(
+                                                                      intensity:
+                                                                          0.6,
+                                                                      shape: NeumorphicShape
+                                                                          .convex,
+                                                                      boxShape:
+                                                                          NeumorphicBoxShape
+                                                                              .circle(),
+                                                                      depth: 2,
+                                                                      lightSource:
+                                                                          LightSource
+                                                                              .bottomRight,
+                                                                      color: Colors
+                                                                          .black12,
+                                                                    ),
+                                                                    child:
+                                                                        Container(
+                                                                      height:
+                                                                          35,
+                                                                      width: 35,
+                                                                      decoration: BoxDecoration(
+                                                                          // color: Colors.red,
+                                                                          borderRadius: BorderRadius.circular(10)),
+                                                                      child: products[index]
+                                                                              [
+                                                                              "share_mobile"]
+                                                                          ? IconButton(
+                                                                              icon: Icon(
+                                                                                Icons.call,
+                                                                                size: 20,
+                                                                                color: Colors.amber,
+                                                                              ),
+                                                                              onPressed: () {
+                                                                                callTicketOwner(
+                                                                                  products[index]["ticket_owner"],
+                                                                                );
+                                                                                databaseMethods.uploadTicketResponseByCall(
+                                                                                  products[index]["id"],
+                                                                                  responded,
+                                                                                );
+                                                                                adMobService.showRewardedAd1();
+                                                                                adMobService.loadRewardedAd1();
+                                                                              },
+                                                                            )
+                                                                          : Icon(
+                                                                              Icons.phone_disabled,
+                                                                              size: 20),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: 10,
+                                                                  ),
+                                                                  Neumorphic(
+                                                                    style:
+                                                                        NeumorphicStyle(
+                                                                      intensity:
+                                                                          0.6,
+                                                                      // surfaceIntensity: 1,
+                                                                      // border: NeumorphicBorder(),
+                                                                      shape: NeumorphicShape
+                                                                          .convex,
+                                                                      boxShape:
+                                                                          NeumorphicBoxShape
+                                                                              .circle(),
+
+                                                                      depth: 2,
+                                                                      lightSource:
+                                                                          LightSource
+                                                                              .bottomRight,
+                                                                      color: Colors
+                                                                          .black12,
+                                                                    ),
+                                                                    child: Container(
+                                                                        height: 35,
+                                                                        width: 35,
+                                                                        decoration: BoxDecoration(
+                                                                            // color: Colors.red,
+                                                                            borderRadius: BorderRadius.circular(10)),
+                                                                        child: !responded
+                                                                            ? IconButton(
+                                                                                icon: Icon(
+                                                                                  FontAwesome.comments_o,
+                                                                                  size: 20,
+                                                                                  color: Colors.amber,
+                                                                                ),
+                                                                                onPressed: () {
+                                                                                  _tripEditModalBottomSheet(
+                                                                                    context,
+                                                                                    products[index]["id"],
+                                                                                    products[index]["ticket_owner"],
+                                                                                    title,
+                                                                                    products[index]["uplodedPhoto"],
+                                                                                    products[index]["ticket_owner"],
+                                                                                  );
+                                                                                  adMobService.showRewardedAd2();
+                                                                                  adMobService.loadRewardedAd2();
+                                                                                },
+                                                                              )
+                                                                            : Icon(
+                                                                                Icons.history,
+                                                                                size: 20,
+                                                                                color: Colors.amber,
+                                                                              )),
+                                                                  ),
+                                                                ],
+                                                              )
+                                                            : Text(""),
                                                       ],
                                                     ),
                                                   ),
-                                                  products[index][
-                                                              "ticket_owner"] !=
-                                                          FirebaseAuth
-                                                              .instance
-                                                              .currentUser
-                                                              .phoneNumber
-                                                      ? Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .end,
-                                                          children: [
-                                                            Neumorphic(
-                                                              style:
-                                                                  NeumorphicStyle(
-                                                                intensity: 0.6,
-                                                                // surfaceIntensity: 1,
-                                                                // border: NeumorphicBorder(),
-                                                                shape:
-                                                                    NeumorphicShape
-                                                                        .convex,
-                                                                boxShape:
-                                                                    NeumorphicBoxShape
-                                                                        .circle(),
-
-                                                                depth: 2,
-                                                                lightSource:
-                                                                    LightSource
-                                                                        .bottomRight,
-                                                                color: Colors
-                                                                    .black12,
-                                                              ),
-                                                              child: Container(
-                                                                height: 35,
-                                                                width: 35,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                        // color: Colors.red,
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(10)),
-                                                                child:
-                                                                    StreamBuilder(
-                                                                        stream: FirebaseFirestore
-                                                                            .instance
-                                                                            .collection(
-                                                                                "global_ticket")
-                                                                            .doc(products[index][
-                                                                                "id"])
-                                                                            .collection(
-                                                                                "responses")
-                                                                            .doc(FirebaseAuth
-                                                                                .instance.currentUser.phoneNumber)
-                                                                            .snapshots(),
-                                                                        builder:
-                                                                            (context,
-                                                                                snapshot2) {
-                                                                          var userTicketDocument =
-                                                                              snapshot2.data;
-                                                                          try {
-                                                                            responded =
-                                                                                userTicketDocument["responseViaChat"];
-                                                                          } catch (e) {
-                                                                            responded =
-                                                                                false;
-                                                                          }
-                                                                          return products[index]["share_mobile"]
-                                                                              ? IconButton(
-                                                                                  icon: Icon(
-                                                                                    Icons.call,
-                                                                                    size: 20,
-                                                                                    color: Colors.amber,
-                                                                                  ),
-                                                                                  onPressed: () {
-                                                                                    Future.delayed(const Duration(seconds: 1), () {
-                                                                                      adMobService.showRewardedAd2();
-                                                                                      adMobService.loadRewardedAd2();
-                                                                                    });
-                                                                                    callTicketOwner(
-                                                                                      products[index]["ticket_owner"],
-                                                                                    );
-                                                                                    databaseMethods.uploadTicketResponseByCall(
-                                                                                      products[index]["id"],
-                                                                                      responded,
-                                                                                    );
-                                                                                    // if (callAdCounter == 0) {
-                                                                                    //   callAdCounter = callAdCounter + 1;
-
-                                                                                    //   adMobService.showRewardedAd2();
-                                                                                    // } else if (callAdCounter >= 1) {
-                                                                                    //   callTicketOwner(
-                                                                                    //     products[index]["ticket_owner"],
-                                                                                    //   );
-                                                                                    //   databaseMethods.uploadTicketResponseByCall(
-                                                                                    //     products[index]["id"],
-                                                                                    //     responded,
-                                                                                    //   );
-                                                                                    //   callAdCounter = 0;
-                                                                                    //   adMobService.loadRewardedAd2();
-                                                                                    // }
-                                                                                  },
-                                                                                )
-                                                                              : Icon(Icons.phone_disabled, size: 20);
-                                                                        }),
-                                                              ),
-                                                            ),
-                                                            SizedBox(
-                                                              width: 10,
-                                                            ),
-                                                            Neumorphic(
-                                                              style:
-                                                                  NeumorphicStyle(
-                                                                intensity: 0.6,
-                                                                // surfaceIntensity: 1,
-                                                                // border: NeumorphicBorder(),
-                                                                shape:
-                                                                    NeumorphicShape
-                                                                        .convex,
-                                                                boxShape:
-                                                                    NeumorphicBoxShape
-                                                                        .circle(),
-
-                                                                depth: 2,
-                                                                lightSource:
-                                                                    LightSource
-                                                                        .bottomRight,
-                                                                color: Colors
-                                                                    .black12,
-                                                              ),
-                                                              child: Container(
-                                                                height: 35,
-                                                                width: 35,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                        // color: Colors.red,
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(10)),
-                                                                child:
-                                                                    IconButton(
-                                                                  icon: Icon(
-                                                                    FontAwesome
-                                                                        .comments_o,
-                                                                    size: 20,
-                                                                    color: Colors
-                                                                        .amber,
-                                                                  ),
-                                                                  onPressed:
-                                                                      () {
-                                                                    _tripEditModalBottomSheet(
-                                                                      context,
-                                                                      products[
-                                                                              index]
-                                                                          [
-                                                                          "id"],
-                                                                      products[
-                                                                              index]
-                                                                          [
-                                                                          "ticket_owner"],
-                                                                      title,
-                                                                      products[
-                                                                              index]
-                                                                          [
-                                                                          "uplodedPhoto"],
-                                                                      products[
-                                                                              index]
-                                                                          [
-                                                                          "ticket_owner"],
-                                                                    );
-                                                                  },
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        )
-                                                      : Text(""),
-                                                ],
-                                              ),
+                                                ),
+                                              ],
                                             ),
-                                          ),
-                                          // Positioned(
-                                          //     child:
-                                          //         Text(address == null ? " null" : address))
-                                        ],
-                                      ),
-                                    );
+                                          );
+                                        });
                                   },
                                   staggeredTileBuilder: (int index) =>
                                       new StaggeredTile.count(
-                                          2, index.isEven ? 3.2 : 3.8
-                                          // ? index == products.length
-                                          //     ? 3.2
-                                          //     : index % 5 == 0
-                                          //         ? 7.1
-                                          //         : 3.2
-                                          // : index == products.length
-                                          //     ? 3.2
-                                          //     : index % 5 == 0
-                                          //         ? 7.5
-                                          //         : 3.8
-                                          ),
-                                  mainAxisSpacing: 4.0,
-                                  crossAxisSpacing: 4.0,
+                                          2, index.isEven ? 3.2 : 3.8),
+                                  mainAxisSpacing: 10.0,
+                                  crossAxisSpacing: 10.0,
                                 ),
                               ),
                       );
@@ -1583,11 +1478,7 @@ class _searchBarState extends State<searchBar> {
                               ),
                             );
                           }).toList(),
-                          // hint: Text(
-                          //   '$kms KM',
-                          //   style: TextStyle(
-                          //       fontWeight: FontWeight.bold, color: Colors.black),
-                          // ),
+
                           onTap: () {
                             getCurrentLocation();
                           },
@@ -1598,7 +1489,7 @@ class _searchBarState extends State<searchBar> {
                           },
                         ),
                       ),
-                      hintText: "Search...",
+                      hintText: "What are you looking for?",
                       hintStyle: TextStyle(
                         color: Constants.textFieldHintText,
                       )),
@@ -1762,7 +1653,7 @@ class _searchBarState extends State<searchBar> {
                 ),
                 onPressed: () {
                   if (textFieldTextLength != 0 || kms != 0) {
-                    AdMobService.createInterstitialAd();
+                    AdMobService.createInterstitialAd1();
                     setState(() {
                       ticketsWithinDistance = kms * 1000;
                       sc = searchController.text;

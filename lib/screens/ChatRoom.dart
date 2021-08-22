@@ -36,8 +36,8 @@ class _chatRoomState extends State<chatRoom> {
 
   @override
   void initState() {
-    AdMobService.createInterstitialAd();
-    AdMobService.showInterstitialAd();
+    AdMobService.createInterstitialAd2();
+    AdMobService.showInterstitialAd2();
     Future.delayed(const Duration(milliseconds: 300), () {
       setState(() {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
@@ -179,12 +179,7 @@ class _chatRoomState extends State<chatRoom> {
                                                   style:
                                                       TextStyle(fontSize: 10),
                                                 ),
-                                              ]))
-                                              // Text(
-                                              //   snapshot.data.docs[index]['message'],
-                                              //   style: TextStyle(fontSize: 17),
-                                              // ),
-                                              ),
+                                              ]))),
                                         ),
                                       );
                                     },

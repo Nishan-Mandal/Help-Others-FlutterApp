@@ -51,10 +51,6 @@ class _navigationBarState extends State<navigationBar> {
             .orderBy("timeStamp", descending: true)
             .snapshots(),
         builder: (context, snapshot2) {
-          // var userTicketDocument = snapshot2.data;
-          // print("------------------------");
-          // // print(userTicketDocument["responderMessageSeen"]);
-          // print(snapshot2.data.docs[0]["ownerMessageSeen"]);
           if (!snapshot2.hasData || snapshot2.hasError) {
             return Center(
                 child: CircularProgressIndicator(
@@ -76,36 +72,8 @@ class _navigationBarState extends State<navigationBar> {
                   messageCheker = true;
                 }
               }
-              // snapshot2.data.docs[0]['responderNumber'] ==
-              //         FirebaseAuth.instance.currentUser.phoneNumber
-              //     ? (snapshot2.data.docs[0]['responderMessageSeen']
-              //         ? messageCheker = false
-              //         : messageCheker = true)
-              //     : (snapshot2.data.docs[0]['ownerMessageSeen']
-              //         ? messageCheker = false
-              //         : messageCheker = true);
             }
-            // if (snapshot2.data.docs.length != 0) {
-            //   String thisUser = snapshot2.data.docs[0]["ticket_creater_mobile"];
-            //   if (thisUser == FirebaseAuth.instance.currentUser.phoneNumber &&
-            //       snapshot2.data.docs[0]["ownerMessageSeen"] == false) {
-            //     // if (this.mounted) {
-            //     // setState(() {
-            //     messageCheker = true;
-            //     // });
-            //     // }
-            //   } else if (thisUser !=
-            //           FirebaseAuth.instance.currentUser.phoneNumber &&
-            //       snapshot2.data.docs[0]["responderMessageSeen"] == false) {
-            //     // if (this.mounted) {
-            //     // setState(() {
-            //     messageCheker = true;
-            //     // });
-            //     // }
-            //   } else {
-            //     messageCheker = false;
-            //   }
-            // }
+
             return Scaffold(
               body: tabs[navBarIndex],
               bottomNavigationBar: BottomNavigationBar(
@@ -116,10 +84,7 @@ class _navigationBarState extends State<navigationBar> {
                   });
                 },
                 backgroundColor: Colors.grey[900],
-                // selectedIconTheme: IconThemeData(color: Colors.yellow[100]),
                 selectedItemColor: Colors.amber,
-                // selectedLabelStyle: TextStyle(color: Colors.blue),
-
                 unselectedItemColor: Colors.amber,
                 type: BottomNavigationBarType.fixed,
                 items: <BottomNavigationBarItem>[
@@ -128,7 +93,6 @@ class _navigationBarState extends State<navigationBar> {
                       navBarIndex == 0
                           ? MaterialCommunityIcons.view_dashboard
                           : MaterialCommunityIcons.view_dashboard_outline,
-                      // color: Colors.white,
                     ),
                     label: 'Home',
                   ),
@@ -139,9 +103,7 @@ class _navigationBarState extends State<navigationBar> {
                           navBarIndex == 1
                               ? Icons.message
                               : Icons.message_outlined,
-
                           size: 25.5,
-                          // color: Colors.white,
                         ),
                         Visibility(
                           visible: messageCheker,
@@ -168,18 +130,14 @@ class _navigationBarState extends State<navigationBar> {
                       navBarIndex == 2
                           ? Icons.add_circle
                           : Icons.add_circle_outline,
-
                       color: Colors.redAccent[400],
-                      // size: 30,
                     ),
                     label: 'Post Ad',
                   ),
                   BottomNavigationBarItem(
                     icon: Icon(navBarIndex == 3
-                            ? Icons.favorite
-                            : Icons.favorite_outline
-                        // color: Colors.white,
-                        ),
+                        ? Icons.favorite
+                        : Icons.favorite_outline),
                     label: 'My Ads',
                   ),
                   BottomNavigationBarItem(

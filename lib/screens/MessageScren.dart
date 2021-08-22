@@ -72,7 +72,6 @@ class _allMessagesState extends State<allMessages> {
   Widget build(BuildContext context) {
     var queryData = MediaQuery.of(context).size;
     return Container(
-      // color: Constants.scaffoldBackground,
       child: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection("messages")
@@ -126,7 +125,6 @@ class _allMessagesState extends State<allMessages> {
                                   child: Stack(
                                     children: [
                                       Card(
-                                        // color: Constants.scaffoldBackground,
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
@@ -406,7 +404,6 @@ class _buyingMessagesState extends State<buyingMessages> {
                                   child: Stack(
                                     children: [
                                       Card(
-                                        // color: Constants.scaffoldBackground,
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
@@ -686,7 +683,6 @@ class _sellingMessagesState extends State<sellingMessages> {
                                   child: Stack(
                                     children: [
                                       Card(
-                                        // color: Constants.scaffoldBackground,
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,

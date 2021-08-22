@@ -903,170 +903,174 @@ class _crreateTicketsState extends State<crreateTickets> {
               children: [
                 Container(
                   height: 390,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5, left: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Visibility(
-                                visible: countTitleChar >= 10 ? true : false,
-                                child: Icon(
-                                  Icons.check_box,
-                                  color: Constants.searchIcon,
-                                )),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 10),
-                              child: Container(
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "$countTitleChar",
-                                      style: TextStyle(
-                                          color: countTitleChar >= 10
-                                              ? Constants.searchIcon
-                                              : Colors.red),
-                                    ),
-                                    Text("/10",
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 5, left: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Visibility(
+                                  visible: countTitleChar >= 10 ? true : false,
+                                  child: Icon(
+                                    Icons.check_box,
+                                    color: Constants.searchIcon,
+                                  )),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: Container(
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "$countTitleChar",
                                         style: TextStyle(
-                                            color: Constants.searchIcon))
-                                  ],
+                                            color: countTitleChar >= 10
+                                                ? Constants.searchIcon
+                                                : Colors.red),
+                                      ),
+                                      Text("/10",
+                                          style: TextStyle(
+                                              color: Constants.searchIcon))
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Form(
-                          key: titleKey,
-                          child: TextFormField(
-                            inputFormatters: [
-                              LengthLimitingTextInputFormatter(70)
+                              )
                             ],
-                            onChanged: (value) {
-                              setState(() {
-                                countTitleChar = titleControler.text.length;
-                              });
-                            },
-                            decoration: InputDecoration(
-                                labelText: "Provide Title",
-                                labelStyle:
-                                    TextStyle(color: Constants.searchIcon),
-                                border: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Constants.searchIcon))),
-                            validator: (value) {
-                              return value.length < 10
-                                  ? "Title should be more than 10 characters"
-                                  : null;
-                            },
-                            controller: titleControler,
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8, left: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Visibility(
-                                visible:
-                                    countDescriptionChar >= 20 ? true : false,
-                                child: Icon(
-                                  Icons.check_box,
-                                  color: Constants.searchIcon,
-                                )),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 10),
-                              child: Container(
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "$countDescriptionChar",
-                                      style: TextStyle(
-                                          color: countDescriptionChar >= 20
-                                              ? Constants.searchIcon
-                                              : Colors.red),
-                                    ),
-                                    Text("/20",
-                                        style: TextStyle(
-                                            color: Constants.searchIcon))
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Form(
-                          key: discriptionKey,
-                          child: TextFormField(
-                            onChanged: (value) {
-                              setState(() {
-                                countDescriptionChar =
-                                    descriptionControler.text.length;
-                              });
-                            },
-                            inputFormatters: [
-                              LengthLimitingTextInputFormatter(4000)
-                            ],
-                            decoration: InputDecoration(
-                                labelText: "Provide Description",
-                                labelStyle:
-                                    TextStyle(color: Constants.searchIcon),
-                                border: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Constants.searchIcon))),
-                            validator: (value) {
-                              return value.length < 20
-                                  ? "Description should be more than 20 characters"
-                                  : null;
-                            },
-                            controller: descriptionControler,
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Form(
+                            key: titleKey,
+                            child: TextFormField(
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(70)
+                              ],
+                              onChanged: (value) {
+                                setState(() {
+                                  countTitleChar = titleControler.text.length;
+                                });
+                              },
+                              decoration: InputDecoration(
+                                  labelText: "Provide Title",
+                                  labelStyle:
+                                      TextStyle(color: Constants.searchIcon),
+                                  border: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Constants.searchIcon))),
+                              validator: (value) {
+                                return value.length < 10
+                                    ? "Title should be more than 10 characters"
+                                    : null;
+                              },
+                              controller: titleControler,
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Container(
-                            decoration: BoxDecoration(
-                                color: Colors.grey[900],
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                    color: Constants.searchIcon, width: 1)),
-                            child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 5, right: 5, top: 10, bottom: 10),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.lightbulb,
-                                      color: Colors.yellow,
-                                      size: 30,
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    Text(
-                                      "Discribe your offer/search with as much\ndetails as possible! Providing enough relevent\ninformation to other user gets your ad\nfound even faster.",
-                                      style: TextStyle(
-                                          color: Constants.searchIcon),
-                                    )
-                                  ],
-                                ))),
-                      ),
-                    ],
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8, left: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Visibility(
+                                  visible:
+                                      countDescriptionChar >= 20 ? true : false,
+                                  child: Icon(
+                                    Icons.check_box,
+                                    color: Constants.searchIcon,
+                                  )),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: Container(
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "$countDescriptionChar",
+                                        style: TextStyle(
+                                            color: countDescriptionChar >= 20
+                                                ? Constants.searchIcon
+                                                : Colors.red),
+                                      ),
+                                      Text("/20",
+                                          style: TextStyle(
+                                              color: Constants.searchIcon))
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Form(
+                            key: discriptionKey,
+                            child: TextFormField(
+                              onChanged: (value) {
+                                setState(() {
+                                  countDescriptionChar =
+                                      descriptionControler.text.length;
+                                });
+                              },
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(4000)
+                              ],
+                              keyboardType: TextInputType.multiline,
+                              maxLines: null,
+                              decoration: InputDecoration(
+                                  labelText: "Provide Description",
+                                  labelStyle:
+                                      TextStyle(color: Constants.searchIcon),
+                                  border: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Constants.searchIcon))),
+                              validator: (value) {
+                                return value.length < 20
+                                    ? "Description should be more than 20 characters"
+                                    : null;
+                              },
+                              controller: descriptionControler,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.grey[900],
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                      color: Constants.searchIcon, width: 1)),
+                              child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 5, right: 5, top: 10, bottom: 10),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.lightbulb,
+                                        color: Colors.yellow,
+                                        size: 30,
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        "Discribe your offer/search with as much\ndetails as possible! Providing enough relevent\ninformation to other user gets your ad\nfound even faster.",
+                                        style: TextStyle(
+                                            color: Constants.searchIcon),
+                                      )
+                                    ],
+                                  ))),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 Container(
@@ -1563,7 +1567,7 @@ class _previewState extends State<preview> {
   @override
   void initState() {
     super.initState();
-    adMobService.loadRewardedAd();
+    adMobService.loadRewardedAd5();
   }
 
   @override
@@ -1832,7 +1836,7 @@ class _previewState extends State<preview> {
                             Future.delayed(const Duration(seconds: 3), () {
                               imageFile = null;
                               try {
-                                adMobService.showRewardedAd();
+                                adMobService.showRewardedAd5();
                               } catch (e) {
                                 print(e.toString());
                               }

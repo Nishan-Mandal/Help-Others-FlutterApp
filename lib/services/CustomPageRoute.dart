@@ -14,15 +14,5 @@ class CustomPageRouteAnimation extends PageRouteBuilder {
       FadeTransition(
         opacity: animation,
         child: child,
-        // child: ScaleTransition(
-        //   scale: animation.drive(Tween(begin: 1.0, end: 1.0)
-        //       .chain(CurveTween(curve: Curves.easeOutCubic))),
-        //   child: child,
-        // ),
       );
-  // SlideTransition(
-  //   position: Tween<Offset>(begin: Offset(1, 0), end: Offset.zero)
-  //       .animate(animation),
-  //   child: child,
-  // );
 }

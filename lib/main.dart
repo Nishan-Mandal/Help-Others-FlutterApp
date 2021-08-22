@@ -174,8 +174,6 @@ class _LandingPageState extends State<LandingPage> {
       _previousResult = connresult;
     });
 
-    // checkDefaultTicket();
-    // checkInternetConnectivity();
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       RemoteNotification notification = message.notification;
       AndroidNotification android = message.notification?.android;
@@ -378,9 +376,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ],
                 ),
-                // SizedBox(
-                //   height: 5,
-                // ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 5, right: 5, left: 5),
                   child: Container(

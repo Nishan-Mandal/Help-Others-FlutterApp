@@ -166,14 +166,12 @@ class SlideTile extends StatelessWidget {
           ),
           Text(
             title,
-            // textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
           ),
           SizedBox(
             height: 20,
           ),
           Text(desc,
-              // textAlign: TextAlign.center,
               style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14))
         ],
       ),
@@ -228,7 +226,7 @@ List<SliderModel> getSlides() {
 
   //2
   sliderModel.setDesc(
-      "A lot of users admires you, find whome you like.\nCheckout the advertisement of the nearby peoples and find your match. You can send message, chat with them, and even you can directly call if they share the number.");
+      "A lot of users admires you, find whom you like.\nCheckout the advertisement of the nearby peoples and find your match. You can send message, chat with them, and even you can directly call if they share the number.");
   sliderModel.setTitle("Find...");
   sliderModel.setImageAssetPath("getStartedPage2.png");
   slides.add(sliderModel);

@@ -105,8 +105,6 @@ class _GetOtpPageState extends State<GetOtpPage> {
                   FocusScope.of(context).unfocus();
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(content: Text('invalid OTP')));
-                  // _scaffoldkey.currentState
-                  //     .showSnackBar(SnackBar(content: Text('invalid OTP')));
                 }
               },
             ),
@@ -133,7 +131,6 @@ class _GetOtpPageState extends State<GetOtpPage> {
             child: Text("Resend OTP", style: TextStyle(color: Colors.black)),
             onPressed: () {
               setState(() {
-              
                 if (resendButton) {
                   resendButton = false;
                   startTimer();

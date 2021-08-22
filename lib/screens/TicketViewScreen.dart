@@ -52,14 +52,15 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
   AdMobService adMobService = new AdMobService();
   final TextEditingController messageControler = TextEditingController();
   bool responded = false;
+  bool respondedViaCall = false;
   int callAdCounter = 0;
   String idInMessageCollection;
 
   @override
   void initState() {
     super.initState();
-    adMobService.loadRewardedAd();
-    adMobService.loadRewardedAd2();
+    adMobService.loadRewardedAd3();
+    adMobService.loadRewardedAd4();
     databaseMethods.totalViewsInAd(widget.id, widget.ticketOwnweMobileNumber);
   }
 
@@ -125,7 +126,8 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
         name,
         widget.photo,
         widget.ticketOwnweMobileNumber,
-        context);
+        context,
+        respondedViaCall);
   }
 
   showOverlay(BuildContext context) async {
@@ -353,6 +355,11 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                 } catch (e) {
                   responded = false;
                 }
+                try {
+                  respondedViaCall = userTicketDocument["responseViaCall"];
+                } catch (e) {
+                  respondedViaCall = false;
+                }
                 return Scaffold(
                   backgroundColor: Constants.tscaffoldBackground,
                   floatingActionButton: Column(
@@ -474,8 +481,8 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                 _tripEditModalBottomSheet(
                                                     context);
 
-                                                adMobService.loadRewardedAd();
-                                                adMobService.showRewardedAd();
+                                                adMobService.showRewardedAd3();
+                                                adMobService.loadRewardedAd3();
                                               },
                                             ),
                                           )
@@ -510,28 +517,26 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                 ],
                                               ),
                                               onPressed: () {
-                                                setState(() {
-                                                  Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            chatRoom(
-                                                          widget.id,
-                                                          widget
-                                                              .ticketOwnweMobileNumber,
-                                                          widget.title,
-                                                          idInMessageCollection,
-                                                          userAccount["name"],
-                                                          widget.photo,
-                                                          widget
-                                                              .ticketOwnweMobileNumber,
-                                                        ),
-                                                      ));
-                                                  AdMobService
-                                                      .createInterstitialAd2();
-                                                  AdMobService
-                                                      .showInterstitialAd2();
-                                                });
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          chatRoom(
+                                                        widget.id,
+                                                        widget
+                                                            .ticketOwnweMobileNumber,
+                                                        widget.title,
+                                                        idInMessageCollection,
+                                                        userAccount["name"],
+                                                        widget.photo,
+                                                        widget
+                                                            .ticketOwnweMobileNumber,
+                                                      ),
+                                                    ));
+                                                AdMobService
+                                                    .createInterstitialAd2();
+                                                AdMobService
+                                                    .showInterstitialAd2();
                                               },
                                             ),
                                           )),
@@ -565,21 +570,15 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                             ),
                                             onPressed: () {
                                               if (widget.shareMobileNumber) {
-                                                if (callAdCounter == 0) {
-                                                  callAdCounter =
-                                                      callAdCounter + 1;
-                                                  adMobService
-                                                      .showRewardedAd2();
-                                                  adMobService
-                                                      .loadRewardedAd2();
-                                                } else if (callAdCounter >= 1) {
-                                                  callTicketOwner();
-                                                  databaseMethods
-                                                      .uploadTicketResponseByCall(
-                                                    widget.id,
-                                                    responded,
-                                                  );
-                                                }
+                                                callTicketOwner();
+                                                databaseMethods
+                                                    .uploadTicketResponseByCall(
+                                                  widget.id,
+                                                  responded,
+                                                );
+
+                                                adMobService.showRewardedAd4();
+                                                adMobService.loadRewardedAd4();
                                               }
                                             },
                                             child: Row(
@@ -629,16 +628,10 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                             decoration: BoxDecoration(boxShadow: [
                               BoxShadow(
                                 color: Colors.grey[900],
-                                // spreadRadius: 10,
-                                // blurRadius: 25.0,
                                 offset: Offset(0, 0),
                               ),
                             ]),
                             alignment: Alignment.bottomLeft,
-                            // child: IconButton(
-                            //   icon: Icon(Icons.arrow_back),
-                            //   onPressed: () => Navigator.of(context).pop(dashboard("")),
-                            // ),
                           ),
                           Expanded(
                             child: SingleChildScrollView(
@@ -688,7 +681,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                           fontWeight: FontWeight.bold),
                                     ),
                                   ),
-
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
@@ -734,16 +726,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                       ),
                                     ),
                                   ),
-                                  //     // https://www.google.com/maps/place/Newtown,+Kolkata,+West+Bengal/@22.5861408,88.4227606,12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d22.5753931!4d88.4797903
-                                  //     // RaisedButton(
-                                  //     //   child: Text("map"),
-                                  //     //   onPressed: () {
-                                  //     //     mapInBrowser(
-                                  //     //         // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}");
-                                  //     //         // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}/@${widget.latitude},${widget.longitude},12z");
-                                  //     //         "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},12z/data=!3m1!4b1!4m5!3m4!1s0x3a0275350398a5b9:0x75e165b244323425!8m2!3d${widget.latitude}!4d${widget.longitude}");
-                                  //     //   },
-                                  //     // ),
                                   Divider(
                                     thickness: 1,
                                   ),
@@ -759,11 +741,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                   ),
                                   GestureDetector(
                                     onTap: () => mapInBrowser(
-                                        "https://www.google.com/maps/preview/@${widget.latitude},${widget.longitude},17z"
-                                        // "https://www.google.com/maps/place/@${widget.latitude},${widget.longitude},${widget.latitude}${widget.longitude}"
-                                        // "http://maps.google.com/maps?daddr=${widget.latitude},${widget.longitude}"
-                                        // "https://www.google.com/maps/dir//${widget.latitude},${widget.longitude}"
-                                        ),
+                                        "https://www.google.com/maps/preview/@${widget.latitude},${widget.longitude},17z"),
                                     child: Stack(
                                       children: [
                                         Padding(
@@ -842,16 +820,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                           ),
                                         )
                                       : SizedBox(),
-                                  //     // Visibility(
-                                  //     //   visible: userAccount["mobile_number"] !=
-                                  //     //           FirebaseAuth
-                                  //     //               .instance.currentUser.phoneNumber
-                                  //     //       ? true
-                                  //     //       : false,
-                                  //     // child:
-                                  //     // Padding(
-                                  //     //   padding: const EdgeInsets.all(12.0),
-                                  //     // child:
                                   Divider(
                                     thickness: 2,
                                   ),
@@ -869,7 +837,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: Constants.tSeeProfileSticker,
-                                            // borderRadius: BorderRadius.circular(15)
                                           ),
                                           child: Row(
                                             children: [
@@ -932,7 +899,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                       ),
                                     ),
                                   ),
-
                                   Padding(
                                     padding: const EdgeInsets.only(
                                         left: 10, right: 10, top: 10),
@@ -978,6 +944,8 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                 String description = snapshot3
                                                     .data
                                                     .docs[index]["description"];
+                                                String address = snapshot3.data
+                                                    .docs[index]["address"];
                                                 return snapshot3.data
                                                                 .docs[index]
                                                             ["id"] !=
@@ -1025,13 +993,9 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                               height: 50,
                                                               width: 180,
                                                               decoration: BoxDecoration(
-                                                                  gradient: LinearGradient(
-                                                                      begin: Alignment
-                                                                          .topLeft,
-                                                                      end: Alignment
-                                                                          .bottomRight,
-                                                                      colors: Constants
-                                                                          .gradientColorOnAd),
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      800],
                                                                   border: Border
                                                                       .all(),
                                                                   borderRadius:
@@ -1085,15 +1049,15 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                                           fit: BoxFit
                                                                               .cover,
                                                                         ),
-                                                                        //     Image(
-                                                                        //   fit: BoxFit
-                                                                        //       .cover,
-                                                                        //   image: NetworkImage(snapshot3
-                                                                        //       .data
-                                                                        //       .docs[index]["uplodedPhoto"]),
-                                                                        // ),
                                                                       ),
                                                                     ),
+                                                                  ),
+                                                                  Divider(
+                                                                    height: 2,
+                                                                    thickness:
+                                                                        1,
+                                                                    color: Constants
+                                                                        .divider,
                                                                   ),
                                                                   Padding(
                                                                     padding:
@@ -1133,8 +1097,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                                     padding: const EdgeInsets
                                                                             .only(
                                                                         left: 8,
-                                                                        top:
-                                                                            12),
+                                                                        top: 8),
                                                                     child: Row(
                                                                       mainAxisAlignment:
                                                                           MainAxisAlignment
@@ -1150,7 +1113,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                                               size: 15,
                                                                             ),
                                                                             Text(
-                                                                              snapshot3.data.docs[index]["address"],
+                                                                              address.length > 7 ? address.substring(0, 8) + ".." : address,
                                                                               style: TextStyle(color: Constants.locationMarker, fontSize: 12),
                                                                             )
                                                                           ],
@@ -1162,7 +1125,7 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                                                               Row(
                                                                             children: [
                                                                               Icon(
-                                                                                Icons.add_ic_call,
+                                                                                snapshot3.data.docs[index]["share_mobile"] ? Icons.call : Icons.phone_disabled,
                                                                                 size: 22,
                                                                                 color: Constants.callIcon,
                                                                               ),
@@ -1198,7 +1161,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                                           height: 250,
                                           width: queryData.width,
                                           child: AdWidget(
-                                            // key: UniqueKey(),
                                             ad: banner2,
                                           ),
                                         )
@@ -1212,8 +1174,6 @@ class _ticketViewScreenState extends State<ticketViewScreen> {
                           ),
                         ],
                       ),
-
-                      // }),
                     ),
                   ),
                 );

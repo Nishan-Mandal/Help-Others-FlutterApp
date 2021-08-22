@@ -95,10 +95,6 @@ class _firstAdState extends State<firstAd> {
                   child: Container(
                     height: queryData.height * 0.1,
                     width: queryData.height,
-                    // decoration: BoxDecoration(
-                    //     border:
-                    //         Border(bottom: BorderSide(color: Colors.black))),
-
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8, top: 25),
                       child: Text(

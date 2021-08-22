@@ -76,13 +76,10 @@ class _myAdsState extends State<myAds> {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        // shape:
-        //     RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
         title: Text(
           "Do you want to delete your post ?",
           style: TextStyle(color: Constants.searchIcon),
         ),
-        // backgroundColor: Colors.amber[300],
         actions: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(primary: Constants.searchIcon),
@@ -140,6 +137,7 @@ class _myAdsState extends State<myAds> {
                       String title = snapshot.data.docs[index]["title"];
                       String description =
                           snapshot.data.docs[index]["description"];
+                      String address = snapshot.data.docs[index]["address"];
                       int arrayLength =
                           snapshot.data.docs[index]["totalViews"].length - 1;
                       return GestureDetector(
@@ -166,10 +164,7 @@ class _myAdsState extends State<myAds> {
                           children: [
                             new Container(
                                 decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: Constants.gradientColorOnAd),
+                                    color: Colors.grey[800],
                                     borderRadius:
                                         BorderRadius.all(Radius.circular(20))),
                                 child: new Center(
@@ -228,12 +223,8 @@ class _myAdsState extends State<myAds> {
                                                     color: Constants.searchIcon,
                                                     borderRadius:
                                                         BorderRadius.only(
-                                                      // topRight:
-                                                      //     Radius.circular(10),
                                                       bottomRight:
                                                           Radius.circular(10),
-                                                      // bottomLeft:
-                                                      //     Radius.circular(10),
                                                       topLeft:
                                                           Radius.circular(10),
                                                     )),
@@ -305,9 +296,7 @@ class _myAdsState extends State<myAds> {
                                     decoration: BoxDecoration(
                                         color: Constants.searchIcon,
                                         borderRadius: BorderRadius.only(
-                                          // topRight: Radius.circular(10),
                                           bottomRight: Radius.circular(10),
-                                          // bottomLeft: Radius.circular(10),
                                           topLeft: Radius.circular(10),
                                         )),
                                     height: 20,
@@ -366,8 +355,9 @@ class _myAdsState extends State<myAds> {
                                             size: 15,
                                           ),
                                           Text(
-                                            snapshot.data.docs[index]
-                                                ["address"],
+                                            address.length > 7
+                                                ? address.substring(0, 8) + ".."
+                                                : address,
                                             style: TextStyle(
                                                 color: Constants.locationMarker,
                                                 fontSize: 12),
@@ -425,17 +415,6 @@ class favourites extends StatefulWidget {
 
 class _favouritesState extends State<favourites> {
   DatabaseMethods databaseMethods = new DatabaseMethods();
-  // Future<bool> onBackPress() {
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     Navigator.pop(context);
-  //     Navigator.pushAndRemoveUntil(
-  //         context,
-  //         MaterialPageRoute(
-  //           builder: (context) => navigationBar(),
-  //         ),
-  //         (route) => false);
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -467,6 +446,7 @@ class _favouritesState extends State<favourites> {
                       String title = snapshot.data.docs[index]["title"];
                       String description =
                           snapshot.data.docs[index]["description"];
+                      String address = snapshot.data.docs[index]["address"];
                       bool myFavFlag = false;
 
                       try {
@@ -502,10 +482,7 @@ class _favouritesState extends State<favourites> {
                           children: [
                             new Container(
                                 decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: Constants.gradientColorOnAd),
+                                    color: Colors.grey[800],
                                     borderRadius:
                                         BorderRadius.all(Radius.circular(20))),
                                 child: new Center(
@@ -640,8 +617,9 @@ class _favouritesState extends State<favourites> {
                                             size: 15,
                                           ),
                                           Text(
-                                            snapshot.data.docs[index]
-                                                ["address"],
+                                            address.length > 7
+                                                ? address.substring(0, 8) + ".."
+                                                : address,
                                             style: TextStyle(
                                                 color: Constants.locationMarker,
                                                 fontSize: 12),

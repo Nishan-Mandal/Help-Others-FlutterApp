@@ -8,7 +8,7 @@ class Search {
   double longitude;
   Search(this.title, this.description, this.category, this.latitude,
       this.longitude);
-  // creating a Trip object from a firebase snapshot
+
   Search.fromSnapshot(DocumentSnapshot snapshot)
       : title = snapshot['title'],
         description = snapshot['description'],

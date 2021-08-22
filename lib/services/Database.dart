@@ -157,6 +157,7 @@ class DatabaseMethods {
     String photo,
     String notCurrentUserNumber,
     BuildContext context,
+    bool responseViaCall,
   ) async {
     String dateTime = DateFormat.yMEd().add_jms().format(DateTime.now());
     var ref = FirebaseFirestore.instance
@@ -167,8 +168,11 @@ class DatabaseMethods {
 
     var messages1 = FirebaseFirestore.instance.collection("messages").doc();
 
-    await ref
-        .set({"dateTime": dateTime, "responseViaChat": true}).catchError((e) {
+    await ref.set({
+      "dateTime": dateTime,
+      "responseViaChat": true,
+      "responseViaCall": responseViaCall,
+    }).catchError((e) {
       print(e.toString());
     });
 
@@ -207,15 +211,6 @@ class DatabaseMethods {
     }).catchError((e) {
       print(e.toString());
     });
-
-    // return chatRoom(
-    //     ticketDocumentId,
-    //     FirebaseAuth.instance.currentUser.phoneNumber,
-    //     ticketTitle,
-    //     messages1.id,
-    //     appBarname,
-    //     photo,
-    //     notCurrentUserNumber);
 
     Navigator.push(
         context,

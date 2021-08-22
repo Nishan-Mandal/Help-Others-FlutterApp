@@ -17,7 +17,7 @@ class Constants {
   static Color divider = Colors.black12;
   static Color titleText = Colors.white;
   static Color descriptionText = Colors.white54;
-  static Color myFavIconBackground = Colors.grey[700];
+  static Color myFavIconBackground = Colors.grey[800];
   static Color myFavIconTrue = Colors.red;
   static Color myFavIconFalse = Colors.white70;
   static Color callIcon = Colors.white70;
